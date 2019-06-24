@@ -1,0 +1,16 @@
+{
+  "source": "Unity",
+  "applications": [
+    {
+      "app_key": "application.generated.unity.group3_vr.exe",
+      "launch_type": "url",
+      "url": "steam://launch/",
+      "action_manifest_path": "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\group3_vr\\actions.json",
+      "strings": {
+        "en_us": {
+          "name": "group3_vr [Testing]"
+        }
+      }
+    }
+  ]
+}
