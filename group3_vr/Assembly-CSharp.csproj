@@ -629,6 +629,7 @@
     <None Include="Assets\MapboxAR\Examples\ARTabletop\Shaders\Clip_MapBoxStylesPerRenderer.shader" />
     <None Include="Assets\CustomOutline-ConstantWidth.shader" />
     <None Include="Assets\UnityARKitPlugin\Plugins\iOS\UnityARKit\Shaders\YUVShader.shader" />
+    <None Include="Assets\CustomOutline.shader" />
     <None Include="Assets\UnityARInterface\Examples\Common\Shaders\MobileARShadow.shader" />
     <None Include="Assets\Mapbox\link.xml" />
     <None Include="Assets\Mapbox\Core\Plugins\link.xml" />

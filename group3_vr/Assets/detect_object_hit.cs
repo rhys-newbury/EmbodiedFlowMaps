@@ -38,6 +38,7 @@ public class detect_object_hit : MonoBehaviour
             GameObject gameObject = GameObject.Find("object");
             draw_object main = (draw_object)gameObject.GetComponent(typeof(draw_object));
             main.updateScene(currentList);
+            currentList.Clear();
             //Enter New Scene
 
         }
@@ -45,6 +46,7 @@ public class detect_object_hit : MonoBehaviour
 
     private void Pointer_ActivationButtonPressed(object sender, ControllerInteractionEventArgs e)
     {
+        Debug.Log(currentList.Count());
         //If still on an object
         if (currentObject != null)
         {

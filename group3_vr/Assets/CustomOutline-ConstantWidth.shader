@@ -1,114 +1,64 @@
-// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
-
-Shader "Custom/OutlineDiffuseShader"
+Shader "Custom/DrawSimple"
 {
-	Properties{
-		_Color("Main Color", Color) = (.5,.5,.5,1)
-		_OutlineColor("Outline Color", Color) = (0,0,0,1)
-		_Outline("Outline width", Range(.002, 0.03)) = .002
-		_MainTex("Base (RGB)", 2D) = "white" { }
-	}
+	SubShader
+	{
+		// #0: things that are visible (pass depth). 1 in alpha, 1 in red (SM2.0)
+		Pass
+		{
 
-		CGINCLUDE
-#include "UnityCG.cginc"
+		//One = The value of one - use this to let either the source or the destination color come through fully.
+		//Zero = The value zero - use this to remove either the source or the destination values.
+		Blend One Zero
 
-		struct appdata {
-		float4 vertex : POSITION;
-		float3 normal : NORMAL;
-	};
+		//Only render pixels whose reference value is less than or equal to the value in the buffer.
+		ZTest LEqual
 
-	struct v2f {
-		float4 pos : POSITION;
-		float4 color : COLOR;
-	};
+		//Off = Disables culling - all faces are drawn. Used for special effects.
+		Cull Off
 
-	uniform float _Outline;
-	uniform float4 _OutlineColor;
-
-	v2f vert(appdata v) {
-		// just make a copy of incoming vertex data but scaled according to normal direction
-		v2f o;
-		o.pos = UnityObjectToClipPos(v.vertex);
-
-		float3 norm = normalize(mul((float3x3)UNITY_MATRIX_IT_MV, v.normal));
-		float2 offset = TransformViewToProjection(norm.xy);
-
-		o.pos.xy += offset * o.pos.z * _Outline;
-		o.color = _OutlineColor;
-		return o;
-	}
-	ENDCG
-
-		SubShader{
-		//Tags {"Queue" = "Geometry+100" }
+		//Controls whether pixels from this object are written to the depth buffer (default is On). If you’re drawng solid objects, leave this on.
+		//If you’re drawing semitransparent effects, switch to ZWrite Off. For more details read below.
+		ZWrite Off
+		// push towards camera a bit, so that coord mismatch due to dynamic batching is not affecting us
+		Offset - 0.02, 0
 		CGPROGRAM
-#pragma surface surf Lambert
+		#pragma vertex vert
+		#pragma fragment frag
+		#pragma target 2.0
 
-		sampler2D _MainTex;
-	fixed4 _Color;
-
-	struct Input {
-		float2 uv_MainTex;
-	};
-
-	void surf(Input IN, inout SurfaceOutput o) {
-		fixed4 c = tex2D(_MainTex, IN.uv_MainTex) * _Color;
-		o.Albedo = c.rgb;
-		o.Alpha = c.a;
-	}
-	ENDCG
-
-		// note that a vertex shader is specified here but its using the one above
-		Pass{
-		Name "OUTLINE"
-		Tags{ "LightMode" = "Always" }
-		Cull Front
-		ZWrite On
-		ColorMask RGB
-		Blend SrcAlpha OneMinusSrcAlpha
-		//Offset 50,50
-
-		CGPROGRAM
-#pragma vertex vert
-#pragma fragment frag
-		half4 frag(v2f i) :COLOR{ return i.color; }
+		float _ObjectId = 1;
+		#define DRAW_COLOR float4(1,1,1, 1)
+		#include "SceneViewSelected.cginc"
 		ENDCG
 	}
+		// #2: all the things, including the ones that fail the depth test. Additive blend, 1 in green, 1 in alpha (SM2.0)
+		Pass
+		{
+			//Additive Blending
+			Blend One One
+			//Use the larger of source and destination.
+			BlendOp Max
+			//Always passes
+			ZTest Always
+			//Controls whether pixels from this object are written to the depth buffer (default is On). If you’re drawng solid objects, leave this on.
+			//If you’re drawing semitransparent effects, switch to ZWrite Off. For more details read below.
+			ZWrite Off
+			//Off = Disables culling - all faces are drawn. Used for special effects.
+			Cull Off
+			//Set color channel writing mask. Writing ColorMask 0 turns off rendering to all color channels.
+			//Default mode is writing to all channels (RGBA), but for some special effects you might want to leave certain channels unmodified, or disable color writes completely.
+			ColorMask GBA
+			// push towards camera a bit, so that coord mismatch due to dynamic batching is not affecting us
+			Offset - 0.02, 0
+			CGPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+			#pragma target 2.0
+			float _ObjectId;
+			#define DRAW_COLOR float4(0, 0, 1, 1)
+			#include "SceneViewSelected.cginc"
+			ENDCG
+		}
 	}
 
-		SubShader{
-		CGPROGRAM
-#pragma surface surf Lambert
-
-		sampler2D _MainTex;
-	fixed4 _Color;
-
-	struct Input {
-		float2 uv_MainTex;
-	};
-
-	void surf(Input IN, inout SurfaceOutput o) {
-		fixed4 c = tex2D(_MainTex, IN.uv_MainTex) * _Color;
-		o.Albedo = c.rgb;
-		o.Alpha = c.a;
-	}
-	ENDCG
-
-		Pass{
-		Name "OUTLINE"
-		Tags{ "LightMode" = "Always" }
-		Cull Front
-		ZWrite On
-		ColorMask RGB
-		Blend SrcAlpha OneMinusSrcAlpha
-
-		//      CGPROGRAM
-		//#pragma vertex vert
-		//#pragma exclude_renderers gles xbox360 ps3
-		//      ENDCG
-				SetTexture[_MainTex]{ combine primary }
-			}
-	}
-
-		Fallback "Diffuse"
 }

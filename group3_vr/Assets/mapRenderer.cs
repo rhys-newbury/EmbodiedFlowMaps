@@ -25,7 +25,6 @@ public class mapRenderer
     public void drawSingular(GameObject gameObject, string dataFile, float centerX=0, float centerY=0)
     {
         //bool done = false;
-        bool everySecond = true;
         int count = 0;
 
 
@@ -50,7 +49,7 @@ public class mapRenderer
             foreach (Match match in matches)
             {
 
-                   float x, y;
+                    float x, y;
 
                     string[] data = match.Groups[1].ToString().Split(',');
 
@@ -66,9 +65,7 @@ public class mapRenderer
 
                     indices++;
                     count++;
-
-
-
+              
             }
 
             float[] bounds = new float[] { maxX, maxY, minX, minY };
@@ -86,8 +83,7 @@ public class mapRenderer
         var area = (totalMaxX - totalMinX) * (totalMaxY - totalMinY);
 
 
-        //TODO : Improve this equation
-        var ZShift = area * -0.5F + 10F;
+        var ZShift = area * -0.5F + 7F;
 
         foreach (var data in drawingData) {
 
@@ -110,9 +106,6 @@ public class mapRenderer
 
 
         drawSingular(gameObject, "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\data3.txt", -1.5F, 1.5F);
-        drawSingular(gameObject, "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\data3.txt", 1.5F, 1.5F);
-        drawSingular(gameObject, "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\data3.txt", -1.5F, -1.5F);
-        drawSingular(gameObject, "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\data3.txt", 1.5F, -1.5F);
 
 
     }

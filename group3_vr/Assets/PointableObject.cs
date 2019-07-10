@@ -20,6 +20,8 @@ public class PointableObject : MonoBehaviour
     private MeshRenderer meshRenderer;
     private float[] bounds;
 
+    private readonly float ANGLE = 1 / Mathf.Sqrt(2);
+
     public int gridX;
     public int gridY;
     private float centroidX;
@@ -37,73 +39,48 @@ public class PointableObject : MonoBehaviour
 
     public void onPointEnter()
     {
-        if (this.selected)
-        {
-            this.color.a = 0.8F;
-            this.meshRenderer.material.color = this.color;
-        }
 
-        else
-        {
-            this.color.a = 0.5F;
-            this.meshRenderer.material.color = this.color;
-        }
+        this.color.a = 0.5F;
+        this.meshRenderer.material.color = this.color;
     }
    
 
     public void onPointLeave()
     {
-        if (this.selected)
-        {
-            this.color.a = 1F;
-            this.meshRenderer.material.color = this.color;
-        }
 
-        else
-        {
-            this.color.a = 0.75F;
-            this.meshRenderer.material.color = this.color;
-        }
+        this.color.a = 1F;
+        this.meshRenderer.material.color = this.color;
+       
 
     }
 
     internal bool onClick()
     {
-        //if (this.color.r != 0)
-        //{
-        //    this.color.r = 0F;
-        //    this.color.b = 255F;
-        //    this.meshRenderer.material.color = this.color;
-        //    return true;
-        //}
-        //else
-        //{
-        //    this.color.r = 255F;
-        //    this.color.b = 0F;
-        //    this.meshRenderer.material.color = this.color;
-        //    return false;
+        this.selected = !this.selected;
 
-        //}
 
         if (this.selected)
         {
-            this.color.a = 1F;
-            this.meshRenderer.material.color = this.color;
+            createLine();
+            return true;
         }
-
         else
         {
-            this.color.a = 0.75F;
-            this.meshRenderer.material.color = this.color;
+            destoryLine();
+            return false;
         }
-        return this.selected;
+
     }
 
     private void drawObject()
     {
-        
-        // Use the triangulator to get indices for creating triangles
-        var indices = T.Triangulate();
+        if (vertices3D.Count() == 0)
+        {
+            return;
+        }
+
+            // Use the triangulator to get indices for creating triangles
+            var indices = T.Triangulate();
 
         Color meshColor = UnityEngine.Random.ColorHSV();
         // Generate a color for each vertex
@@ -115,18 +92,17 @@ public class PointableObject : MonoBehaviour
         var mesh = new Mesh
         {
             vertices = vertices3D,
-            triangles = indices
+            triangles = indices,
         };
 
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
 
 
-
         // Set up game object with mesh;
         meshRenderer = objToSpawn.AddComponent<MeshRenderer>();
         meshRenderer.material = new Material(Shader.Find("Sprites/Default"));
-        this.color = Color.red;
+        this.color = meshColor;
         meshRenderer.material.color = this.color;
 
         var filter = objToSpawn.AddComponent<MeshFilter>();
@@ -135,7 +111,7 @@ public class PointableObject : MonoBehaviour
         var collider = objToSpawn.AddComponent<MeshCollider>();
         collider.sharedMesh = mesh;
 
-        objToSpawn.transform.SetPositionAndRotation(new Vector3(-this.centroidX+1.5F, -this.centroidY+2.5F, ZShift), new Quaternion(0, 0, 0, 1));
+        objToSpawn.transform.SetPositionAndRotation(new Vector3(this.centroidX-1.5F, -this.centroidY+3.5F, -ZShift), new Quaternion(0, 1, 0, 0));
 
     }
 
@@ -144,13 +120,7 @@ public class PointableObject : MonoBehaviour
         
         T = new Triangulator(points);
         vertices3D = System.Array.ConvertAll<Vector2, Vector3>(points, v => v);
-        var vertices3D2 = points.Select(x => new Vector3(x.x, x.y, 5F));
-        var y = vertices3D.ToList();
-        y.AddRange(vertices3D2);
-        vertices3D = y.ToArray();
-
-
-
+   
         this.name = name;
         this.bounds = bounds;
         this.objToSpawn = objToSpawn;
@@ -172,6 +142,35 @@ public class PointableObject : MonoBehaviour
     public float getMaxX()
     {
         return bounds[0];
+    }
+
+    public void createLine()
+    {
+        var line = objToSpawn.AddComponent<LineRenderer>();
+        line.useWorldSpace = false;
+        var tempVertices3D = vertices3D.ToList();
+        tempVertices3D.Add(vertices3D[0]);
+        //Chuck her in front of the country so its visible
+        tempVertices3D = tempVertices3D.Select(x => new Vector3(x.x, x.y, -0.01F)).ToList();
+        var FinaltempVertices3D = tempVertices3D.ToArray();
+        line.positionCount = FinaltempVertices3D.Count();
+        line.SetPositions(FinaltempVertices3D);
+
+        line.material = new Material(Shader.Find("Sprites/Default"));
+        line.startColor = Color.red;
+        line.endColor = Color.yellow;
+        line.startWidth = 0.03F;
+        line.endWidth = 0.03F;
+        line.alignment = LineAlignment.TransformZ;
+
+    }
+
+    public void destoryLine()
+    {
+        var line = objToSpawn.GetComponent<LineRenderer>();
+        Destroy(line);
+
+
     }
 
     internal void setOrigin(float centroidX, float centroidY, float ZShift)
