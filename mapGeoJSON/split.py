@@ -1,50 +1,33 @@
-import re, utm, math
-min0 = float('inf')
-min1 = float('inf')
-total = []
-states = []
-def convert(latitude, longitude):
-        mapWidth = 2000
-        mapHeight = 1000
+import glob
+max_dist = 0
+for file in glob.glob("*.csv"):
+    l = []
+    
+    A = 0
+    Cx = 0
+    Cy = 0
+    x = []
+    y = []
+    for line in open(file):
 
-        x = (longitude+180)*(mapWidth/360)
+        data = list(map(float, line.split(",")))
+        x.append(data[0]/100)
+        y.append(data[1]/100)
+    x.append(x[0])
+    y.append(y[0])
+    for i in range(0, len(x)-1):
+        A += x[i]*y[i+1] - x[i+1]*y[i]
+        Cx += (x[i]+x[i+1]) * (x[i]*y[i+1] - x[i+1]*y[i])
+        Cy += (y[i]+y[i+1]) * (x[i]*y[i+1] - x[i+1]*y[i])
         
-        latRad = latitude*math.pi/180
+    A *= 0.5
+    Cx *= 1/(6*A)
+    Cy *= 1/(6*A)
 
-        mercN = math.log(math.tan((math.pi/4)+(latRad/2)))
-        y = (mapHeight/2)-(mapWidth*mercN/(2*math.pi))
-
-        return [x,y]
-        
-for line in open("data.txt"):
-    match1 = re.search('"name":"(.*?)"', line)
-
-    match2 = re.search(',"coordinates":\[\[(.*?)\]\]', line)
-
-    name = match1.group(1)
-    coordinates = re.findall("\[(.*?)\],", match2.group(1))
-
-    #For each line, cast each part to float before converting to utm coordinates
-    coordinates = list(map(lambda i : convert(i[1],i[0]), list(map(lambda i : list(map(lambda x  : float(x.strip()), i.split(","))), coordinates))))
-    total.append([name, coordinates])
-
+    max_dist = max(max_dist, max(list(map(lambda data : (data[0]**2 + data[1]**2)**0.5, zip(x,y)))))
     
+    print(file, Cx, Cy)
     
-    #min0 = min(min0, min(coordinates, key=lambda e: int(e[0]))[0])
-    #min1 = min(min1, min(coordinates, key=lambda e: int(e[1]))[1])
-    
-for line in total:
-    state = line[0]
-    coordinates = line[1]
-
-    coordinates = map(lambda x : [str(x[0]), str(x[1])], coordinates)
-
-    output = '\n'.join(list(map(lambda x : ','.join(x), coordinates)))
-    file = open(state + ".csv", 'w')
-    file.write(output)
-    file.close()
-
-
 
     
 
