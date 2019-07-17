@@ -82,7 +82,8 @@ public class mapRenderer
 
         var area = (totalMaxX - totalMinX) * (totalMaxY - totalMinY);
 
-
+        //Doesnt work yet
+        //Stephen to fix.
         var ZShift = area * -0.5F + 7F;
 
         foreach (var data in drawingData) {

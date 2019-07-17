@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using UnityEngine.EventSystems;
 using VRTK;
 using System;
-
+using UnityEngine.UI;
 
 public class PointableObject : MonoBehaviour
 {
@@ -31,6 +31,22 @@ public class PointableObject : MonoBehaviour
 
     private bool selected = false;
 
+    private static GameObject tooltip;
+    private static Text tooltip_text;
+
+    public void Start()
+    {
+        //Only need to be done once
+        //Tooltip is static throughout all pointable objects
+        if (tooltip == null)
+        {
+            tooltip = GameObject.Find("tooltip");
+            tooltip_text = GameObject.Find("tooltip_text").GetComponent<Text>();
+            
+            tooltip.SetActive(false);
+        }
+    }
+
     public string getName()
     {
         return this.name;
@@ -40,8 +56,11 @@ public class PointableObject : MonoBehaviour
     public void onPointEnter()
     {
 
-        this.color.a = 0.5F;
+        this.color.a = 0.3F;
         this.meshRenderer.material.color = this.color;
+        tooltip.SetActive(true);
+        tooltip_text.text = this.getName();
+        
     }
    
 
@@ -50,8 +69,8 @@ public class PointableObject : MonoBehaviour
 
         this.color.a = 1F;
         this.meshRenderer.material.color = this.color;
-       
 
+        tooltip.SetActive(false);
     }
 
     internal bool onClick()
@@ -72,6 +91,11 @@ public class PointableObject : MonoBehaviour
 
     }
 
+    public bool isSelected()
+    {
+        return this.selected;
+    }
+
     private void drawObject()
     {
         if (vertices3D.Count() == 0)
@@ -79,8 +103,8 @@ public class PointableObject : MonoBehaviour
             return;
         }
 
-            // Use the triangulator to get indices for creating triangles
-            var indices = T.Triangulate();
+        // Use the triangulator to get indices for creating triangles
+        var indices = T.Triangulate();
 
         Color meshColor = UnityEngine.Random.ColorHSV();
         // Generate a color for each vertex
@@ -111,13 +135,13 @@ public class PointableObject : MonoBehaviour
         var collider = objToSpawn.AddComponent<MeshCollider>();
         collider.sharedMesh = mesh;
 
+        //Setting position of stuff
         objToSpawn.transform.SetPositionAndRotation(new Vector3(this.centroidX-1.5F, -this.centroidY+3.5F, -ZShift), new Quaternion(0, 1, 0, 0));
 
     }
 
     internal void constructor(Vector2[] points, string name, GameObject objToSpawn, float[] bounds)
     {
-        
         T = new Triangulator(points);
         vertices3D = System.Array.ConvertAll<Vector2, Vector3>(points, v => v);
    
