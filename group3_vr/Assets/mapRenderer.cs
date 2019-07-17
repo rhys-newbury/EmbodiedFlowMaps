@@ -91,6 +91,7 @@ public class mapRenderer
             var vertices2D = data.Item1.Select(x => new Vector2(x.x, x.y)).ToArray();
             GameObject temp = new GameObject();
             PointableObject pointableObject = temp.AddComponent(typeof(PointableObject)) as PointableObject;
+            //Doesnt work
             pointableObject.setOrigin(totalMaxX - centerX, totalMaxY - centerY, -ZShift);
             pointableObject.constructor(vertices2D, data.Item3, temp, data.Item2);
             pointableObject.setParent(gameObject.transform);
