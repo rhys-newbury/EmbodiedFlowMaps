@@ -14,8 +14,8 @@ public class mapRenderer
     private static readonly Regex _coordinates = new Regex(@"(?i),""coordinates"":\[\[(.*?)\]\]");
     private static readonly Regex _convert = new Regex(@"(?i)\[(.*?)\],");
 
-    private static int mapWidth = 2000;
-    private static int mapHeight = 1000;
+    private static int mapWidth = 100000;
+    private static int mapHeight = 50000;
 
     private static readonly float SQRT = 1 / Mathf.Sqrt(2);
 
@@ -84,8 +84,8 @@ public class mapRenderer
 
         //Doesnt work yet
         //Stephen to fix.
-        var ZShift = area * -0.5F + 7F;
-
+        //var ZShift = area * -0.5F + 7F;
+        var ZShift = -5F;
         foreach (var data in drawingData) {
 
             var vertices2D = data.Item1.Select(x => new Vector2(x.x, x.y)).ToArray();
@@ -103,11 +103,14 @@ public class mapRenderer
     {
         decideGridPos(current);
 
-        mapHeight = 2000*10;
-        mapWidth = 2000*10;
+        //mapHeight = 2000*10;
+        //mapWidth = 2000*10;
 
 
-        drawSingular(gameObject, "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\data3.txt", -1.5F, 1.5F);
+        drawSingular(gameObject, "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\data3.txt", 1.5F, 0.5F);
+        drawSingular(gameObject, "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\data_test.txt", 1.5F, 3.5F);
+        drawSingular(gameObject, "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\data3.txt", 5.5F, 0.5F);
+        drawSingular(gameObject, "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\data3.txt", 5.5F, 3.5F);
 
 
     }

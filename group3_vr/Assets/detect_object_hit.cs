@@ -218,9 +218,9 @@ public class detect_object_hit : MonoBehaviour
         {
             return;
         }
-        selectingObject = true;
-        currentObject = e.target.GetComponent("PointableObject") as PointableObject;
-        currentObject.onPointEnter();
+        //selectingObject = true;
+        //currentObject = e.target.GetComponent("PointableObject") as PointableObject;
+        //currentObject.onPointEnter();
     
 
     }
