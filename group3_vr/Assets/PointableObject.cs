@@ -33,6 +33,7 @@ public class PointableObject : MonoBehaviour
 
     private static GameObject tooltip;
     private static Text tooltip_text;
+    private Mesh mesh;
 
     public void Start()
     {
@@ -98,30 +99,59 @@ public class PointableObject : MonoBehaviour
 
     private void drawObject()
     {
-        if (vertices3D.Count() == 0)
+
+
+        List<Vector3> verticesList = new List<Vector3>(vertices3D);
+        List<Vector3> verticesExtrudedList = new List<Vector3>();
+        List<int> indices = new List<int>();
+
+        var originalVertexCount = vertices3D.Count();
+
+        for (int i = 0; i < verticesList.Count; i++)
         {
-            return;
+            verticesExtrudedList.Add(new Vector3(verticesList[i].x, verticesList[i].y, 0.1F));
+        }
+
+        //add the extruded parts to the end of verteceslist
+        verticesList.AddRange(verticesExtrudedList);
+
+        for (int i = 0; i < originalVertexCount; i++)
+        {
+
+            int N = originalVertexCount;
+            int i1 = i;
+            int i2 = (i1 + 1) % N;
+            int i3 = i1 + N;
+            int i4 = i2 + N;
+
+            indices.Add(i1);
+            indices.Add(i3);
+            indices.Add(i4);
+
+            indices.Add(i1);
+            indices.Add(i4);
+            indices.Add(i2);
+
         }
 
         // Use the triangulator to get indices for creating triangles
-        var indices = T.Triangulate();
+        var indices2 = T.Triangulate().ToList();
+        indices2.AddRange(indices);
+
+        //Mesh mesh = new Mesh();
+        this.mesh = new Mesh();
+
+        this.mesh.vertices = verticesList.ToArray();
+        this.mesh.triangles = indices2.ToArray();
+
+        this.mesh.RecalculateNormals();
+        this.mesh.RecalculateBounds();
 
         Color meshColor = UnityEngine.Random.ColorHSV();
-        // Generate a color for each vertex
-        var colors = Enumerable.Range(0, vertices3D.Length)
-            .Select(i => meshColor)
-            .ToArray();
 
-        // Create the mesh
-        var mesh = new Mesh
-        {
-            vertices = vertices3D,
-            triangles = indices,
-        };
-
-        mesh.RecalculateNormals();
-        mesh.RecalculateBounds();
-
+        var colors = Enumerable.Range(0, verticesList.Count)
+         .Select(i => meshColor)
+         .ToArray();
 
         // Set up game object with mesh;
         meshRenderer = objToSpawn.AddComponent<MeshRenderer>();
@@ -130,17 +160,23 @@ public class PointableObject : MonoBehaviour
         meshRenderer.material.color = this.color;
 
         var filter = objToSpawn.AddComponent<MeshFilter>();
-        filter.mesh = mesh;
+        filter.mesh = this.mesh;
 
         var collider = objToSpawn.AddComponent<MeshCollider>();
-        collider.sharedMesh = mesh;
+        collider.sharedMesh = this.mesh;
 
         //Setting position of stuff
-        objToSpawn.transform.SetPositionAndRotation(new Vector3(this.centroidX-1.5F, -this.centroidY+3.5F, -ZShift), new Quaternion(0, 1, 0, 0));
+        //objToSpawn.transform.SetPositionAndRotation(new Vector3(0,0,0), new Quaternion(0, 1, 0, 0));
+
 
     }
 
-    internal void constructor(Vector2[] points, string name, GameObject objToSpawn, float[] bounds)
+    public Mesh getMesh()
+    {
+        return this.mesh;
+    }
+
+     internal void constructor(Vector2[] points, string name, GameObject objToSpawn, float[] bounds)
     {
         T = new Triangulator(points);
         vertices3D = System.Array.ConvertAll<Vector2, Vector3>(points, v => v);
@@ -153,6 +189,8 @@ public class PointableObject : MonoBehaviour
 
         this.drawObject();
     }
+
+
 
     public void setParent(Transform parent)
     {
@@ -183,8 +221,8 @@ public class PointableObject : MonoBehaviour
         line.material = new Material(Shader.Find("Sprites/Default"));
         line.startColor = Color.red;
         line.endColor = Color.yellow;
-        line.startWidth = 0.03F;
-        line.endWidth = 0.03F;
+        line.startWidth = 0.01F;
+        line.endWidth = 0.01F;
         line.alignment = LineAlignment.TransformZ;
 
     }
@@ -197,12 +235,7 @@ public class PointableObject : MonoBehaviour
 
     }
 
-    internal void setOrigin(float centroidX, float centroidY, float ZShift)
-    {
-        this.centroidX = centroidX;
-        this.centroidY = centroidY;
-        this.ZShift = ZShift;
-    }
+
 
     public float getMaxY()
     {
@@ -214,6 +247,7 @@ public class PointableObject : MonoBehaviour
     }
 
 }
+
 
 
 

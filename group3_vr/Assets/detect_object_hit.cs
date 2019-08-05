@@ -40,9 +40,6 @@ public class detect_object_hit : MonoBehaviour
 
         controller = GetComponent<VRTK_ControllerEvents>();
         controller.TouchpadPressed += Controller_TouchpadPressed;
-        controller.GripPressed += Controller_GripPressed;
-        controller.GripReleased += Controller_GripReleased;
-        controller.GripClicked += Controller_GripClicked;
 
         //Hide the plane
         if (plane_behind_map == null)
@@ -77,84 +74,12 @@ public class detect_object_hit : MonoBehaviour
                 line.SetPositions(list);
             }
 
-
         }
 
      }
 
-    private void Controller_GripClicked(object sender, ControllerInteractionEventArgs e)
-        //Draw the line on click
+       private void Controller_TouchpadPressed(object sender, ControllerInteractionEventArgs e)
     {
-        
-        const float dims = 0.05F;
-        
-        line = plane_behind_map.AddComponent<LineRenderer>();
-
-        line.useWorldSpace = true;
-
-        //Put in front of map
-        currentPos.z += 0.25F;
-
-        var vertex1 = new Vector3(currentPos.x, currentPos.y, currentPos.z);
-        var vertex2 = new Vector3(currentPos.x+dims, currentPos.y, currentPos.z);
-        var vertex3 = new Vector3(currentPos.x + dims, currentPos.y+dims, currentPos.z);
-        var vertex4 = new Vector3(currentPos.x, currentPos.y+dims, currentPos.z);
-
-        Vector3[] list = { vertex1, vertex2, vertex3, vertex4, vertex1 };
-
-        line.positionCount = 5;
-        line.SetPositions(list);
-
-        line.material = new Material(Shader.Find("Sprites/Default"));
-        line.startColor = Color.red;
-        line.endColor = Color.yellow;
-        line.startWidth = 0.03F;
-        line.endWidth = 0.03F;
-        line.alignment = LineAlignment.TransformZ;
-
-    }
-
-    private void Controller_GripReleased(object sender, ControllerInteractionEventArgs e)
-    {
-        //Hide Plane on release
-        plane_behind_map.SetActive(false);
-        isGripping = false;
-        selectingObject = false;
-
-
-        //TODO : @Stephen
-        //Write something to zoom in to box once positioning is correct.
-        //var obj = GameObject.Find("object");
-
-        //var pos1 = line.GetPosition(0);
-        //var pos2 = line.GetPosition(2);
-
-        //var center = pos1 + pos2;
-
-        //obj.transform.position = new Vector3(center.x / 2, center.y / 2, center.z / 2);
-
-        Destroy(line);
-
-
-    }
-
-    private void Controller_GripPressed(object sender, ControllerInteractionEventArgs e)
-    {
-        //On grip press hide plane
-        isGripping = true;
-        plane_behind_map.SetActive(true);
-        selectingObject = false;
-    }
-
-
-
-    private void Controller_TouchpadPressed(object sender, ControllerInteractionEventArgs e)
-    {
-        if (isGripping)
-        {
-            return;
-        }
-
         //If still on an object
         if (currentObject != null)
         {
@@ -183,17 +108,15 @@ public class detect_object_hit : MonoBehaviour
 
     private void Pointer_SelectionButtonPressed(object sender, ControllerInteractionEventArgs e)
     {
-        if (isGripping)
-        {
-            return;
-        }
         if (currentList.Count > 0) {
 
             //IEnumerable<string> currentNames = currentList.Select(x => x.getName());
-
-            GameObject gameObject = GameObject.Find("object");
-            draw_object main = (draw_object)gameObject.GetComponent(typeof(draw_object));
-            main.updateScene(currentList);
+            for (int i = 0; i < 4; i++)
+            {
+                GameObject gameObject = GameObject.Find("object" + i.ToString());
+                draw_object main = (draw_object)gameObject.GetComponent(typeof(draw_object));
+                main.updateScene(currentList);
+            }
             currentList.Clear();
             //Enter New Scene
 
@@ -201,27 +124,35 @@ public class detect_object_hit : MonoBehaviour
     }
     private void Pointer_DestinationMarkerExit(object sender, DestinationMarkerEventArgs e)
     {
-        if (isGripping || !selectingObject)
+        try
+        {
+            if (!selectingObject)
+            {
+                return;
+            }
+            selectingObject = false;
+            currentObject = e.raycastHit.collider.gameObject.GetComponent("PointableObject") as PointableObject;
+            currentObject.onPointLeave();
+            currentObject = null;
+        }
+        catch
         {
             return;
         }
-        selectingObject = false;
-        currentObject = e.target.GetComponent("PointableObject") as PointableObject;
-        currentObject.onPointLeave();
-        currentObject = null;
 
     }
 
     private void Pointer_DestinationMarkerEnter(object sender, DestinationMarkerEventArgs e)
     {
-        if (isGripping)
-        {
-            return;
-        }
-        //selectingObject = true;
-        //currentObject = e.target.GetComponent("PointableObject") as PointableObject;
-        //currentObject.onPointEnter();
-    
+        
+            
+            currentObject = e.raycastHit.collider.gameObject.GetComponent("PointableObject") as PointableObject;
+
+
+        selectingObject = true;
+
+            currentObject.onPointEnter();
+               
 
     }
 

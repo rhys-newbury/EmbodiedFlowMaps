@@ -14,18 +14,24 @@ public class mapRenderer
     private static readonly Regex _coordinates = new Regex(@"(?i),""coordinates"":\[\[(.*?)\]\]");
     private static readonly Regex _convert = new Regex(@"(?i)\[(.*?)\],");
 
-    private static int mapWidth = 100000;
-    private static int mapHeight = 50000;
+    private static int mapWidth = 1000;
+    private static int mapHeight = 50;
 
     private static readonly float SQRT = 1 / Mathf.Sqrt(2);
+
+    private static readonly float FINAL_AREA = 1;
 
 
     public mapRenderer() { }
 
-    public void drawSingular(GameObject gameObject, string dataFile, float centerX=0, float centerY=0)
+    public void drawSingular(GameObject gameObject, string dataFile, float centerX=0, float centerY=0, int number=0)
     {
         //bool done = false;
         int count = 0;
+        var parent = GameObject.Find("object" + number.ToString());
+
+        parent.transform.SetPositionAndRotation(new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 1));
+
 
 
         List<Tuple<Vector2[], float[], string>> drawingData = new List<Tuple<Vector2[], float[],string>>();
@@ -80,22 +86,71 @@ public class mapRenderer
         var totalMinX = Mathf.Min(drawingData.Select(x => x.Item2[2]).ToArray());
         var totalMinY = Mathf.Min(drawingData.Select(x => x.Item2[3]).ToArray());
 
+
+        var TmpcenterX = (totalMaxX + totalMinX) / 2;
+        var TmpcenterY = (totalMaxY + totalMinY) / 2;
+
         var area = (totalMaxX - totalMinX) * (totalMaxY - totalMinY);
 
-        //Doesnt work yet
-        //Stephen to fix.
-        //var ZShift = area * -0.5F + 7F;
-        var ZShift = -5F;
+        var factor = Mathf.Sqrt(FINAL_AREA / area);
+
+        drawingData = drawingData.Select(x => new Tuple<Vector2[], float[], string>(x.Item1.Select(y => new Vector2(y.x * factor, y.y * factor)).ToArray(),
+            new float[] { x.Item2[0] * factor, x.Item2[1] * factor, x.Item2[2] * factor, x.Item2[3] * factor },
+            x.Item3)).ToList();
+
+
+        totalMaxX = Mathf.Max(drawingData.Select(x => x.Item2[0]).ToArray());
+        totalMaxY = Mathf.Max(drawingData.Select(x => x.Item2[1]).ToArray());
+        totalMinX = Mathf.Min(drawingData.Select(x => x.Item2[2]).ToArray());
+        totalMinY = Mathf.Min(drawingData.Select(x => x.Item2[3]).ToArray());
+
+
+        TmpcenterX = (totalMaxX + totalMinX) / 2;
+        TmpcenterY = (totalMaxY + totalMinY) / 2;
+
+        area = (totalMaxX - totalMinX) * (totalMaxY - totalMinY);
+
+
+        //< VRTK_InteractableObject >(new VRTK_InteractableObject());
+
+        var children = new List<PointableObject>();
+
         foreach (var data in drawingData) {
 
-            var vertices2D = data.Item1.Select(x => new Vector2(x.x, x.y)).ToArray();
             GameObject temp = new GameObject();
             PointableObject pointableObject = temp.AddComponent(typeof(PointableObject)) as PointableObject;
             //Doesnt work
-            pointableObject.setOrigin(totalMaxX - centerX, totalMaxY - centerY, -ZShift);
-            pointableObject.constructor(vertices2D, data.Item3, temp, data.Item2);
-            pointableObject.setParent(gameObject.transform);
+            pointableObject.constructor(data.Item1, data.Item3, temp, data.Item2);
+            pointableObject.setParent(parent.transform);
+
+            children.Add(pointableObject);
         }
+
+        MeshFilter[] meshFilters = parent.GetComponentsInChildren<MeshFilter>();
+        CombineInstance[] combine = new CombineInstance[meshFilters.Length];
+
+        int i = 0;
+        while (i < meshFilters.Length)
+        {
+            combine[i].mesh = meshFilters[i].sharedMesh;
+            combine[i].transform = meshFilters[i].transform.localToWorldMatrix;
+            i++;
+
+        }
+        parent.transform.GetComponent<MeshFilter>().mesh = new Mesh();
+        parent.transform.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
+
+        Debug.Log(TmpcenterX);
+        Debug.Log(TmpcenterY);
+
+        foreach (var child in children)
+        {
+            child.transform.SetPositionAndRotation(new Vector3(TmpcenterX, -TmpcenterY, 0), new Quaternion(0, 1, 0, 0));
+        }    
+        
+        parent.transform.SetPositionAndRotation(new Vector3(0-centerX, 1-centerY, -2), new Quaternion(0, 0, 0, 1));
+
+
 
     }
 
@@ -103,14 +158,10 @@ public class mapRenderer
     {
         decideGridPos(current);
 
-        //mapHeight = 2000*10;
-        //mapWidth = 2000*10;
-
-
-        drawSingular(gameObject, "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\data3.txt", 1.5F, 0.5F);
-        drawSingular(gameObject, "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\data_test.txt", 1.5F, 3.5F);
-        drawSingular(gameObject, "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\data3.txt", 5.5F, 0.5F);
-        drawSingular(gameObject, "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\data3.txt", 5.5F, 3.5F);
+        drawSingular(gameObject, "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\data3.txt", 0.15F, 0.05F,0);
+        drawSingular(gameObject, "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\data3.txt", 0.15F, 0.35F,1);
+        drawSingular(gameObject, "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\data3.txt", 0.55F, 0.05F,2);
+        drawSingular(gameObject, "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\data3.txt", 0.55F, 0.35F,3);
 
 
     }

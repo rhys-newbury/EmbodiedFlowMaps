@@ -15,7 +15,7 @@ public class draw_object : MonoBehaviour
 
     private void Start()
     {
-        string file = "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\data_test.txt";
+        string file = "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\data3.txt";
         mapRenderer map = new mapRenderer();
         map.drawSingular(this.gameObject, file);
 
