@@ -30,7 +30,7 @@ public class mapRenderer
         int count = 0;
         var parent = GameObject.Find("object" + number.ToString());
 
-        parent.transform.SetPositionAndRotation(new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 1));
+        parent.transform.SetPositionAndRotation(new Vector3(number, 0, 0), new Quaternion(0, 0, 0, 1));
 
 
 
