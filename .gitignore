@@ -3,29 +3,45 @@
 # =============== #
 group3_vr/Temp/
 group3_vr/Library/
+group3_vr/Assets/GoogleARCore
+group3_vr/Assets/Mapbox
+group3_vr/Assets/MapboxAR
+group3_vr/Assets/PlugIns/*
+group3_vr/Assets/Resources/*
+group3_vr/Assets/Scenes/*
+group3_vr/Assets/ThirdPartyAssets/*
+group3_vr/Assets/UnityARInterface/*
+group3_vr/Assets/UnityARKitPlugin/*
 
 # ===================================== #
 # Visual Studio / MonoDevelop generated #
 # ===================================== #
 group3_vr/group3_vr/ExportedObj/
-obj/
-*.svd
-*.userprefs
-/*.csproj
-*.pidb
-*.suo
-/*.sln
-*.user
-*.unityproj
-*.booproj
+group3_vr/obj/
+group3_vr/*.svd
+group3_vr/*.userprefs
+group3_vr/*.csproj
+group3_vr/*.pidb
+group3_vr/*.suo
+group3_vr/*.sln
+group3_vr/*.user
+group3_vr/*.unityproj
+group3_vr/*.booproj
 
 # ============ #
 # OS generated #
 # ============ #
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+group3_vr/.DS_Store
+group3_vr/.DS_Store?
+group3_vr/._*
+group3_vr/.Spotlight-V100
+group3_vr/.Trashes
+group3_vr/ehthumbs.db
+group3_vr/Thumbs.db
+
+
+.idea/*
+.vs/*
+.idea
+.vs
+venv/

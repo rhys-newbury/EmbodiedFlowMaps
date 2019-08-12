@@ -22,8 +22,6 @@ public class PointableObject : MonoBehaviour
 
     private readonly float ANGLE = 1 / Mathf.Sqrt(2);
 
-    public int gridX;
-    public int gridY;
     private float centroidX;
 
     private float centroidY;
@@ -56,18 +54,15 @@ public class PointableObject : MonoBehaviour
 
     public void onPointEnter()
     {
-
         this.color.a = 0.3F;
         this.meshRenderer.material.color = this.color;
         tooltip.SetActive(true);
         tooltip_text.text = this.getName();
-        
     }
    
 
     public void onPointLeave()
     {
-
         this.color.a = 1F;
         this.meshRenderer.material.color = this.color;
 
@@ -77,7 +72,6 @@ public class PointableObject : MonoBehaviour
     internal bool onClick()
     {
         this.selected = !this.selected;
-
 
         if (this.selected)
         {
@@ -99,7 +93,6 @@ public class PointableObject : MonoBehaviour
 
     private void drawObject()
     {
-
 
         List<Vector3> verticesList = new List<Vector3>(vertices3D);
         List<Vector3> verticesExtrudedList = new List<Vector3>();
@@ -164,11 +157,7 @@ public class PointableObject : MonoBehaviour
 
         var collider = objToSpawn.AddComponent<MeshCollider>();
         collider.sharedMesh = this.mesh;
-
-        //Setting position of stuff
-        //objToSpawn.transform.SetPositionAndRotation(new Vector3(0,0,0), new Quaternion(0, 1, 0, 0));
-
-
+        
     }
 
     public Mesh getMesh()
@@ -185,7 +174,6 @@ public class PointableObject : MonoBehaviour
         this.bounds = bounds;
         this.objToSpawn = objToSpawn;
         this.objToSpawn.name = name;
- 
 
         this.drawObject();
     }
@@ -195,15 +183,6 @@ public class PointableObject : MonoBehaviour
     public void setParent(Transform parent)
     {
         objToSpawn.transform.SetParent(parent);
-    }
-
-    public float getMinX()
-    {
-        return bounds[2];
-    }
-    public float getMaxX()
-    {
-        return bounds[0];
     }
 
     public void createLine()
@@ -227,23 +206,17 @@ public class PointableObject : MonoBehaviour
 
     }
 
+    public virtual Quaternion getAngle()
+    {
+        return new Quaternion(0, 1, 0, 0);
+    }
+
     public void destoryLine()
     {
         var line = objToSpawn.GetComponent<LineRenderer>();
         Destroy(line);
 
 
-    }
-
-
-
-    public float getMaxY()
-    {
-        return bounds[1];
-    }
-    public float getMinY()
-    {
-        return bounds[3];
     }
 
 }

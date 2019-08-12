@@ -21,16 +21,21 @@ public class mapRenderer
 
     private static readonly float FINAL_AREA = 1;
 
+    private enum LEVEL
+    {
+        COUNTRY_LEVEL,
+        STATE_LEVEL,
+        COUNTY_LEVEL
+    }
 
     public mapRenderer() { }
 
-    public void drawSingular(GameObject gameObject, string dataFile, float centerX=0, float centerY=0, int number=0)
+    public void drawSingular(GameObject gameObject, string dataFile, int level, float centerX=0, float centerY=0, int number=0)
     {
         //bool done = false;
         int count = 0;
-        var parent = GameObject.Find("object" + number.ToString());
 
-        parent.transform.SetPositionAndRotation(new Vector3(number, 0, 0), new Quaternion(0, 0, 0, 1));
+        gameObject.transform.SetPositionAndRotation(new Vector3(number, 0, 0), new Quaternion(0, 0, 0, 1));
 
 
 
@@ -90,6 +95,7 @@ public class mapRenderer
         var TmpcenterX = (totalMaxX + totalMinX) / 2;
         var TmpcenterY = (totalMaxY + totalMinY) / 2;
 
+        
         var area = (totalMaxX - totalMinX) * (totalMaxY - totalMinY);
 
         var factor = Mathf.Sqrt(FINAL_AREA / area);
@@ -110,23 +116,21 @@ public class mapRenderer
 
         area = (totalMaxX - totalMinX) * (totalMaxY - totalMinY);
 
-
-        //< VRTK_InteractableObject >(new VRTK_InteractableObject());
-
         var children = new List<PointableObject>();
 
         foreach (var data in drawingData) {
 
             GameObject temp = new GameObject();
-            PointableObject pointableObject = temp.AddComponent(typeof(PointableObject)) as PointableObject;
-            //Doesnt work
+
+            PointableObject pointableObject = temp.AddComponent(getType(level)) as PointableObject;
+
             pointableObject.constructor(data.Item1, data.Item3, temp, data.Item2);
-            pointableObject.setParent(parent.transform);
+            pointableObject.setParent(gameObject.transform);
 
             children.Add(pointableObject);
         }
 
-        MeshFilter[] meshFilters = parent.GetComponentsInChildren<MeshFilter>();
+        MeshFilter[] meshFilters = gameObject.GetComponentsInChildren<MeshFilter>();
         CombineInstance[] combine = new CombineInstance[meshFilters.Length];
 
         int i = 0;
@@ -137,52 +141,19 @@ public class mapRenderer
             i++;
 
         }
-        parent.transform.GetComponent<MeshFilter>().mesh = new Mesh();
-        parent.transform.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
-
-        Debug.Log(TmpcenterX);
-        Debug.Log(TmpcenterY);
+        MeshFilter mf = gameObject.AddComponent(typeof(MeshFilter)) as MeshFilter;
+        gameObject.GetComponent<MeshFilter>().mesh = new Mesh();
+        gameObject.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
 
         foreach (var child in children)
         {
-            child.transform.SetPositionAndRotation(new Vector3(TmpcenterX, -TmpcenterY, 0), new Quaternion(0, 1, 0, 0));
-        }    
-        
-        parent.transform.SetPositionAndRotation(new Vector3(0-centerX, 1-centerY, -2), new Quaternion(0, 0, 0, 1));
-
-
-
-    }
-
-    internal void drawMultiple(GameObject gameObject, List<PointableObject> current)
-    {
-        decideGridPos(current);
-
-        drawSingular(gameObject, "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\data3.txt", 0.15F, 0.05F,0);
-        drawSingular(gameObject, "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\data3.txt", 0.15F, 0.35F,1);
-        drawSingular(gameObject, "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\data3.txt", 0.55F, 0.05F,2);
-        drawSingular(gameObject, "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\data3.txt", 0.55F, 0.35F,3);
-
-
-    }
-
-    private void decideGridPos(List<PointableObject> currentObjects)
-    {
-        //Modifies the original pointable objects to fill in their grid positions
-
-        float width = Mathf.Ceil(Mathf.Sqrt(currentObjects.Count));
-        float height = Mathf.Ceil(currentObjects.Count / width);
-
-        var XSorted = currentObjects.OrderBy(x => x.getMinX()).ToList();
-        var YSorted = currentObjects.OrderBy(x => x.getMinY()).ToList();
-
-        for (int i = 0; i < currentObjects.Count; i++)
-        {
-            XSorted[i].gridX = (int)Mathf.Floor(i / width);
-            YSorted[i].gridY = (int)Mathf.Floor(i / height);
+            child.transform.SetPositionAndRotation(new Vector3(TmpcenterX, -TmpcenterY, 0), child.getAngle());
         }
 
+        gameObject.transform.SetPositionAndRotation(new Vector3(0-centerX, 1-centerY, -2), new Quaternion(0, 0, 0, 1));
+
     }
+
 
     private (float, float) convert(float latitude, float longitude)
     {
@@ -197,4 +168,26 @@ public class mapRenderer
         return (-x / 100, -y / 100);
 
     }
+
+    private System.Type getType(int level)
+    {
+        if (level == (int)LEVEL.COUNTRY_LEVEL)
+        {
+            return typeof(Country);
+        }
+        else if (level == (int)LEVEL.STATE_LEVEL)
+        {
+            return typeof(State);
+        }
+        else if (level == (int)LEVEL.COUNTY_LEVEL)
+        {
+            return typeof(County);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    
 }
