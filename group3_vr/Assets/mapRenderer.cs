@@ -14,10 +14,8 @@ public class mapRenderer
     private static readonly Regex _coordinates = new Regex(@"(?i),""coordinates"":\[\[(.*?)\]\]");
     private static readonly Regex _convert = new Regex(@"(?i)\[(.*?)\],");
 
-    private static int mapWidth = 1000;
-    private static int mapHeight = 50;
-
-    private static readonly float SQRT = 1 / Mathf.Sqrt(2);
+    private static int MAPWIDTH = 1000;
+    private static int MAPHEIGHT = 50;
 
     private static readonly float FINAL_AREA = 1;
 
@@ -117,11 +115,10 @@ public class mapRenderer
         area = (totalMaxX - totalMinX) * (totalMaxY - totalMinY);
 
         var children = new List<PointableObject>();
-
+        
         foreach (var data in drawingData) {
 
             GameObject temp = new GameObject();
-
             PointableObject pointableObject = temp.AddComponent(getType(level)) as PointableObject;
 
             pointableObject.constructor(data.Item1, data.Item3, temp, data.Item2);
@@ -129,6 +126,7 @@ public class mapRenderer
 
             children.Add(pointableObject);
         }
+        
 
         MeshFilter[] meshFilters = gameObject.GetComponentsInChildren<MeshFilter>();
         CombineInstance[] combine = new CombineInstance[meshFilters.Length];
@@ -147,7 +145,7 @@ public class mapRenderer
 
         foreach (var child in children)
         {
-            child.transform.SetPositionAndRotation(new Vector3(TmpcenterX, -TmpcenterY, 0), child.getAngle());
+            child.transform.SetPositionAndRotation(child.getTranslation(TmpcenterX, TmpcenterY), child.getAngle());
         }
 
         gameObject.transform.SetPositionAndRotation(new Vector3(0-centerX, 1-centerY, -2), new Quaternion(0, 0, 0, 1));
@@ -158,12 +156,12 @@ public class mapRenderer
     private (float, float) convert(float latitude, float longitude)
     {
 
-        float x = (longitude + 180) * (mapWidth / 360);
+        float x = (longitude + 180) * (MAPWIDTH / 360);
 
         float latRad = latitude * Mathf.PI / 180;
 
         float mercN = Mathf.Log(Mathf.Tan((Mathf.PI / 4) + (latRad / 2)));
-        float y = (mapHeight / 2) - (mapWidth * mercN / (2 * Mathf.PI));
+        float y = (MAPHEIGHT / 2) - (MAPWIDTH * mercN / (2 * Mathf.PI));
 
         return (-x / 100, -y / 100);
 
@@ -171,6 +169,7 @@ public class mapRenderer
 
     private System.Type getType(int level)
     {
+        Debug.Log(level);
         if (level == (int)LEVEL.COUNTRY_LEVEL)
         {
             return typeof(Country);

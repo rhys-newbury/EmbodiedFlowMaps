@@ -11,7 +11,7 @@ using System;
 public class draw_object : MonoBehaviour
 {
 
-    private int currentLevel = 0;
+    public static int currentLevel = 0;
     private static bool startUp = true;
     private static List<draw_object> currentList = new List<draw_object>();
 
@@ -64,7 +64,8 @@ public class draw_object : MonoBehaviour
     {
         string file = "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\data3.txt";
         mapRenderer map = new mapRenderer();
-        map.drawSingular(this.gameObject, file,1);
+
+        map.drawSingular(this.gameObject, file,currentLevel);
 
         currentList.Add(this);
       

@@ -211,6 +211,11 @@ public class PointableObject : MonoBehaviour
         return new Quaternion(0, 1, 0, 0);
     }
 
+    public virtual Vector3 getTranslation(float x, float y)
+    {
+        return new Vector3(x, -y, 0);
+    }
+
     public void destoryLine()
     {
         var line = objToSpawn.GetComponent<LineRenderer>();

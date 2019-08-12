@@ -57,6 +57,7 @@ public class detect_object_hit : MonoBehaviour
         draw_object.clear();
         if (currentList.Count > 0)
         {
+            draw_object.currentLevel++;
             for (int i = 0; i < currentList.Count; i++)
             {
                 GameObject gameObject = new GameObject();
