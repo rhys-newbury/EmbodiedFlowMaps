@@ -10,14 +10,14 @@ using System;
 public class mapRenderer
 {
 
-    private static readonly Regex _name = new Regex(@"(?i)""name"":""(.*?)""");
-    private static readonly Regex _coordinates = new Regex(@"(?i),""coordinates"":\[\[(.*?)\]\]");
-    private static readonly Regex _convert = new Regex(@"(?i)\[(.*?)\],");
+    private readonly Regex NAME_REGEX = new Regex(@"(?i)""name"":""(.*?)""");
+    private readonly Regex COORDS_REGEX = new Regex(@"(?i),""coordinates"":\[\[(.*?)\]\]");
+    private readonly Regex _convert = new Regex(@"(?i)\[(.*?)\],");
 
-    private static int MAPWIDTH = 1000;
-    private static int MAPHEIGHT = 50;
+    private int MAPWIDTH = 1000;
+    private int MAPHEIGHT = 50;
 
-    private static readonly float FINAL_AREA = 1;
+    private readonly float FINAL_AREA = 1;
 
     private enum LEVEL
     {
@@ -35,11 +35,10 @@ public class mapRenderer
 
         gameObject.transform.SetPositionAndRotation(new Vector3(number, 0, 0), new Quaternion(0, 0, 0, 1));
 
-
-
         List<Tuple<Vector2[], float[], string>> drawingData = new List<Tuple<Vector2[], float[],string>>();
 
         StreamReader inp_stm = new StreamReader(dataFile);
+
         while (!inp_stm.EndOfStream)
         {
             float maxX = -10000000, maxY = -10000000;
@@ -47,14 +46,15 @@ public class mapRenderer
 
             string inp_ln = inp_stm.ReadLine();
 
-            string StateName = _name.Match(inp_ln).Groups[1].ToString();
+            string StateName = NAME_REGEX.Match(inp_ln).Groups[1].ToString();
          
-            string coordinates = _coordinates.Match(inp_ln).Groups[1].ToString();
+            string coordinates = COORDS_REGEX.Match(inp_ln).Groups[1].ToString();
             
 
             MatchCollection matches = _convert.Matches(coordinates);
             Vector2[] vertices2D = new Vector2[matches.Count];
             int indices = 0;
+
             foreach (Match match in matches)
             {
 
@@ -63,7 +63,6 @@ public class mapRenderer
                     string[] data = match.Groups[1].ToString().Split(',');
 
                     (x, y) = convert(float.Parse(data[1]), float.Parse(data[0]));
-
 
                     vertices2D[indices] = new Vector2(x, y);
 
@@ -80,8 +79,6 @@ public class mapRenderer
             float[] bounds = new float[] { maxX, maxY, minX, minY };
 
             drawingData.Add(new Tuple<Vector2[], float[], string>(vertices2D, bounds, StateName));
-
-
         }
 
         var totalMaxX = Mathf.Max(drawingData.Select(x => x.Item2[0]).ToArray());
@@ -148,7 +145,9 @@ public class mapRenderer
             child.transform.SetPositionAndRotation(child.getTranslation(TmpcenterX, TmpcenterY), child.getAngle());
         }
 
-        gameObject.transform.SetPositionAndRotation(new Vector3(0-centerX, 1-centerY, -2), new Quaternion(0, 0, 0, 1));
+        gameObject.transform.SetPositionAndRotation(new Vector3(0-centerX, 1-centerY, -2), children[0].getFinalAngle());
+
+
 
     }
 
@@ -169,7 +168,6 @@ public class mapRenderer
 
     private System.Type getType(int level)
     {
-        Debug.Log(level);
         if (level == (int)LEVEL.COUNTRY_LEVEL)
         {
             return typeof(Country);

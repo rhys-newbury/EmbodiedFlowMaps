@@ -49,12 +49,15 @@ public class draw_object : MonoBehaviour
     public static void clear()
     {
         foreach (draw_object drawObject in currentList) {
-            int childs = drawObject.gameObject.transform.childCount;
-            for (var i = childs - 1; i >= 0; i--)
-            {
-                Destroy(drawObject.gameObject.transform.GetChild(i).gameObject);
-            }
+            //int childs = drawObject.gameObject.transform.childCount;
+            //for (var i = childs - 1; i >= 0; i--)
+            //{
+            //    Destroy(drawObject.gameObject.transform.GetChild(i).gameObject);
+            //}
+            //Destroy()
+            Destroy(drawObject.gameObject);
         }
+       
         currentList.Clear();
     }
 

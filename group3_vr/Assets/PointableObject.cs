@@ -216,6 +216,13 @@ public class PointableObject : MonoBehaviour
         return new Vector3(x, -y, 0);
     }
 
+    public virtual Quaternion getFinalAngle()
+    {
+        return new Quaternion(0,0,0,1);
+    }
+
+
+
     public void destoryLine()
     {
         var line = objToSpawn.GetComponent<LineRenderer>();
