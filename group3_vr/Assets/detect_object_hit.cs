@@ -18,6 +18,10 @@ public class detect_object_hit : MonoBehaviour
     
     //The box currently being drawn
     private LineRenderer line;
+    private VRTK_ControllerTooltips help_tooltip;
+    private bool help_tooltip_state = false;
+    private VRTK_ControllerTooltips data_tooltip;
+    private Action<string> change_text;
 
     void Awake()
     {
@@ -33,7 +37,22 @@ public class detect_object_hit : MonoBehaviour
         controller = GetComponent<VRTK_ControllerEvents>();
         controller.TouchpadPressed += Controller_TouchpadPressed;
 
+        help_tooltip = gameObject.transform.GetChild(0).GetComponent<VRTK_ControllerTooltips>();
+        help_tooltip.ToggleTips(false);
+
+          
+        change_text = delegate (string x)
+        {
+            Debug.Log(x);
+            data_tooltip.UpdateText(VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip, x);
+        };
+
+
+        data_tooltip = gameObject.transform.GetChild(1).GetComponent<VRTK_ControllerTooltips>();
+        data_tooltip.ToggleTips(false);
+
     }
+
 
     private void Controller_TouchpadPressed(object sender, ControllerInteractionEventArgs e)
     {
@@ -49,6 +68,12 @@ public class detect_object_hit : MonoBehaviour
             {
                 currentList.Remove(currentObject);
             }
+        }
+        else
+        {
+            help_tooltip_state = !help_tooltip_state;
+            help_tooltip.ToggleTips(help_tooltip_state);
+
         }
     }
 
@@ -79,6 +104,8 @@ public class detect_object_hit : MonoBehaviour
             currentObject = e.raycastHit.collider.gameObject.GetComponent("PointableObject") as PointableObject;
             currentObject.onPointLeave();
             currentObject = null;
+            data_tooltip.ToggleTips(false);
+
         }
         catch
         {
@@ -89,9 +116,13 @@ public class detect_object_hit : MonoBehaviour
 
     private void Pointer_DestinationMarkerEnter(object sender, DestinationMarkerEventArgs e)
     {
+
         currentObject = e.raycastHit.collider.gameObject.GetComponent("PointableObject") as PointableObject;
         selectingObject = true;
-        currentObject.onPointEnter();
+        currentObject.onPointEnter(change_text);
+        data_tooltip.ToggleTips(true);
+        help_tooltip.ToggleTips(false);
+        help_tooltip_state = false;
     }
 
 }

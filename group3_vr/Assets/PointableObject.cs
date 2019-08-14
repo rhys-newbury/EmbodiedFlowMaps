@@ -29,21 +29,14 @@ public class PointableObject : MonoBehaviour
 
     private bool selected = false;
 
-    private static GameObject tooltip;
-    private static Text tooltip_text;
+
     private Mesh mesh;
 
     public void Start()
     {
         //Only need to be done once
         //Tooltip is static throughout all pointable objects
-        if (tooltip == null)
-        {
-            tooltip = GameObject.Find("tooltip");
-            tooltip_text = GameObject.Find("tooltip_text").GetComponent<Text>();
-            
-            tooltip.SetActive(false);
-        }
+
     }
 
     public string getName()
@@ -52,12 +45,11 @@ public class PointableObject : MonoBehaviour
      }
 
 
-    public void onPointEnter()
+    public void onPointEnter(Action<string> change_text)
     {
         this.color.a = 0.3F;
         this.meshRenderer.material.color = this.color;
-        tooltip.SetActive(true);
-        tooltip_text.text = this.getName();
+        change_text(this.getName());
     }
    
 
@@ -65,8 +57,6 @@ public class PointableObject : MonoBehaviour
     {
         this.color.a = 1F;
         this.meshRenderer.material.color = this.color;
-
-        tooltip.SetActive(false);
     }
 
     internal bool onClick()

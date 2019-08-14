@@ -36,7 +36,7 @@ public class draw_object : MonoBehaviour
 
         if (startUp)
         {
-            string file = "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\American_map.txt";
+            string file = "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\America.txt";
             mapRenderer map = new mapRenderer();
             map.drawSingular(this.gameObject, file,0);
 
@@ -65,7 +65,8 @@ public class draw_object : MonoBehaviour
 
     internal void draw(PointableObject pointableObject)
     {
-        string file = "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\data3.txt";
+        Debug.Log(pointableObject.name);
+        string file = "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\Alabama.txt";
         mapRenderer map = new mapRenderer();
 
         map.drawSingular(this.gameObject, file,currentLevel);
