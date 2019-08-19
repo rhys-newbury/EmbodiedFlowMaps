@@ -14,8 +14,8 @@ public class mapRenderer
     private readonly Regex COORDS_REGEX = new Regex(@"(?i),""coordinates"":\[\[(.*?)\]\]");
     private readonly Regex _convert = new Regex(@"(?i)\[(.*?)\],");
 
-    private int MAPWIDTH = 1000;
-    private int MAPHEIGHT = 50;
+    private static int MAPWIDTH = 1000;
+    private static int MAPHEIGHT = 50;
 
     private readonly float FINAL_AREA = 1;
 
@@ -144,7 +144,7 @@ public class mapRenderer
 
         foreach (var child in children)
         {
-            child.transform.SetPositionAndRotation(child.getTranslation(TmpcenterX, TmpcenterY), child.getAngle());
+            child.SetPositionAndRotation(child.getTranslation(TmpcenterX, TmpcenterY), child.getAngle());
         }
 
         gameObject.transform.SetPositionAndRotation(new Vector3(0-centerX, 1-centerY, -2), children[0].getFinalAngle());
@@ -154,7 +154,7 @@ public class mapRenderer
     }
 
 
-    private (float, float) convert(float latitude, float longitude)
+    private static (float, float) convert(float latitude, float longitude)
     {
 
         float x = (longitude + 180) * (MAPWIDTH / 360);
