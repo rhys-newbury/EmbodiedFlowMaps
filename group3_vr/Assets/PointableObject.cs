@@ -183,14 +183,13 @@ public class PointableObject : MonoBehaviour
         go.transform.parent = this.wrapper.transform;
         VRTK_ObjectTooltip tooltip = go.GetComponent<VRTK_ObjectTooltip>() as VRTK_ObjectTooltip;
         tooltip.displayText = this.name;
+        tooltip.alwaysFaceHeadset = true;
         this.go.SetActive(false);
-
 
 
         this.objToSpawn = objToSpawn;
         this.objToSpawn.name = name;
-
-
+        
         this.drawObject();
     }
 
@@ -198,11 +197,7 @@ public class PointableObject : MonoBehaviour
 
     public void setParent(Transform parent)
     {
-
-
- 
         this.wrapper.transform.SetParent(parent);
-
     }
 
     public void createLine()
