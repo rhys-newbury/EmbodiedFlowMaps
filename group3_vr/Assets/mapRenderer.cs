@@ -14,8 +14,8 @@ public class mapRenderer
     private readonly Regex COORDS_REGEX = new Regex(@"(?i),""coordinates"":\[\[(.*?)\]\]");
     private readonly Regex _convert = new Regex(@"(?i)\[(.*?)\],");
 
-    private int MAPWIDTH = 1000;
-    private int MAPHEIGHT = 50;
+    private static int MAPWIDTH = 1000;
+    private static int MAPHEIGHT = 50;
 
     private readonly float FINAL_AREA = 1;
 
@@ -154,7 +154,7 @@ public class mapRenderer
     }
 
 
-    private (float, float) convert(float latitude, float longitude)
+    public static (float, float) convert(float latitude, float longitude)
     {
 
         float x = (longitude + 180) * (MAPWIDTH / 360);
