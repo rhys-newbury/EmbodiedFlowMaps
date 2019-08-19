@@ -142,21 +142,32 @@ public class mapRenderer
         gameObject.GetComponent<MeshFilter>().mesh = new Mesh();
         gameObject.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
 
+        var maximumY = -100F;
+
         foreach (var child in children)
         {
             child.SetPositionAndRotation(child.getTranslation(TmpcenterX, TmpcenterY), child.getAngle());
+            maximumY = Mathf.Max(maximumY, child.transform.parent.position.y);
         }
+        
 
         gameObject.transform.SetPositionAndRotation(new Vector3(0-centerX, 1-centerY, -2), children[0].getFinalAngle());
         
         GameObject go = MonoBehaviour.Instantiate(Resources.Load("ObjectTooltip")) as GameObject;
         go.transform.parent = gameObject.transform;
-        go.transform.SetPositionAndRotation(gameObject.transform.position, gameObject.transform.rotation);
-        go.transform.position = new Vector3(go.transform.position.x, totalMinY - 0.1F, go.transform.position.z);
+
+
+        go.transform.localPosition = new Vector3(0, maximumY+0.15F, 0);
+        
+        //go.transform.SetPositionAndRotation(gameObject.transform.position, gameObject.transform.rotation);
+        //go.transform.position = new Vector3(go.transform.position.x, totalMinY - 0.1F, go.transform.position.z);
         
 
         VRTK_ObjectTooltip tooltip = go.GetComponent<VRTK_ObjectTooltip>() as VRTK_ObjectTooltip;
         tooltip.displayText = parentName;
+        tooltip.drawLineFrom = go.transform;
+        tooltip.drawLineTo = go.transform;
+
 
 
 
