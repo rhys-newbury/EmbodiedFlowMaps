@@ -8,18 +8,15 @@ using static mapRenderer;
 public class County : PointableObject
 {
 
+    
     private static Quaternion Angle = new Quaternion(0, 0.6F, 0.8F, 0);
     private static Quaternion FinalAngle = new Quaternion(0, 0, 1, 0);
-<<<<<<< HEAD
 
 
     private List<GameObject> buildings = new List<GameObject>();
 
-        
 
-=======
-    
->>>>>>> Added tooltips to counties
+
     // Start is called before the first frame update
     new void Start()
     {
@@ -27,7 +24,7 @@ public class County : PointableObject
         Debug.Log("County Stuff");
         createBuildings();
 
-
+        
     }
 
     public override Quaternion getAngle()
@@ -72,6 +69,10 @@ public class County : PointableObject
 
             GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
 
+
+
+            cube.GetComponent<MeshRenderer>().material = Resources.Load("Materials/Glass", typeof(Material)) as Material;
+               
             cube.name = "BUILDING";
 
             (x, y) = mapRenderer.convert(float.Parse(strData[0]), float.Parse(strData[1]));
@@ -79,10 +80,11 @@ public class County : PointableObject
             //cube.transform.position = new Vector3(x, y, 0);
 
 
-            cube.transform.position = this.transform.position;
+            cube.transform.position = this.transform.parent.position;
 
 
-            cube.transform.localScale = new Vector3(0.1f, 0.5f, 0.1f);
+
+            cube.transform.localScale = new Vector3(0.01f, 0.5f, 0.01f);
 
             
 
