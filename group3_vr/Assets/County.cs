@@ -11,11 +11,9 @@ public class County : PointableObject
     private static Quaternion Angle = new Quaternion(0, 0.6F, 0.8F, 0);
     private static Quaternion FinalAngle = new Quaternion(0, 0, 1, 0);
 
-
     private List<GameObject> buildings = new List<GameObject>();
 
         
-
     // Start is called before the first frame update
     new void Start()
     {

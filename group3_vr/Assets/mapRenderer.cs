@@ -32,6 +32,8 @@ public class mapRenderer
     {
         //bool done = false;
         int count = 0;
+        string parentName = dataFile.Split('\\')[dataFile.Split('\\').Count() - 1];
+        parentName = parentName.Substring(0, parentName.Length - 4);
 
         gameObject.transform.SetPositionAndRotation(new Vector3(number, 0, 0), new Quaternion(0, 0, 0, 1));
 
@@ -46,7 +48,7 @@ public class mapRenderer
 
             string inp_ln = inp_stm.ReadLine();
 
-            string StateName = NAME_REGEX.Match(inp_ln).Groups[1].ToString();
+            string currentName = NAME_REGEX.Match(inp_ln).Groups[1].ToString();
          
             string coordinates = COORDS_REGEX.Match(inp_ln).Groups[1].ToString();
             
@@ -78,7 +80,7 @@ public class mapRenderer
 
             float[] bounds = new float[] { maxX, maxY, minX, minY };
 
-            drawingData.Add(new Tuple<Vector2[], float[], string>(vertices2D, bounds, StateName));
+            drawingData.Add(new Tuple<Vector2[], float[], string>(vertices2D, bounds, currentName));
         }
 
         var totalMaxX = Mathf.Max(drawingData.Select(x => x.Item2[0]).ToArray());
@@ -142,10 +144,19 @@ public class mapRenderer
 
         foreach (var child in children)
         {
-            child.transform.SetPositionAndRotation(child.getTranslation(TmpcenterX, TmpcenterY), child.getAngle());
+            child.SetPositionAndRotation(child.getTranslation(TmpcenterX, TmpcenterY), child.getAngle());
         }
 
         gameObject.transform.SetPositionAndRotation(new Vector3(0-centerX, 1-centerY, -2), children[0].getFinalAngle());
+        
+        GameObject go = MonoBehaviour.Instantiate(Resources.Load("ObjectTooltip")) as GameObject;
+        go.transform.parent = gameObject.transform;
+        go.transform.SetPositionAndRotation(gameObject.transform.position, gameObject.transform.rotation);
+        go.transform.position = new Vector3(go.transform.position.x, totalMinY - 0.1F, go.transform.position.z);
+        
+
+        VRTK_ObjectTooltip tooltip = go.GetComponent<VRTK_ObjectTooltip>() as VRTK_ObjectTooltip;
+        tooltip.displayText = parentName;
 
 
 
@@ -153,6 +164,7 @@ public class mapRenderer
 
 
     public static (float, float) convert(float latitude, float longitude)
+
     {
 
         float x = (longitude + 180) * (MAPWIDTH / 360);
