@@ -13,6 +13,8 @@ public class PointableObject : MonoBehaviour
 {
 
     private string name;
+    private GameObject wrapper;
+    private GameObject go;
     private GameObject objToSpawn;
     private Vector3[] vertices3D;
     private Triangulator T;
@@ -29,13 +31,10 @@ public class PointableObject : MonoBehaviour
 
     private bool selected = false;
 
-
     private Mesh mesh;
 
     public void Start()
     {
-        //Only need to be done once
-        //Tooltip is static throughout all pointable objects
 
     }
 
@@ -50,6 +49,7 @@ public class PointableObject : MonoBehaviour
         this.color.a = 0.3F;
         this.meshRenderer.material.color = this.color;
         change_text(this.getName());
+        this.go.SetActive(true);
     }
    
 
@@ -57,6 +57,7 @@ public class PointableObject : MonoBehaviour
     {
         this.color.a = 1F;
         this.meshRenderer.material.color = this.color;
+        this.go.SetActive(false);
     }
 
     internal bool onClick()
@@ -155,15 +156,40 @@ public class PointableObject : MonoBehaviour
         return this.mesh;
     }
 
-     internal void constructor(Vector2[] points, string name, GameObject objToSpawn, float[] bounds)
+    public void SetPositionAndRotation(Vector3 pos, Quaternion angle)
+    {
+        this.transform.SetPositionAndRotation(pos, angle);
+
+        float centerX = (this.bounds[0] + this.bounds[2]) / 2F;
+        float centerY = (this.bounds[1] + this.bounds[3]) / 2F;
+
+        this.wrapper.transform.SetPositionAndRotation(this.transform.TransformPoint(new Vector3(centerX, centerY, -0.05F)), new Quaternion(0, 0, 0, 1));
+
+        this.objToSpawn.transform.SetParent(this.wrapper.transform);
+
+    }
+
+    internal void constructor(Vector2[] points, string name, GameObject objToSpawn, float[] bounds)
     {
         T = new Triangulator(points);
         vertices3D = System.Array.ConvertAll<Vector2, Vector3>(points, v => v);
    
         this.name = name;
         this.bounds = bounds;
+
+        this.wrapper = new GameObject();
+
+        this.go = Instantiate(Resources.Load("ObjectTooltip")) as GameObject;
+        go.transform.parent = this.wrapper.transform;
+        VRTK_ObjectTooltip tooltip = go.GetComponent<VRTK_ObjectTooltip>() as VRTK_ObjectTooltip;
+        tooltip.displayText = this.name;
+        this.go.SetActive(false);
+
+
+
         this.objToSpawn = objToSpawn;
         this.objToSpawn.name = name;
+
 
         this.drawObject();
     }
@@ -172,7 +198,11 @@ public class PointableObject : MonoBehaviour
 
     public void setParent(Transform parent)
     {
-        objToSpawn.transform.SetParent(parent);
+
+
+ 
+        this.wrapper.transform.SetParent(parent);
+
     }
 
     public void createLine()
