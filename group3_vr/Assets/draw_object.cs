@@ -22,17 +22,24 @@ public class draw_object : MonoBehaviour
         VRTK_InteractHaptics interactHaptics = gameObject.AddComponent(typeof(VRTK_InteractHaptics)) as VRTK_InteractHaptics;
         VRTK.GrabAttachMechanics.VRTK_ChildOfControllerGrabAttach grabAttach = gameObject.AddComponent(typeof(VRTK.GrabAttachMechanics.VRTK_ChildOfControllerGrabAttach)) as VRTK.GrabAttachMechanics.VRTK_ChildOfControllerGrabAttach;
         VRTK.SecondaryControllerGrabActions.VRTK_SwapControllerGrabAction grabAction = gameObject.AddComponent(typeof(VRTK.SecondaryControllerGrabActions.VRTK_SwapControllerGrabAction)) as VRTK.SecondaryControllerGrabActions.VRTK_SwapControllerGrabAction;
+        VRTK.SecondaryControllerGrabActions.VRTK_AxisScaleGrabAction scaleAction = gameObject.AddComponent(typeof(VRTK.SecondaryControllerGrabActions.VRTK_AxisScaleGrabAction)) as VRTK.SecondaryControllerGrabActions.VRTK_AxisScaleGrabAction;
         Rigidbody rigidBody = gameObject.AddComponent(typeof(Rigidbody)) as Rigidbody;
 
         interactObject.isGrabbable = true;
         interactObject.holdButtonToGrab = false;
         interactObject.grabAttachMechanicScript = grabAttach;
-        interactObject.secondaryGrabActionScript = grabAction;
+        interactObject.secondaryGrabActionScript = scaleAction;
 
         grabAttach.precisionGrab = true;
 
         rigidBody.useGravity = false;
         rigidBody.isKinematic = true;
+
+        scaleAction.lockAxis = new Vector3State(false, false, true);
+        scaleAction.uniformScaling = true;
+       
+
+
 
         Debug.Log("Creating Game Object");
 
