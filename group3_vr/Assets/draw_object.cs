@@ -29,6 +29,8 @@ public class draw_object : MonoBehaviour
         interactObject.grabAttachMechanicScript = grabAttach;
         interactObject.secondaryGrabActionScript = grabAction;
 
+        grabAttach.precisionGrab = true;
+
         rigidBody.useGravity = false;
         rigidBody.isKinematic = true;
 
@@ -36,7 +38,7 @@ public class draw_object : MonoBehaviour
 
         if (startUp)
         {
-            string file = "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\America.txt";
+            string file = "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\a.txt";
             mapRenderer map = new mapRenderer();
             map.drawSingular(this.gameObject, file,0);
 
