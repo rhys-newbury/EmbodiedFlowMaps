@@ -40,6 +40,7 @@ public class County : PointableObject
         cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
         dataCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
         dummyScaler = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        dummyScaler.GetComponent<Renderer>().enabled = false;
 
         startTime = Time.time;
         
@@ -69,7 +70,7 @@ public class County : PointableObject
 
         float fracJourneyData = distCoveredData / journeyLengthData;
 
-        cube.transform.localScale = Vector3.Lerp(cube.transform.localScale, new Vector3(0.01f, 0.5f, 0.01f), fracJourney);
+        cube.transform.localScale = Vector3.Lerp(cube.transform.localScale, new Vector3(0.01f, 0.2f, 0.01f), fracJourney);
 
         //dataCube.transform.localScale = Vector3.Lerp(cube.transform.localScale, new Vector3(0.01f, 0.2f, 0.01f), 0.5f);
 
@@ -163,6 +164,12 @@ public class County : PointableObject
 
 
             cube.transform.position = this.transform.parent.position;
+
+            cube.transform.position += new Vector3(0f, 0.05f, 0f);
+
+            cube.transform.SetParent(this.transform);
+
+            dummyScaler.transform.SetParent(this.transform);
 
             //dataCube.transform.position = this.transform.parent.position;
 
