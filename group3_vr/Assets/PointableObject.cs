@@ -13,6 +13,7 @@ public class PointableObject : MonoBehaviour
 {
 
     private string name;
+    public string parentName;
     private GameObject wrapper;
     private GameObject go;
     private GameObject objToSpawn;
@@ -41,7 +42,7 @@ public class PointableObject : MonoBehaviour
     public string getName()
     {
         return this.name;
-     }
+    }
 
 
     public void onPointEnter(Action<string> change_text)
@@ -169,12 +170,13 @@ public class PointableObject : MonoBehaviour
 
     }
 
-    internal void constructor(Vector2[] points, string name, GameObject objToSpawn, float[] bounds)
+    internal void constructor(Vector2[] points, string name, GameObject objToSpawn, float[] bounds, string parentName)
     {
         T = new Triangulator(points);
         vertices3D = System.Array.ConvertAll<Vector2, Vector3>(points, v => v);
    
         this.name = name;
+        this.parentName = parentName;
         this.bounds = bounds;
 
         this.wrapper = new GameObject();
