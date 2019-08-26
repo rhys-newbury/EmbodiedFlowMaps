@@ -32,7 +32,7 @@ public class PointableObject : MonoBehaviour
 
     private bool selected = false;
 
-    private Mesh mesh;
+    public Mesh mesh;
 
     public void Start()
     {
@@ -149,7 +149,7 @@ public class PointableObject : MonoBehaviour
 
         var collider = objToSpawn.AddComponent<MeshCollider>();
         collider.sharedMesh = this.mesh;
-        
+
     }
 
     public Mesh getMesh()

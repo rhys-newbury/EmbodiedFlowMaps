@@ -332,21 +332,7 @@ public class mapRenderer
             children.Add(pointableObject);
         }
 
-
-        MeshFilter[] meshFilters = gameObject.GetComponentsInChildren<MeshFilter>();
-        CombineInstance[] combine = new CombineInstance[meshFilters.Length];
-
-        int i = 0;
-        while (i < meshFilters.Length)
-        {
-            combine[i].mesh = meshFilters[i].sharedMesh;
-            combine[i].transform = meshFilters[i].transform.localToWorldMatrix;
-            i++;
-
-        }
-        MeshFilter mf = gameObject.AddComponent(typeof(MeshFilter)) as MeshFilter;
-        gameObject.GetComponent<MeshFilter>().mesh = new Mesh();
-        gameObject.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
+   
 
         var maximumY = -100F;
 

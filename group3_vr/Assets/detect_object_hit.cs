@@ -22,10 +22,66 @@ public class detect_object_hit : MonoBehaviour
     private bool help_tooltip_state = false;
     private VRTK_ControllerTooltips data_tooltip;
     private Action<string> change_text;
+    private VRTK_ControllerEvents controller;
+    private long oldTime = 0;
+    private Vector3 oldPos = new Vector3(0,0,0);
 
+    private List<float> velocityBuffer = (new float[] { 0, 0, 0, 0, 0 }).ToList();
+
+    private void Update()
+    {
+        try
+        {
+
+
+
+            var obj = GetComponent<VRTK_InteractGrab>().GetGrabbedObject();
+            Rigidbody rb = obj.GetComponent<Rigidbody>();
+            Vector3 v3Velocity = rb.velocity;
+
+
+            var Time = System.DateTime.Now.Ticks;
+           // Debug.Log(Time - oldTime);
+
+            if (Time-oldTime < 300000)
+            {
+
+                var newPos = obj.transform.position;
+                var delta = newPos - oldPos;
+
+                var speed = delta.magnitude / Time * (Mathf.Pow(10,20));
+                if (oldPos.magnitude != 0)
+                {
+                    //Debug.Log(speed);
+
+                    velocityBuffer.RemoveAt(0);
+                    velocityBuffer.Add(speed);
+                }
+                oldPos = newPos;
+
+
+                if (velocityBuffer.Sum() > 50)
+                {
+                    Debug.Log("Throw!!");
+                    GameObject.Destroy(obj);
+                }
+
+            }
+            else
+            {
+                velocityBuffer = (new float[] { 0, 0, 0, 0, 0 }).ToList();
+            }
+
+            oldTime = Time;
+
+            //Debug.Log(v3Velocity.magnitude);
+        }
+        catch { }
+
+    }
     void Awake()
     {
-        VRTK_ControllerEvents controller;
+        //VRTK_ControllerEvents controller;
         VRTK_Pointer pointer;
 
         //Set up event listeners
@@ -36,6 +92,7 @@ public class detect_object_hit : MonoBehaviour
 
         controller = GetComponent<VRTK_ControllerEvents>();
         controller.TouchpadPressed += Controller_TouchpadPressed;
+
 
         help_tooltip = gameObject.transform.GetChild(0).GetComponent<VRTK_ControllerTooltips>();
         help_tooltip.ToggleTips(false);
