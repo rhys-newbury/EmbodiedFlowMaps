@@ -14,8 +14,8 @@ public class mapRenderer
     private readonly Regex COORDS_REGEX = new Regex(@"(?i),""coordinates"":\[\[(.*?)\]\]");
     private readonly Regex _convert = new Regex(@"(?i)\[(.*?)\],");
 
-    private int MAPWIDTH = 1000;
-    private int MAPHEIGHT = 50;
+    private static int MAPWIDTH = 1000;
+    private static int MAPHEIGHT = 50;
 
     private readonly float FINAL_AREA = 1;
 
@@ -142,19 +142,39 @@ public class mapRenderer
         gameObject.GetComponent<MeshFilter>().mesh = new Mesh();
         gameObject.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
 
+        var maximumY = -100F;
+
         foreach (var child in children)
         {
-            child.transform.SetPositionAndRotation(child.getTranslation(TmpcenterX, TmpcenterY), child.getAngle());
+            child.SetPositionAndRotation(child.getTranslation(TmpcenterX, TmpcenterY), child.getAngle());
+            maximumY = Mathf.Max(maximumY, child.transform.parent.position.y);
         }
+        
 
         gameObject.transform.SetPositionAndRotation(new Vector3(0-centerX, 1-centerY, -2), children[0].getFinalAngle());
+
+        if (level != (int)LEVEL.COUNTY_LEVEL)
+        {
+            GameObject go = MonoBehaviour.Instantiate(Resources.Load("ObjectTooltip")) as GameObject;
+            go.transform.parent = gameObject.transform;
+
+
+            go.transform.localPosition = new Vector3(0, maximumY + 0.15F, 0);
+
+
+            VRTK_ObjectTooltip tooltip = go.GetComponent<VRTK_ObjectTooltip>() as VRTK_ObjectTooltip;
+            tooltip.displayText = parentName;
+            tooltip.drawLineFrom = go.transform;
+            tooltip.drawLineTo = go.transform;
+        }
+
 
 
 
     }
 
 
-    private (float, float) convert(float latitude, float longitude)
+    private static (float, float) convert(float latitude, float longitude)
     {
 
         float x = (longitude + 180) * (MAPWIDTH / 360);
