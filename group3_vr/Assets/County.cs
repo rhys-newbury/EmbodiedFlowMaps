@@ -27,6 +27,8 @@ public class County : PointableObject
 
     private float journeyLengthData;
 
+    private float capacity;
+
 
 
 
@@ -70,7 +72,7 @@ public class County : PointableObject
 
         float fracJourneyData = distCoveredData / journeyLengthData;
 
-        cube.transform.localScale = Vector3.Lerp(cube.transform.localScale, new Vector3(0.01f, 0.2f, 0.01f), fracJourney);
+        cube.transform.localScale = Vector3.Lerp(cube.transform.localScale, new Vector3(0.03f, 0.2f + capacity/1000, 0.03f), fracJourney);
 
         //dataCube.transform.localScale = Vector3.Lerp(cube.transform.localScale, new Vector3(0.01f, 0.2f, 0.01f), 0.5f);
 
@@ -161,6 +163,8 @@ public class County : PointableObject
             (x, y) = mapRenderer.convert(float.Parse(strData[0]), float.Parse(strData[1]));
 
             //cube.transform.position = new Vector3(x, y, 0);
+
+            this.capacity = float.Parse(strData[2]);
 
 
             cube.transform.position = this.transform.parent.position;
