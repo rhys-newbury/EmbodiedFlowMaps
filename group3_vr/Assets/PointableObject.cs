@@ -184,6 +184,7 @@ public class PointableObject : MonoBehaviour
         this.go = Instantiate(Resources.Load("ObjectTooltip")) as GameObject;
         go.transform.parent = this.wrapper.transform;
         VRTK_ObjectTooltip tooltip = go.GetComponent<VRTK_ObjectTooltip>() as VRTK_ObjectTooltip;
+        tooltip.alwaysFaceHeadset = true;
         tooltip.displayText = this.name;
         this.go.SetActive(false);
 

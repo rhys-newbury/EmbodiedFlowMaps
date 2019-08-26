@@ -348,21 +348,40 @@ public class mapRenderer
         gameObject.GetComponent<MeshFilter>().mesh = new Mesh();
         gameObject.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
 
+        var maximumY = -100F;
+
+
         foreach (var child in children)
         {
             child.SetPositionAndRotation(child.getTranslation(TmpcenterX, TmpcenterY), child.getAngle());
+            maximumY = Mathf.Max(maximumY, child.transform.parent.position.y);
+
+        }
+
+
+        if (level != (int)LEVEL.COUNTY_LEVEL)
+        {
+            GameObject objectToolTip = MonoBehaviour.Instantiate(Resources.Load("ObjectTooltip")) as GameObject;
+            objectToolTip.transform.parent = gameObject.transform;
+
+            objectToolTip.transform.localPosition = new Vector3(0, maximumY + 0.15F, 0);
+        
+            VRTK_ObjectTooltip tooltipData = objectToolTip.GetComponent<VRTK_ObjectTooltip>() as VRTK_ObjectTooltip;
+            tooltipData.displayText = parentName;
+            tooltipData.drawLineFrom = objectToolTip.transform;
+            tooltipData.drawLineTo = objectToolTip.transform;
         }
 
         gameObject.transform.SetPositionAndRotation(new Vector3(0 - centerX, 1 - centerY, -2), children[0].getFinalAngle());
 
-        GameObject go = MonoBehaviour.Instantiate(Resources.Load("ObjectTooltip")) as GameObject;
-        go.transform.parent = gameObject.transform;
-        go.transform.SetPositionAndRotation(gameObject.transform.position, gameObject.transform.rotation);
-        go.transform.position = new Vector3(go.transform.position.x, totalMinY - 0.1F, go.transform.position.z);
+        //GameObject go = MonoBehaviour.Instantiate(Resources.Load("ObjectTooltip")) as GameObject;
+        //go.transform.parent = gameObject.transform;
+        //go.transform.SetPositionAndRotation(gameObject.transform.position, gameObject.transform.rotation);
+        //go.transform.position = new Vector3(go.transform.position.x, totalMinY - 0.1F, go.transform.position.z);
 
 
-        VRTK_ObjectTooltip tooltip = go.GetComponent<VRTK_ObjectTooltip>() as VRTK_ObjectTooltip;
-        tooltip.displayText = parentName;
+        //VRTK_ObjectTooltip tooltip = go.GetComponent<VRTK_ObjectTooltip>() as VRTK_ObjectTooltip;
+        //tooltip.displayText = parentName;
 
 
 
