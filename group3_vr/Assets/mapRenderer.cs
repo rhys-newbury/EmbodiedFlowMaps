@@ -176,16 +176,16 @@ public class mapRenderer
 
                 foreach (var b in buildingList)
                     {
-                        var newBuilding = new Buildings();
+                    var newBuilding = new Buildings();
                     float x, y;
                     (x, y) = convert(float.Parse(b[0]), float.Parse(b[1]));
                     x *= factor;
                     y *= factor;
 
-                        newBuilding.gameObj.transform.SetPositionAndRotation(new Vector3(x,y, 0), new Quaternion(0, 0, 0, 1));
-                        newBuilding.gameObj.transform.parent = pointableObject.transform;
+                    newBuilding.gameObj.transform.SetPositionAndRotation(new Vector3(x,y, 0), new Quaternion(0, 0, 0, 1));
+                    newBuilding.gameObj.transform.parent = pointableObject.transform;
 
-                        stateData[currentName].Add(newBuilding);
+                    stateData[currentName].Add(newBuilding);
 
 
                 }
