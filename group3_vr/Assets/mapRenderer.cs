@@ -65,7 +65,6 @@ public class mapRenderer
         }
        
     }
-
     public void drawSingular(GameObject gameObject, string inp_ln, string parentName, int level, float centerX = 0, float centerY = 0, int number = 0)
     {
         //bool done = false;
@@ -234,7 +233,6 @@ public class mapRenderer
 
 
     }
-
     public void drawMultiple(GameObject gameObject, string dataFile, int level, float centerX=0, float centerY=0, int number=0)
     {
         //bool done = false;

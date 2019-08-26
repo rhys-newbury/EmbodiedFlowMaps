@@ -12,7 +12,6 @@ public class County : PointableObject
     private static Quaternion Angle = new Quaternion(0, 0.6F, 0.8F, 0);
     private static Quaternion FinalAngle = new Quaternion(0, 0, 1, 0);
 
-
     private List<GameObject> buildings = new List<GameObject>();
 
     public float speed = 0.05f;
