@@ -125,9 +125,11 @@ public class County : PointableObject
 
         startTime += 0.1f;
 
-        string file = "C:\\Users\\Jesse\\Documents\\group3_vr\\group3_vr\\dummycounty.txt";
+        //string file = "C:\\Users\\Jesse\\Documents\\group3_vr\\group3_vr\\dummycounty.txt";
 
-        StreamReader inp_stm = new StreamReader(file);
+        string file = "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\dummycounty.txt";
+
+     StreamReader inp_stm = new StreamReader(file);
 
         int myTuple;
 
