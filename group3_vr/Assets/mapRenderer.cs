@@ -37,8 +37,8 @@ public class mapRenderer
         {
             _buildingData = new Dictionary<String, Dictionary<String, List<List<String>>>>();
 
-            StreamReader inp_stm = new StreamReader("C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\data_processing_scripts\\building_data.csv");
-
+            StreamReader inp_stm = new StreamReader("C:\\Users\\newbu\\vr\\group3_vr\\data_processing_scripts\\building_data.csv");
+                
             while (!inp_stm.EndOfStream)
             {
                 string inp_ln = inp_stm.ReadLine();

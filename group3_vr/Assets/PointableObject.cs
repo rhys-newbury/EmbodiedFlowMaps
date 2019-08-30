@@ -132,7 +132,8 @@ public class PointableObject : MonoBehaviour
         this.mesh.RecalculateNormals();
         this.mesh.RecalculateBounds();
 
-        Color meshColor = UnityEngine.Random.ColorHSV();
+        //Color meshColor = UnityEngine.Random.ColorHSV();
+        Color meshColor = dataAccessor.getColour(dataAccessor.stateIncoming[this.name]);
 
         var colors = Enumerable.Range(0, verticesList.Count)
          .Select(i => meshColor)
@@ -174,6 +175,7 @@ public class PointableObject : MonoBehaviour
     {
         T = new Triangulator(points);
         vertices3D = System.Array.ConvertAll<Vector2, Vector3>(points, v => v);
+   
    
         this.name = name;
         this.parentName = parentName;
