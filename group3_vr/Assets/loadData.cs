@@ -5,7 +5,7 @@ using UnityEngine;
 
 public static class dataAccessor
 {
-    public static Dictionary<string, float> stateIncoming = new Dictionary<string, float>();
+    private static Dictionary<string, float> stateIncoming = new Dictionary<string, float>();
    
     public static void load()
     {

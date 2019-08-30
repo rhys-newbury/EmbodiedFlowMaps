@@ -59,6 +59,11 @@ public class County : PointableObject
 
     }
 
+    public override int getLevel()
+    {
+        return 2;
+    }
+
 
     public void Update()
     {
