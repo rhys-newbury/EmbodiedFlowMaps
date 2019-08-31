@@ -44,6 +44,10 @@ public class PointableObject : MonoBehaviour
         return this.name;
     }
 
+    public virtual int getLevel() {
+        return 0;
+    }
+
 
     public void onPointEnter(Action<string> change_text)
     {
@@ -133,7 +137,7 @@ public class PointableObject : MonoBehaviour
         this.mesh.RecalculateBounds();
 
         //Color meshColor = UnityEngine.Random.ColorHSV();
-        Color meshColor = dataAccessor.getColour(dataAccessor.stateIncoming[this.name]);
+        Color meshColor = dataAccessor.getColour(dataAccessor.getData(this.name));
 
         var colors = Enumerable.Range(0, verticesList.Count)
          .Select(i => meshColor)

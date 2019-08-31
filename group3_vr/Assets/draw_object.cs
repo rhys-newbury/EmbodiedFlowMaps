@@ -83,7 +83,7 @@ public class draw_object : MonoBehaviour
              file = "C:\\Users\\newbu\\vr\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.name + ".json";
 
 
-            map.drawMultiple(this.gameObject, file, currentLevel);
+            map.drawMultiple(this.gameObject, file, level);
 
         }
         else
@@ -92,7 +92,7 @@ public class draw_object : MonoBehaviour
             foreach (var line in System.IO.File.ReadAllLines(file)) {
                 if (line.Contains(pointableObject.name))
                 {
-                    map.drawSingular(this.gameObject, line, pointableObject.parentName, currentLevel);
+                    map.drawSingular(this.gameObject, line, pointableObject.parentName, level);
                     break;
                 }
             }

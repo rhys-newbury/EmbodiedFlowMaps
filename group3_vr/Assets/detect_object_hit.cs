@@ -88,7 +88,7 @@ public class detect_object_hit : MonoBehaviour
         pointer = GetComponent<VRTK_Pointer>();
         pointer.DestinationMarkerEnter += Pointer_DestinationMarkerEnter;
         pointer.DestinationMarkerExit += Pointer_DestinationMarkerExit;
-        pointer.SelectionButtonPressed += Pointer_SelectionButtonPressed;
+        //pointer.SelectionButtonPressed += Pointer_SelectionButtonPressed;
 
         controller = GetComponent<VRTK_ControllerEvents>();
         controller.TouchpadPressed += Controller_TouchpadPressed;
@@ -122,7 +122,7 @@ public class detect_object_hit : MonoBehaviour
                 currentList.Add(currentObject);
                 GameObject gameObject = new GameObject();
                 draw_object main = gameObject.AddComponent(typeof(draw_object)) as draw_object;
-                main.draw(currentObject);
+                main.draw(currentObject, currentObject.getLevel()+1);
             }
             else
             {
@@ -138,20 +138,20 @@ public class detect_object_hit : MonoBehaviour
         }
     }
 
-    private void Pointer_SelectionButtonPressed(object sender, ControllerInteractionEventArgs e)
-    {
-       // draw_object.clear();
-        if (currentList.Count > 0)
-        {
-            draw_object.currentLevel++;
-            for (int i = 0; i < currentList.Count; i++)
-            {
+    //private void Pointer_SelectionButtonPressed(object sender, ControllerInteractionEventArgs e)
+    //{
+    //   // draw_object.clear();
+    //    if (currentList.Count > 0)
+    //    {
+    //        draw_object.currentLevel++;
+    //        for (int i = 0; i < currentList.Count; i++)
+    //        {
 
-                main.draw(currentList[i]);
-            }
-       // currentList.Clear();
-    }
-}
+    //            main.draw(currentList[i]);
+    //        }
+    //   // currentList.Clear();
+    //}
+    //}
     private void Pointer_DestinationMarkerExit(object sender, DestinationMarkerEventArgs e)
     {
         try
