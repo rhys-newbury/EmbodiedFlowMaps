@@ -9,4 +9,9 @@ public class Country : PointableObject
     {
         return 0;
     }
+
+    internal override void destory()
+    {
+        return;
+    }
 }

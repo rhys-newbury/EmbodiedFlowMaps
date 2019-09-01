@@ -37,7 +37,7 @@ public class mapRenderer
         {
             _buildingData = new Dictionary<String, Dictionary<String, List<List<String>>>>();
 
-            StreamReader inp_stm = new StreamReader("C:\\Users\\newbu\\vr\\group3_vr\\data_processing_scripts\\building_data.csv");
+            StreamReader inp_stm = new StreamReader("C:\\Users\\FIT3162\\Desktop\\group3_vr\\data_processing_scripts\\building_data.csv");
                 
             while (!inp_stm.EndOfStream)
             {
@@ -65,7 +65,7 @@ public class mapRenderer
         }
        
     }
-    public void drawSingular(GameObject gameObject, string inp_ln, string parentName, int level, float centerX = 0, float centerY = 0, int number = 0)
+    public void drawSingular(GameObject gameObject, string inp_ln, string parentName, int level, PointableObject parent, float centerX = 0, float centerY = 0, int number = 0)
     {
         //bool done = false;
         int count = 0;
@@ -195,7 +195,10 @@ public class mapRenderer
         pointableObject.constructor(data.Item1, data.Item3, temp, data.Item2, parentName);
         pointableObject.setParent(gameObject.transform);
 
-        children.Add(pointableObject);
+            parent.addChild(pointableObject);
+
+
+            children.Add(pointableObject);
     }
 
 
@@ -233,7 +236,7 @@ public class mapRenderer
 
 
     }
-    public void drawMultiple(GameObject gameObject, string dataFile, int level, float centerX=0, float centerY=0, int number=0)
+    public void drawMultiple(GameObject gameObject, string dataFile, int level, PointableObject parent=null, float centerX=0, float centerY=0, int number=0)
     {
         //bool done = false;
         int count = 0;
@@ -330,9 +333,14 @@ public class mapRenderer
             pointableObject.setParent(gameObject.transform);
 
             children.Add(pointableObject);
+            if (parent != null)
+            {
+                parent.addChild(pointableObject);
+            }
+
         }
 
-   
+
 
         var maximumY = -100F;
 

@@ -23,6 +23,8 @@ public class PointableObject : MonoBehaviour
     private MeshRenderer meshRenderer;
     private float[] bounds;
 
+    private List<PointableObject> children = new List<PointableObject>();
+
     private readonly float ANGLE = 1 / Mathf.Sqrt(2);
 
     private float centroidX;
@@ -34,6 +36,7 @@ public class PointableObject : MonoBehaviour
 
     public Mesh mesh;
 
+    
     public void Start()
     {
 
@@ -157,6 +160,11 @@ public class PointableObject : MonoBehaviour
 
     }
 
+    internal virtual void destory()
+    {
+        GameObject.Destroy(this.wrapper);
+    }
+
     public Mesh getMesh()
     {
         return this.mesh;
@@ -214,6 +222,11 @@ public class PointableObject : MonoBehaviour
 
     }
 
+    internal void deleteChildren()
+    {
+        this.children.ForEach(x => x.delete());
+    }
+
     public void createLine()
     {
         var line = objToSpawn.AddComponent<LineRenderer>();
@@ -260,6 +273,18 @@ public class PointableObject : MonoBehaviour
 
     }
 
+    internal void addChild(PointableObject gameObject)
+    {
+        this.children.Add(gameObject);
+            
+    }
+
+    internal void delete()
+    {
+        this.children.ForEach(x => x.delete());
+        GameObject.Destroy(this.gameObject);
+        GameObject.Destroy(this.wrapper);
+    }
 }
 
 

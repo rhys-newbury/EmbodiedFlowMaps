@@ -25,17 +25,28 @@ public class detect_object_hit : MonoBehaviour
     private VRTK_ControllerEvents controller;
     private long oldTime = 0;
     private Vector3 oldPos = new Vector3(0,0,0);
+    private VRTK_Pointer pointer;
+
 
     private List<float> velocityBuffer = (new float[] { 0, 0, 0, 0, 0 }).ToList();
+    private bool touchpadPressed = false;
+    private float touchpadAngle;
 
     private void Update()
     {
         try
         {
 
-
-
             var obj = GetComponent<VRTK_InteractGrab>().GetGrabbedObject();
+            var pointable = obj.GetComponent<PointableObject>();
+
+
+            if (touchpadPressed)
+            {
+                var t = VRTK.VRTK_DeviceFinder.DeviceTransform(VRTK_DeviceFinder.Devices.Headset);
+                obj.transform.position = obj.transform.position + pointer.transform.parent.transform.TransformDirection(new Vector3(0, 0, (touchpadAngle < 90 || touchpadAngle > 270) ? 0.01F : -0.01F));
+            }
+
             Rigidbody rb = obj.GetComponent<Rigidbody>();
             Vector3 v3Velocity = rb.velocity;
 
@@ -60,10 +71,21 @@ public class detect_object_hit : MonoBehaviour
                 oldPos = newPos;
 
 
-                if (velocityBuffer.Sum() > 50)
+                if (velocityBuffer.Sum() > 250 && velocityBuffer.Where((x) => x > 30).Count() > 3)
                 {
+                    foreach (var i in velocityBuffer)
+                    {
+                        Debug.Log("Buffer: " + i.ToString());
+                    }
                     Debug.Log("Throw!!");
-                    GameObject.Destroy(obj);
+                    foreach (var item in pointable.GetComponentsInChildren<PointableObject>())
+                    {
+                        item.delete();
+                        //item.onPointLeave();
+                    }
+                    pointable.destory();
+                    //GameObject.Destroy(obj);
+                    
                 }
 
             }
@@ -82,17 +104,20 @@ public class detect_object_hit : MonoBehaviour
     void Awake()
     {
         //VRTK_ControllerEvents controller;
-        VRTK_Pointer pointer;
 
         //Set up event listeners
         pointer = GetComponent<VRTK_Pointer>();
         pointer.DestinationMarkerEnter += Pointer_DestinationMarkerEnter;
         pointer.DestinationMarkerExit += Pointer_DestinationMarkerExit;
+
         //pointer.SelectionButtonPressed += Pointer_SelectionButtonPressed;
 
         controller = GetComponent<VRTK_ControllerEvents>();
-        controller.TouchpadPressed += Controller_TouchpadPressed;
+        controller.TriggerPressed += Controller_TriggerPressed;
 
+        controller.TouchpadAxisChanged += Controller_TouchpadAxisChanged;
+        controller.TouchpadReleased += Controller_TouchpadReleased;
+        controller.TouchpadPressed += Controller_TouchpadPressed;
 
         help_tooltip = gameObject.transform.GetChild(0).GetComponent<VRTK_ControllerTooltips>();
         help_tooltip.ToggleTips(false);
@@ -100,7 +125,6 @@ public class detect_object_hit : MonoBehaviour
           
         change_text = delegate (string x)
         {
-            Debug.Log(x);
             data_tooltip.UpdateText(VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip, x);
         };
 
@@ -110,8 +134,22 @@ public class detect_object_hit : MonoBehaviour
 
     }
 
-
     private void Controller_TouchpadPressed(object sender, ControllerInteractionEventArgs e)
+    {
+        this.touchpadPressed = true;
+    }
+
+    private void Controller_TouchpadReleased(object sender, ControllerInteractionEventArgs e)
+    {
+        this.touchpadPressed = false;
+    }
+
+    private void Controller_TouchpadAxisChanged(object sender, ControllerInteractionEventArgs e)
+    {
+        this.touchpadAngle = e.touchpadAngle;
+    }
+
+    private void Controller_TriggerPressed(object sender, ControllerInteractionEventArgs e)
     {
     //If still on an object
         if (currentObject != null)
@@ -127,7 +165,9 @@ public class detect_object_hit : MonoBehaviour
             else
             {
                 currentList.Remove(currentObject);
-               
+                currentObject.deleteChildren();
+
+
             }
         }
         else
@@ -163,6 +203,7 @@ public class detect_object_hit : MonoBehaviour
             selectingObject = false;
             currentObject = e.raycastHit.collider.gameObject.GetComponent("PointableObject") as PointableObject;
             currentObject.onPointLeave();
+
             currentObject = null;
             data_tooltip.ToggleTips(false);
 
