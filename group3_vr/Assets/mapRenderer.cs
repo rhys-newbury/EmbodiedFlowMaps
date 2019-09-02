@@ -37,7 +37,7 @@ public class mapRenderer
         {
             _buildingData = new Dictionary<String, Dictionary<String, List<List<String>>>>();
 
-            StreamReader inp_stm = new StreamReader("C:\\Users\\FIT3162\\Desktop\\group3_vr\\data_processing_scripts\\building_data.csv");
+            StreamReader inp_stm = new StreamReader("C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\data_processing_scripts\\building_data.csv");
                 
             while (!inp_stm.EndOfStream)
             {
@@ -194,8 +194,9 @@ public class mapRenderer
 
         pointableObject.constructor(data.Item1, data.Item3, temp, data.Item2, parentName);
         pointableObject.setParent(gameObject.transform);
+        pointableObject.parent = parent;
 
-            parent.addChild(pointableObject);
+        parent.addChild(pointableObject);
 
 
             children.Add(pointableObject);
@@ -336,6 +337,7 @@ public class mapRenderer
             if (parent != null)
             {
                 parent.addChild(pointableObject);
+                pointableObject.parent = parent;
             }
 
         }

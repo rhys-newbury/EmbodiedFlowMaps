@@ -14,7 +14,7 @@ public class PointableObject : MonoBehaviour
 
     private string name;
     public string parentName;
-    private GameObject wrapper;
+    protected GameObject wrapper;
     private GameObject go;
     private GameObject objToSpawn;
     private Vector3[] vertices3D;
@@ -23,7 +23,7 @@ public class PointableObject : MonoBehaviour
     private MeshRenderer meshRenderer;
     private float[] bounds;
 
-    private List<PointableObject> children = new List<PointableObject>();
+    protected List<PointableObject> children = new List<PointableObject>();
 
     private readonly float ANGLE = 1 / Mathf.Sqrt(2);
 
@@ -35,8 +35,8 @@ public class PointableObject : MonoBehaviour
     private bool selected = false;
 
     public Mesh mesh;
+    internal PointableObject parent;
 
-    
     public void Start()
     {
 
@@ -224,7 +224,14 @@ public class PointableObject : MonoBehaviour
 
     internal void deleteChildren()
     {
-        this.children.ForEach(x => x.delete());
+        if (this.children.Count > 0)
+        {
+            var filtered = this.children.Where(x => x != null).ToList();
+            var parent = filtered[0].transform.parent.transform.parent.gameObject;
+            filtered.ForEach(x => x.delete());
+            GameObject.Destroy(parent);
+
+        }
     }
 
     public void createLine()
@@ -267,6 +274,7 @@ public class PointableObject : MonoBehaviour
 
     public void destoryLine()
     {
+        this.selected = false;
         var line = objToSpawn.GetComponent<LineRenderer>();
         Destroy(line);
 
@@ -279,11 +287,12 @@ public class PointableObject : MonoBehaviour
             
     }
 
-    internal void delete()
+    internal virtual void delete()
     {
-        this.children.ForEach(x => x.delete());
-        GameObject.Destroy(this.gameObject);
-        GameObject.Destroy(this.wrapper);
+            this.children.ForEach(x => x.delete());
+            this.children.Clear();
+            GameObject.Destroy(this.gameObject);
+            GameObject.Destroy(this.wrapper);
     }
 }
 

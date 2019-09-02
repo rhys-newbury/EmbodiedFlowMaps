@@ -130,7 +130,7 @@ public class County : PointableObject
 
         //string file = "C:\\Users\\Jesse\\Documents\\group3_vr\\group3_vr\\dummycounty.txt";
 
-        string file = "C:\\Users\\FIT3162\\Desktop\\group3_vr\\dummycounty.txt";
+        string file = "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\dummycounty.txt";
 
      StreamReader inp_stm = new StreamReader(file);
 

@@ -38,12 +38,12 @@ public class detect_object_hit : MonoBehaviour
         {
 
             var obj = GetComponent<VRTK_InteractGrab>().GetGrabbedObject();
-            var pointable = obj.GetComponent<PointableObject>();
+            //var pointable = obj.GetComponent<PointableObject>();
 
 
             if (touchpadPressed)
             {
-                var t = VRTK.VRTK_DeviceFinder.DeviceTransform(VRTK_DeviceFinder.Devices.Headset);
+                //var t = VRTK.VRTK_DeviceFinder.DeviceTransform(VRTK_DeviceFinder.Devices.Headset);
                 obj.transform.position = obj.transform.position + pointer.transform.parent.transform.TransformDirection(new Vector3(0, 0, (touchpadAngle < 90 || touchpadAngle > 270) ? 0.01F : -0.01F));
             }
 
@@ -71,21 +71,23 @@ public class detect_object_hit : MonoBehaviour
                 oldPos = newPos;
 
 
-                if (velocityBuffer.Sum() > 250 && velocityBuffer.Where((x) => x > 30).Count() > 3)
+                if (velocityBuffer.Sum() > 150 && velocityBuffer.Where((x) => x > 20).Count() > 3)
                 {
                     foreach (var i in velocityBuffer)
                     {
                         Debug.Log("Buffer: " + i.ToString());
                     }
-                    Debug.Log("Throw!!");
-                    foreach (var item in pointable.GetComponentsInChildren<PointableObject>())
+                    int level = -1;
+                    //pointable.delete();
+
+                    foreach (var item in obj.GetComponentsInChildren<PointableObject>())
                     {
                         item.delete();
-                        //item.onPointLeave();
+                        level = level == -1 ? item.getLevel() : level;
                     }
-                    pointable.destory();
-                    //GameObject.Destroy(obj);
-                    
+                    //pointable.destory();
+                    if (level > 0) GameObject.Destroy(obj);
+
                 }
 
             }
@@ -160,6 +162,7 @@ public class detect_object_hit : MonoBehaviour
                 currentList.Add(currentObject);
                 GameObject gameObject = new GameObject();
                 draw_object main = gameObject.AddComponent(typeof(draw_object)) as draw_object;
+                main.draw(currentObject, currentObject.getLevel()+1);
                 main.draw(currentObject, currentObject.getLevel()+1);
             }
             else
