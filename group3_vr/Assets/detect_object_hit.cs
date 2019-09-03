@@ -83,9 +83,10 @@ public class detect_object_hit : MonoBehaviour
                     foreach (var item in obj.GetComponentsInChildren<PointableObject>())
                     {
                         item.delete();
+                        item.parent.deselect();
                         level = level == -1 ? item.getLevel() : level;
                     }
-                    //pointable.destory();
+                    
                     if (level > 0) GameObject.Destroy(obj);
 
                 }
@@ -162,7 +163,6 @@ public class detect_object_hit : MonoBehaviour
                 currentList.Add(currentObject);
                 GameObject gameObject = new GameObject();
                 draw_object main = gameObject.AddComponent(typeof(draw_object)) as draw_object;
-                main.draw(currentObject, currentObject.getLevel()+1);
                 main.draw(currentObject, currentObject.getLevel()+1);
             }
             else

@@ -160,6 +160,12 @@ public class PointableObject : MonoBehaviour
 
     }
 
+    internal void deselect()
+    {
+        this.selected = false;
+        destoryLine();
+    }
+
     internal virtual void destory()
     {
         GameObject.Destroy(this.wrapper);
@@ -274,6 +280,7 @@ public class PointableObject : MonoBehaviour
 
     public void destoryLine()
     {
+       
         this.selected = false;
         var line = objToSpawn.GetComponent<LineRenderer>();
         Destroy(line);

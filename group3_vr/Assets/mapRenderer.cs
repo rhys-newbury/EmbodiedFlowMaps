@@ -7,6 +7,8 @@ using System.Text.RegularExpressions;
 using UnityEngine.EventSystems;
 using VRTK;
 using System;
+using UnityEngine.UI;
+
 public class mapRenderer
 {
 
@@ -242,7 +244,7 @@ public class mapRenderer
         //bool done = false;
         int count = 0;
         string parentName = dataFile.Split('\\')[dataFile.Split('\\').Count() - 1];
-        parentName = parentName.Substring(0, parentName.Length - 5);
+        parentName = parentName.Split('.')[0];
 
         gameObject.transform.SetPositionAndRotation(new Vector3(number, 0, 0), new Quaternion(0, 0, 0, 1));
 
@@ -364,6 +366,8 @@ public class mapRenderer
         
             VRTK_ObjectTooltip tooltipData = objectToolTip.GetComponent<VRTK_ObjectTooltip>() as VRTK_ObjectTooltip;
             tooltipData.displayText = parentName;
+            Text[] backend = tooltipData.GetComponentsInChildren<Text>() as Text[];
+            backend.ToList().ForEach(x => x.text = parentName);
             tooltipData.drawLineFrom = objectToolTip.transform;
             tooltipData.drawLineTo = objectToolTip.transform;
         }
