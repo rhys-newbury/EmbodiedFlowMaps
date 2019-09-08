@@ -83,7 +83,6 @@ public class County : PointableObject
 
             building.volumeCube.transform.localScale = Vector3.Lerp(building.capacityCube.transform.localScale, new Vector3(0.01f, 0.2f + building.data / 1000, 0.01f), 0.5f);
 
-            building.tooltip.displayText = this.name;
         }
 
 
@@ -153,7 +152,7 @@ public class County : PointableObject
             foreach (var building in l)
             {
                 //building.cube.name = "CONTAINER";
-                building.capacityCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                //building.capacityCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 building.capacityCube.GetComponent<MeshRenderer>().material = Resources.Load("Materials/Glass", typeof(Material)) as Material;
                 building.capacityCube.transform.position = building.gameObj.transform.position;
                 building.capacityCube.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
@@ -187,7 +186,7 @@ public class County : PointableObject
         foreach (var building in l)
         {
 
-            building.volumeCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            
 
 
             building.volumeCube.transform.position = building.gameObj.transform.position;
