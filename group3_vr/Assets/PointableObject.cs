@@ -13,7 +13,8 @@ public class PointableObject : MonoBehaviour
 {
 
     private string name;
-    private GameObject wrapper;
+    public string parentName;
+    protected GameObject wrapper;
     private GameObject go;
     private GameObject objToSpawn;
     private Vector3[] vertices3D;
@@ -21,6 +22,8 @@ public class PointableObject : MonoBehaviour
     private Color color;
     private MeshRenderer meshRenderer;
     private float[] bounds;
+
+    protected List<PointableObject> children = new List<PointableObject>();
 
     private readonly float ANGLE = 1 / Mathf.Sqrt(2);
 
@@ -31,7 +34,8 @@ public class PointableObject : MonoBehaviour
 
     private bool selected = false;
 
-    private Mesh mesh;
+    public Mesh mesh;
+    internal PointableObject parent;
 
     public void Start()
     {
@@ -41,7 +45,11 @@ public class PointableObject : MonoBehaviour
     public string getName()
     {
         return this.name;
-     }
+    }
+
+    public virtual int getLevel() {
+        return 0;
+    }
 
 
     public void onPointEnter(Action<string> change_text)
@@ -131,7 +139,8 @@ public class PointableObject : MonoBehaviour
         this.mesh.RecalculateNormals();
         this.mesh.RecalculateBounds();
 
-        Color meshColor = UnityEngine.Random.ColorHSV();
+        //Color meshColor = UnityEngine.Random.ColorHSV();
+        Color meshColor = dataAccessor.getColour(dataAccessor.getData(this.name));
 
         var colors = Enumerable.Range(0, verticesList.Count)
          .Select(i => meshColor)
@@ -148,7 +157,18 @@ public class PointableObject : MonoBehaviour
 
         var collider = objToSpawn.AddComponent<MeshCollider>();
         collider.sharedMesh = this.mesh;
-        
+
+    }
+
+    internal void deselect()
+    {
+        this.selected = false;
+        destoryLine();
+    }
+
+    internal virtual void destory()
+    {
+        GameObject.Destroy(this.wrapper);
     }
 
     public Mesh getMesh()
@@ -169,12 +189,14 @@ public class PointableObject : MonoBehaviour
 
     }
 
-    internal void constructor(Vector2[] points, string name, GameObject objToSpawn, float[] bounds)
+    internal void constructor(Vector2[] points, string name, GameObject objToSpawn, float[] bounds, string parentName)
     {
         T = new Triangulator(points);
         vertices3D = System.Array.ConvertAll<Vector2, Vector3>(points, v => v);
    
+   
         this.name = name;
+        this.parentName = parentName;
         this.bounds = bounds;
 
         this.wrapper = new GameObject();
@@ -182,6 +204,7 @@ public class PointableObject : MonoBehaviour
         this.go = Instantiate(Resources.Load("ObjectTooltip")) as GameObject;
         go.transform.parent = this.wrapper.transform;
         VRTK_ObjectTooltip tooltip = go.GetComponent<VRTK_ObjectTooltip>() as VRTK_ObjectTooltip;
+        tooltip.alwaysFaceHeadset = true;
         tooltip.displayText = this.name;
         tooltip.alwaysFaceHeadset = true;
         this.go.SetActive(false);
@@ -198,6 +221,18 @@ public class PointableObject : MonoBehaviour
     public void setParent(Transform parent)
     {
         this.wrapper.transform.SetParent(parent);
+    }
+
+    internal void deleteChildren()
+    {
+        if (this.children.Count > 0)
+        {
+            var filtered = this.children.Where(x => x != null).ToList();
+            var parent = filtered[0].transform.parent.transform.parent.gameObject;
+            filtered.ForEach(x => x.delete());
+            GameObject.Destroy(parent);
+
+        }
     }
 
     public void createLine()
@@ -240,12 +275,27 @@ public class PointableObject : MonoBehaviour
 
     public void destoryLine()
     {
+       
+        this.selected = false;
         var line = objToSpawn.GetComponent<LineRenderer>();
         Destroy(line);
 
 
     }
 
+    internal void addChild(PointableObject gameObject)
+    {
+        this.children.Add(gameObject);
+            
+    }
+
+    internal virtual void delete()
+    {
+            this.children.ForEach(x => x.delete());
+            this.children.Clear();
+            GameObject.Destroy(this.gameObject);
+            GameObject.Destroy(this.wrapper);
+    }
 }
 
 
