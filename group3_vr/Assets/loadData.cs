@@ -6,11 +6,12 @@ using UnityEngine;
 public static class dataAccessor
 {
     private static Dictionary<string, float> stateIncoming = new Dictionary<string, float>();
-   
+    private static Dictionary<string, float> flow = new Dictionary<string, float>();
+
     public static void load()
     {
 
-        StreamReader inp_stm = new StreamReader("C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\data_processing_scripts\\inc.csv");
+        StreamReader inp_stm = new StreamReader("C:\\Users\\FIT3162\\Desktop\\group3_vr\\data_processing_scripts\\inc.csv");
 
         while (!inp_stm.EndOfStream)
         {
@@ -23,8 +24,28 @@ public static class dataAccessor
             float inc_data = float.Parse(data[1]);
 
             stateIncoming.Add(state, inc_data);
+
+
                     
         }
+
+        StreamReader inp_stm2 = new StreamReader("C:\\Users\\FIT3162\\Desktop\\group3_vr\\data_processing_scripts\\flow.csv");
+
+        while (!inp_stm2.EndOfStream)
+        {
+            string inp_ln = inp_stm2.ReadLine();
+
+
+
+            string[] data = inp_ln.Split(',');
+            string state1 = codeToState(data[0]);
+            string state2 = codeToState(data[1]);
+            float inc_data = float.Parse(data[2]);
+
+            flow.Add(state1 + "," + state2, inc_data);
+
+        }
+// Debug.Log(flow);
 
 
 
