@@ -7,6 +7,8 @@ using System.Text.RegularExpressions;
 using UnityEngine.EventSystems;
 using VRTK;
 using System;
+using UnityEngine.UI;
+
 public class mapRenderer
 {
 
@@ -37,8 +39,10 @@ public class mapRenderer
         {
             _buildingData = new Dictionary<String, Dictionary<String, List<List<String>>>>();
 
-            StreamReader inp_stm = new StreamReader("C:\\Users\\Jesse\\Documents\\group3_vr\\group3_vr\\data_processing_scripts\\building_data.csv");
+            //StreamReader inp_stm = new StreamReader("C:\\Users\\Jesse\\Documents\\group3_vr\\group3_vr\\data_processing_scripts\\building_data.csv");
 
+            StreamReader inp_stm = new StreamReader("C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\data_processing_scripts\\building_data.csv");
+                
             while (!inp_stm.EndOfStream)
             {
                 string inp_ln = inp_stm.ReadLine();
@@ -65,7 +69,7 @@ public class mapRenderer
         }
        
     }
-    public void drawSingular(GameObject gameObject, string inp_ln, string parentName, int level, float centerX = 0, float centerY = 0, int number = 0)
+    public void drawSingular(GameObject gameObject, string inp_ln, string parentName, int level, PointableObject parent, float centerX = 0, float centerY = 0, int number = 0)
     {
         //bool done = false;
         int count = 0;
@@ -197,8 +201,12 @@ public class mapRenderer
 
         pointableObject.constructor(data.Item1, data.Item3, temp, data.Item2, parentName);
         pointableObject.setParent(gameObject.transform);
+        pointableObject.parent = parent;
 
-        children.Add(pointableObject);
+        parent.addChild(pointableObject);
+
+
+            children.Add(pointableObject);
     }
 
 
@@ -236,12 +244,12 @@ public class mapRenderer
 
 
     }
-    public void drawMultiple(GameObject gameObject, string dataFile, int level, float centerX=0, float centerY=0, int number=0)
+    public void drawMultiple(GameObject gameObject, string dataFile, int level, PointableObject parent=null, float centerX=0, float centerY=0, int number=0)
     {
         //bool done = false;
         int count = 0;
         string parentName = dataFile.Split('\\')[dataFile.Split('\\').Count() - 1];
-        parentName = parentName.Substring(0, parentName.Length - 5);
+        parentName = parentName.Split('.')[0];
 
         gameObject.transform.SetPositionAndRotation(new Vector3(number, 0, 0), new Quaternion(0, 0, 0, 1));
 
@@ -333,23 +341,15 @@ public class mapRenderer
             pointableObject.setParent(gameObject.transform);
 
             children.Add(pointableObject);
-        }
-
-
-        MeshFilter[] meshFilters = gameObject.GetComponentsInChildren<MeshFilter>();
-        CombineInstance[] combine = new CombineInstance[meshFilters.Length];
-
-        int i = 0;
-        while (i < meshFilters.Length)
-        {
-            combine[i].mesh = meshFilters[i].sharedMesh;
-            combine[i].transform = meshFilters[i].transform.localToWorldMatrix;
-            i++;
+            if (parent != null)
+            {
+                parent.addChild(pointableObject);
+                pointableObject.parent = parent;
+            }
 
         }
-        MeshFilter mf = gameObject.AddComponent(typeof(MeshFilter)) as MeshFilter;
-        gameObject.GetComponent<MeshFilter>().mesh = new Mesh();
-        gameObject.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
+
+
 
         var maximumY = -100F;
 
@@ -371,6 +371,8 @@ public class mapRenderer
         
             VRTK_ObjectTooltip tooltipData = objectToolTip.GetComponent<VRTK_ObjectTooltip>() as VRTK_ObjectTooltip;
             tooltipData.displayText = parentName;
+            Text[] backend = tooltipData.GetComponentsInChildren<Text>() as Text[];
+            backend.ToList().ForEach(x => x.text = parentName);
             tooltipData.drawLineFrom = objectToolTip.transform;
             tooltipData.drawLineTo = objectToolTip.transform;
         }

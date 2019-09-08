@@ -52,6 +52,11 @@ public class County : PointableObject
 
     }
 
+    public override int getLevel()
+    {
+        return 2;
+    }
+
 
     public void Update()
     {
@@ -64,6 +69,8 @@ public class County : PointableObject
         {
 
             journeyLength = Vector3.Distance(building.capacityCube.transform.localScale, new Vector3(0.01f, 0.5f, 0.01f));
+
+
 
 
             float distCovered = (Time.time - startTime) * speed;
