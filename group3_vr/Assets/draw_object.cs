@@ -45,7 +45,7 @@ public class draw_object : MonoBehaviour
 
         if (startUp)
         {
-            string file = "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\America.txt";
+            string file = "C:\\Users\\Jesse\\Documents\\group3_vr\\group3_vr\\mapGeoJSON\\America.txt";
             mapRenderer map = new mapRenderer();
             map.drawMultiple(this.gameObject, file,0);
 
@@ -81,7 +81,7 @@ public class draw_object : MonoBehaviour
 
         if (currentLevel == (int)mapRenderer.LEVEL.STATE_LEVEL)
         {
-             file = "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.name + ".json";
+             file = "C:\\Users\\Jesse\\Documents\\group3_vr\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.name + ".json";
 
 
             map.drawMultiple(this.gameObject, file, currentLevel);
@@ -89,7 +89,7 @@ public class draw_object : MonoBehaviour
         }
         else
         {
-            file = "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.parentName + ".json";
+            file = "C:\\Users\\Jesse\\Documents\\group3_vr\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.parentName + ".json";
             foreach (var line in System.IO.File.ReadAllLines(file)) {
                 if (line.Contains(pointableObject.name))
                 {

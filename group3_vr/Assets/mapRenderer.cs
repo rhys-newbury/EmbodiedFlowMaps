@@ -21,7 +21,7 @@ public class mapRenderer
 
     private static Dictionary<String, Dictionary<String, List<List<String>>>> _buildingData = null;
 
-    private static Dictionary<String, Dictionary<String, List<Buildings>>> buildingData = new Dictionary<String, Dictionary<String, List<Buildings>>>();
+    public static Dictionary<String, Dictionary<String, List<Buildings>>> buildingData = new Dictionary<String, Dictionary<String, List<Buildings>>>();
 
 
 
@@ -37,7 +37,7 @@ public class mapRenderer
         {
             _buildingData = new Dictionary<String, Dictionary<String, List<List<String>>>>();
 
-            StreamReader inp_stm = new StreamReader("C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\data_processing_scripts\\building_data.csv");
+            StreamReader inp_stm = new StreamReader("C:\\Users\\Jesse\\Documents\\group3_vr\\group3_vr\\data_processing_scripts\\building_data.csv");
 
             while (!inp_stm.EndOfStream)
             {
@@ -183,8 +183,11 @@ public class mapRenderer
 
                     newBuilding.gameObj.transform.SetPositionAndRotation(new Vector3(x,y, 0), new Quaternion(0, 0, 0, 1));
                     newBuilding.gameObj.transform.parent = pointableObject.transform;
+                    newBuilding.data = float.Parse(b[5]);
+                    newBuilding.volume = float.Parse(b[6]);
 
                     stateData[currentName].Add(newBuilding);
+
 
 
                 }

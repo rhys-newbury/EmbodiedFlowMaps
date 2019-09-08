@@ -16,6 +16,7 @@ public class County : PointableObject
 
     public float speed = 0.05f;
 
+
     GameObject cube;
     GameObject dataCube;
     GameObject dummyScaler;
@@ -32,47 +33,63 @@ public class County : PointableObject
 
 
 
-
-
     // Start is called before the first frame update
     new void Start()
     {
         base.Start();
         Debug.Log("County Stuff");
-        cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        dataCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        dummyScaler = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        dummyScaler.GetComponent<Renderer>().enabled = false;
+        //cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        //dataCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        //dummyScaler = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        //dummyScaler.GetComponent<Renderer>().enabled = false;
 
         startTime = Time.time;
-        
         createBuildings();
 
         createDataBuildings();
 
-        journeyLength = Vector3.Distance(cube.transform.localScale, new Vector3(0.01f, 0.5f, 0.01f));
-
-        journeyLengthData = Vector3.Distance(dataCube.transform.localScale, new Vector3(0.01f, 0.2f, 0.01f));
-
-
-
-
-
+        
 
     }
 
 
     public void Update()
     {
-        float distCovered = (Time.time - startTime) * speed;
 
-        float distCoveredData = (Time.time - startTime) * speed;
+        var l = mapRenderer.buildingData[this.parentName][this.name];
 
-        float fracJourney = distCovered / journeyLength;
+        
 
-        float fracJourneyData = distCoveredData / journeyLengthData;
+        foreach (var building in l)
+        {
 
-        cube.transform.localScale = Vector3.Lerp(cube.transform.localScale, new Vector3(0.03f, 0.2f + capacity/1000, 0.03f), fracJourney);
+            journeyLength = Vector3.Distance(building.capacityCube.transform.localScale, new Vector3(0.01f, 0.5f, 0.01f));
+
+
+            float distCovered = (Time.time - startTime) * speed;
+
+
+            float fracJourney = distCovered / journeyLength;
+
+
+            building.capacityCube.transform.localScale = Vector3.Lerp(building.capacityCube.transform.localScale, new Vector3(0.01f, 0.5f + building.volume / 1000, 0.01f), fracJourney);
+
+            building.volumeCube.transform.localScale = Vector3.Lerp(building.capacityCube.transform.localScale, new Vector3(0.01f, 0.2f + building.data / 1000, 0.01f), 0.5f);
+
+            building.tooltip.displayText = this.name;
+        }
+
+
+
+        //float distCovered = (Time.time - startTime) * speed;
+
+        //float distCoveredData = (Time.time - startTime) * speed;
+
+        //float fracJourney = distCovered / journeyLength;
+
+        //float fracJourneyData = distCoveredData / journeyLengthData;
+
+        //cube.transform.localScale = Vector3.Lerp(cube.transform.localScale, new Vector3(0.05f, 0.5f + capacity/1000, 0.05f), fracJourney);
 
         //dataCube.transform.localScale = Vector3.Lerp(cube.transform.localScale, new Vector3(0.01f, 0.2f, 0.01f), 0.5f);
 
@@ -81,23 +98,22 @@ public class County : PointableObject
 
 
 
-        Vector3 temp = dataCube.transform.localScale;
-        Vector3 temp2 = dataCube.transform.localPosition;
-        if(fracJourney > 0.09f)
-        {
-            if (temp.y < 2f)
-            {
-                temp.y += 0.1f;
-                temp2.y += 0.05f;
+        //Vector3 temp = dataCube.transform.localScale;
+        //Vector3 temp2 = dataCube.transform.localPosition;
+        //if(fracJourney > 0.09f)
+        //{
+        //    if (temp.y < 2f)
+        //    {
+        //        temp.y += 0.1f;
+        //        temp2.y += 0.05f;
                 
 
-                dataCube.transform.localScale = temp;
-                dataCube.transform.localPosition = temp2;
+        //        dataCube.transform.localScale = temp;
+        //        dataCube.transform.localPosition = temp2;
 
-            }
-        }
-        
-
+        //    }
+        //}
+       
         
 
     }
@@ -125,95 +141,81 @@ public class County : PointableObject
 
         startTime += 0.1f;
 
-        //string file = "C:\\Users\\Jesse\\Documents\\group3_vr\\group3_vr\\dummycounty.txt";
+        var l = mapRenderer.buildingData[this.parentName][this.name];
 
-        string file = "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\dummycounty.txt";
-
-     StreamReader inp_stm = new StreamReader(file);
-
-        int myTuple;
-
-        float x, y;
-
-        while ((!inp_stm.EndOfStream))
-        {
-            string inp_ln = inp_stm.ReadLine();
-
-            string[] strArray = inp_ln.Split(',');
-
-            List<string> strData = new List<string>();
-
-            foreach (string str in strArray)
+            foreach (var building in l)
             {
-                strData.Add(str);
+                //building.cube.name = "CONTAINER";
+                building.capacityCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                building.capacityCube.GetComponent<MeshRenderer>().material = Resources.Load("Materials/Glass", typeof(Material)) as Material;
+                building.capacityCube.transform.position = building.gameObj.transform.position;
+                building.capacityCube.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
+                building.capacityCube.transform.SetParent(this.transform);
+
+
             }
 
-
-            //journeyLength = Vector3.Distance(cube.transform.localScale, new Vector3(0.01f, 0.5f, 0.01f));
-
-
-
-
-            cube.GetComponent<MeshRenderer>().material = Resources.Load("Materials/Glass", typeof(Material)) as Material;
-
-            //dataCube.GetComponent<MeshRenderer>().material = Resources.Load("Materials/GlowingGreen", typeof(Material)) as Material;
-
-            cube.name = "CONTAINER";
-            dataCube.name = "DATA";
-            dummyScaler.name = "SCALER";
-
-            (x, y) = mapRenderer.convert(float.Parse(strData[0]), float.Parse(strData[1]));
-
-            //cube.transform.position = new Vector3(x, y, 0);
-
-            this.capacity = float.Parse(strData[2]);
-
-
-            cube.transform.position = this.transform.parent.position;
-
-            cube.transform.position += new Vector3(0f, 0.05f, 0f);
-
-            cube.transform.SetParent(this.transform);
-
-            dummyScaler.transform.SetParent(this.transform);
-
-            //dataCube.transform.position = this.transform.parent.position;
-
-
-            //cube.transform.localScale = new Vector3(0.01f, 0.5f, 0.01f);
-
-
+           // cube.GetComponent<MeshRenderer>().material = Resources.Load("Materials/Glass", typeof(Material)) as Material;
             
+
+            //cube.transform.position = this.transform.parent.position;
+
+            //cube.transform.position += new Vector3(0f, 0.2f, 0f);
+
+            //cube.transform.SetParent(this.transform);
+
+            //dummyScaler.transform.SetParent(this.transform);
 
 
         }
 
 
-
-    }
-
     public void createDataBuildings()
+
     {
-        dataCube.transform.position = this.transform.parent.position;
-
-        dataCube.transform.position += new Vector3(0f, -0.1f, 0f);
-
-        dataCube.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
-
-        Vector3 pos  = dataCube.transform.position;
 
 
+        var l = mapRenderer.buildingData[this.parentName][this.name];
 
-        dataCube.GetComponent<MeshRenderer>().material = Resources.Load("Materials/GlowingGreen", typeof(Material)) as Material;
+        foreach (var building in l)
+        {
 
-        dummyScaler.transform.position = pos += new Vector3(0f, -0.16f, 0f);
+            building.volumeCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
 
-        dummyScaler.transform.localScale = new Vector3(0.01f, 0.1f, 0.01f);
 
-        dataCube.transform.SetParent(dummyScaler.transform);
+            building.volumeCube.transform.position = building.gameObj.transform.position;
 
+
+
+           // building.volumeCube.transform.position += new Vector3(0f, -0.1f, 0f);
+
+            building.volumeCube.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
+
+            building.volumeCube.transform.SetParent(this.transform);
+
+            Vector3 pos = building.volumeCube.transform.position;
+
+
+
+            building.volumeCube.GetComponent<MeshRenderer>().material = Resources.Load("Materials/GlowingGreen", typeof(Material)) as Material;
+
+            //dummyScaler.transform.position = pos += new Vector3(0f, -0.16f, 0f);
+
+            //dummyScaler.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+
+            //building.volumeCube.transform.SetParent(dummyScaler.transform);
+        }
 
     }
+
+
+
 
 }
+
+
+    
+
+
+
 
