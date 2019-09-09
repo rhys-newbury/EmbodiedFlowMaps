@@ -16,6 +16,11 @@ public class Country : PointableObject
         return 0;
     }
     private List<GameObject> lines = new List<GameObject>();
+
+    public override void addLine(GameObject line)
+    {
+        lines.Add(line);
+    }
     public override void removeLines()
     {
         lines.ToList().ForEach(x => GameObject.Destroy(x));
@@ -28,32 +33,38 @@ public class Country : PointableObject
             try {
                 if (state != origin.name)
                 {
-                    var newObj = new GameObject();
-                    newObj.transform.parent = this.gameObject.transform;
 
-                    var line = newObj.AddComponent(typeof(LineRenderer)) as LineRenderer;
-                    line.transform.SetParent(this.transform);
-                    line.useWorldSpace = true;
-                    line.startWidth = 0.005F;
-                    line.endWidth = 0.005F;
-
-                    Vector3 p0 = origin.transform.parent.transform.position - origin.transform.parent.transform.TransformVector(new Vector3(0, 0, 0.1F));
-                    Vector3 p3 = GameObject.Find(state).transform.parent.transform.position - new Vector3(0, 0, 0.1F);
-
-                    float dist = (p0 - p3).magnitude;
-
-                    Vector3 p1 = p0 + new Vector3(0, 0, dist);
-
-                    Vector3 p2 = p3 + new Vector3(0, 0, dist);
-
-                    Bezier test = new Bezier(p0, p1, p2, p3, 50);
+                    var destination = GameObject.Find(state).GetComponent("PointableObject") as PointableObject;
+                    if (destination.isSelected())
+                    {
 
 
+                        var newObj = new GameObject();
+                        newObj.transform.parent = this.gameObject.transform;
 
-                    line.positionCount = test.points.Length;
-                    line.SetPositions(test.points);
-                    line.useWorldSpace = false;
-                    this.lines.Add(newObj);
+                        var line = newObj.AddComponent(typeof(LineRenderer)) as LineRenderer;
+                        line.transform.SetParent(this.transform);
+                        line.useWorldSpace = true;
+                        line.startWidth = 0.005F;
+                        line.endWidth = 0.005F;
+
+                        Vector3 p0 = origin.transform.parent.transform.position - origin.transform.parent.transform.TransformVector(new Vector3(0, 0, 0.1F));
+                        Vector3 p3 = destination.transform.parent.transform.position - origin.transform.parent.transform.TransformVector(new Vector3(0, 0, 0.1F));
+
+                        float dist = (p0 - p3).magnitude;
+
+                        Vector3 p1 = p0 + new Vector3(0, 0, dist);
+
+                        Vector3 p2 = p3 + new Vector3(0, 0, dist);
+
+                        Bezier test = new Bezier(p0, p1, p2, p3, 50);
+
+                        line.positionCount = test.points.Length;
+                        line.SetPositions(test.points);
+                        line.useWorldSpace = false;
+                        this.lines.Add(newObj);
+                        destination.addLine(newObj);
+                    }
 
                 }
             }

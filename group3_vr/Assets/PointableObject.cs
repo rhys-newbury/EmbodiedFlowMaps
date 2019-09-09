@@ -52,6 +52,11 @@ public class PointableObject : MonoBehaviour
 
     }
 
+    public virtual void addLine(GameObject line)
+    {
+
+    }
+
     public string getName()
     {
         return this.name;
