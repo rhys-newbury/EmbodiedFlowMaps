@@ -15,7 +15,7 @@ public class PointableObject : MonoBehaviour
     private string name;
     public string parentName;
     protected GameObject wrapper;
-    private GameObject go;
+    protected GameObject go;
     private GameObject objToSpawn;
     private Vector3[] vertices3D;
     private Triangulator T;
@@ -52,7 +52,7 @@ public class PointableObject : MonoBehaviour
     }
 
 
-    public void onPointEnter(Action<string> change_text)
+    public virtual void onPointEnter(Action<string> change_text)
     {
         this.color.a = 0.3F;
         this.meshRenderer.material.color = this.color;
@@ -61,7 +61,7 @@ public class PointableObject : MonoBehaviour
     }
    
 
-    public void onPointLeave()
+    public virtual void onPointLeave()
     {
         this.color.a = 1F;
         this.meshRenderer.material.color = this.color;

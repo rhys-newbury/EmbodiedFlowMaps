@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -138,6 +139,18 @@ public class County : PointableObject
     public override Vector3 getTranslation(float x, float y)
     {
         return new Vector3(x, 0.28F*y, -0.96F*y);
+    }
+
+    public override void onPointLeave()
+    {
+        this.go.SetActive(false);
+    }
+
+    public override void onPointEnter(Action<string> change_text)
+    {
+        change_text(this.getName());
+        this.go.SetActive(true);
+
     }
 
 
