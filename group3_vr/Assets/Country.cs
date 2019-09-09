@@ -48,8 +48,8 @@ public class Country : PointableObject
                         line.startWidth = 0.005F;
                         line.endWidth = 0.005F;
 
-                        Vector3 p0 = origin.transform.parent.transform.position - origin.transform.parent.transform.TransformVector(new Vector3(0, 0, 0.1F));
-                        Vector3 p3 = destination.transform.parent.transform.position - origin.transform.parent.transform.TransformVector(new Vector3(0, 0, 0.1F));
+                        Vector3 p0 = origin.transform.parent.transform.position - origin.transform.parent.transform.TransformVector(new Vector3(0, 0, 0.05F));
+                        Vector3 p3 = destination.transform.parent.transform.position - origin.transform.parent.transform.TransformVector(new Vector3(0, 0, 0.05F));
 
                         float dist = (p0 - p3).magnitude;
 

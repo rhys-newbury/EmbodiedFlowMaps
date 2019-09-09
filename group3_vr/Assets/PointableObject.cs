@@ -310,8 +310,13 @@ public class PointableObject : MonoBehaviour
     {
             this.children.ForEach(x => x.delete());
             this.children.Clear();
+
+        try
+        {
             GameObject.Destroy(this.gameObject);
             GameObject.Destroy(this.wrapper);
+        }
+        catch { }
     }
 }
 
