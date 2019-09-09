@@ -8,6 +8,9 @@ public class test : MonoBehaviour
     private GameObject parent1;
     private GameObject parent2;
 
+    Vector3 p0;
+    Vector3 p3;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -25,20 +28,24 @@ public class test : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Vector3 p0 = this.parent1.transform.position;
-        Vector3 p3 = this.parent2.transform.position;
+        if (p0 != this.parent1.transform.position || p3 != this.parent2.transform.position)
+        {
+            p0 = this.parent1.transform.position;
+            p3 = this.parent2.transform.position;
 
-        float dist = (p0 - p3).magnitude;
 
-        Vector3 p1 = p0 + new Vector3(0, dist, 0);
+            float dist = (p0 - p3).magnitude;
 
-        Vector3 p2 = p3 + new Vector3(0, dist, 0);
-        
-        Bezier test = new Bezier(p0, p1, p2, p3, 50);
+            Vector3 p1 = p0 + new Vector3(0, dist, 0);
 
-        line.positionCount = test.points.Length;
-        line.SetPositions(test.points);
-       // line.transform.SetParent(this.gameObject.transform);
+            Vector3 p2 = p3 + new Vector3(0, dist, 0);
+
+            Bezier test = new Bezier(p0, p1, p2, p3, 50);
+
+            line.positionCount = test.points.Length;
+            line.SetPositions(test.points);
+
+        }
 
     }
 }

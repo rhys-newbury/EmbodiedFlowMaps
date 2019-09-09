@@ -5,13 +5,13 @@ using UnityEngine;
 
 public static class dataAccessor
 {
+    private static Dictionary<string, Dictionary<string, float>> flow = new Dictionary<string, Dictionary<string, float>>();
     private static Dictionary<string, float> stateIncoming = new Dictionary<string, float>();
-    private static Dictionary<string, float> flow = new Dictionary<string, float>();
 
     public static void load()
     {
 
-        StreamReader inp_stm = new StreamReader("C:\\Users\\FIT3162\\Desktop\\group3_vr\\data_processing_scripts\\inc.csv");
+        StreamReader inp_stm = new StreamReader("C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\data_processing_scripts\\inc.csv");
 
         while (!inp_stm.EndOfStream)
         {
@@ -26,10 +26,10 @@ public static class dataAccessor
             stateIncoming.Add(state, inc_data);
 
 
-                    
+
         }
 
-        StreamReader inp_stm2 = new StreamReader("C:\\Users\\FIT3162\\Desktop\\group3_vr\\data_processing_scripts\\flow.csv");
+        StreamReader inp_stm2 = new StreamReader("C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\data_processing_scripts\\flow.csv");
 
         while (!inp_stm2.EndOfStream)
         {
@@ -42,11 +42,14 @@ public static class dataAccessor
             string state2 = codeToState(data[1]);
             float inc_data = float.Parse(data[2]);
 
-            flow.Add(state1 + "," + state2, inc_data);
+            if (!flow.ContainsKey(state1))
+            {
+                flow[state1] = new Dictionary<string, float>();
+            }
+
+            flow[state1][state2] = inc_data;
 
         }
-// Debug.Log(flow);
-
 
 
     }
@@ -83,6 +86,8 @@ public static class dataAccessor
         }
         return out_;
     }
+
+    public static string[] list_of_states = (new string[] { "Alabama", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "District of Columbia", "Florida", "Georgia", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota","Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "U.S. Virgin Islands", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming" });
 
 
     private static string codeToState(string code)

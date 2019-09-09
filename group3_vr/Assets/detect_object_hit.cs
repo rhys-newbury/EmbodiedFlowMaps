@@ -220,13 +220,16 @@ public class detect_object_hit : MonoBehaviour
 
     private void Pointer_DestinationMarkerEnter(object sender, DestinationMarkerEventArgs e)
     {
-
-        currentObject = e.raycastHit.collider.gameObject.GetComponent("PointableObject") as PointableObject;
-        selectingObject = true;
-        currentObject.onPointEnter(change_text);
-        data_tooltip.ToggleTips(true);
-        help_tooltip.ToggleTips(false);
-        help_tooltip_state = false;
+        try
+        {
+            currentObject = e.raycastHit.collider.gameObject.GetComponent("PointableObject") as PointableObject;
+            selectingObject = true;
+            currentObject.onPointEnter(change_text);
+            data_tooltip.ToggleTips(true);
+            help_tooltip.ToggleTips(false);
+            help_tooltip_state = false;
+        }
+        catch { }
     }
 
 }

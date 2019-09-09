@@ -42,6 +42,16 @@ public class PointableObject : MonoBehaviour
 
     }
 
+    public virtual void getInternalFlows(PointableObject origin)
+    {
+
+    }
+
+    public virtual void removeLines()
+    {
+
+    }
+
     public string getName()
     {
         return this.name;
@@ -75,11 +85,13 @@ public class PointableObject : MonoBehaviour
         if (this.selected)
         {
             createLine();
+            this.getInternalFlows(this);
             return true;
         }
         else
         {
             destoryLine();
+            this.removeLines();
             return false;
         }
 
