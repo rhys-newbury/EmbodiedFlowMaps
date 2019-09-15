@@ -79,7 +79,7 @@ public class Country : PointableObject
             }
             catch
             {
-                Debug.Log(state);
+                ;
             }
             }
 
@@ -87,7 +87,6 @@ public class Country : PointableObject
 
     internal override void delete()
     {
-        if (children.Count > 0) Debug.Log(children[0]);
         var p = children.Count > 0 ? this.children[0].transform.parent.transform.parent.gameObject : null;
         foreach (var child in this.children)
         {

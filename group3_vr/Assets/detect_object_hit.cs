@@ -52,7 +52,7 @@ public class detect_object_hit : MonoBehaviour
 
 
             var Time = System.DateTime.Now.Ticks;
-           // Debug.Log(Time - oldTime);
+           // (Time - oldTime);
 
             if (Time-oldTime < 300000)
             {
@@ -63,7 +63,7 @@ public class detect_object_hit : MonoBehaviour
                 var speed = delta.magnitude / Time * (Mathf.Pow(10,20));
                 if (oldPos.magnitude != 0)
                 {
-                    //Debug.Log(speed);
+                    //(speed);
 
                     velocityBuffer.RemoveAt(0);
                     velocityBuffer.Add(speed);
@@ -73,10 +73,7 @@ public class detect_object_hit : MonoBehaviour
 
                 if (velocityBuffer.Sum() > 150 && velocityBuffer.Where((x) => x > 20).Count() > 3)
                 {
-                    foreach (var i in velocityBuffer)
-                    {
-                        Debug.Log("Buffer: " + i.ToString());
-                    }
+
                     int level = -1;
                     //pointable.delete();
 
@@ -99,7 +96,7 @@ public class detect_object_hit : MonoBehaviour
 
             oldTime = Time;
 
-            //Debug.Log(v3Velocity.magnitude);
+            ;
         }
         catch { }
 

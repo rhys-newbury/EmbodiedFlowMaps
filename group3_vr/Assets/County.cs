@@ -37,7 +37,7 @@ public class County : PointableObject
     new void Start()
     {
         base.Start();
-        Debug.Log("County Stuff");
+        
         //cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
         //dataCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
         //dummyScaler = GameObject.CreatePrimitive(PrimitiveType.Cube);

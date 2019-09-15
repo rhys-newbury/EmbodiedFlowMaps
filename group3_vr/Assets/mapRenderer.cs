@@ -46,7 +46,7 @@ public class mapRenderer
             while (!inp_stm.EndOfStream)
             {
                 string inp_ln = inp_stm.ReadLine();
-                Debug.Log(inp_ln);
+                ;
 
                 List<String> data = inp_ln.Split(',').ToList();
 

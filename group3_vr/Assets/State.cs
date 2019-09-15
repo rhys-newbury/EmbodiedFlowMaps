@@ -64,7 +64,7 @@ public class State : PointableObject
             }
             catch
             {
-                Debug.Log(state);
+                
             }
         }
 

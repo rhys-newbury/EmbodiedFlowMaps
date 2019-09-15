@@ -15,6 +15,12 @@ public class draw_object : MonoBehaviour
     private static bool startUp = true;
     private static List<draw_object> currentList = new List<draw_object>();
 
+    private Vector3 prevPos = new Vector3();
+
+    private List<LineRenderer> lines = new List<LineRenderer>();
+
+    private static Dictionary<String, Dictionary<string, bool>> currently_joined = new Dictionary<String, Dictionary<string, bool>>();
+    private string parentName;
 
     private void Start()
     {      
@@ -40,6 +46,10 @@ public class draw_object : MonoBehaviour
 
         scaleAction.lockAxis = new Vector3State(false, false, true);
         scaleAction.uniformScaling = true;
+
+        
+
+
         
 
         if (startUp)
@@ -50,6 +60,7 @@ public class draw_object : MonoBehaviour
             dataAccessor.load();
 
            string file = "C:\\Users\\FIT3162\\Desktop\\group3_vr\\mapGeoJSON\\America.txt";
+            this.parentName = "America";
 
             mapRenderer map = new mapRenderer();
             map.drawMultiple(this.gameObject, file,0);
@@ -61,28 +72,132 @@ public class draw_object : MonoBehaviour
 
 
     }
-    public static void clear()
+
+    void addLines(LineRenderer l)
     {
-        //foreach (draw_object drawObject in currentList) {
-        //    //int childs = drawObject.gameObject.transform.childCount;
-        //    //for (var i = childs - 1; i >= 0; i--)
-        //    //{
-        //    //    Destroy(drawObject.gameObject.transform.GetChild(i).gameObject);
-        //    //}
-        //    //Destroy()
-        //    Destroy(drawObject.gameObject);
-        //}
-       
-      //      currentList.Clear();
+        this.lines.Add(l);
+    }
+    static void setLinkStatus(string i1, string i2, bool val)
+    {
+        isLinked(i1, i2);
+        currently_joined[i1][i2] = val;
+        currently_joined[i2][i1] = val;
+    }
+    static bool isLinked(string i1, string i2) 
+    {
+        string access1 = i1;
+        string access2 = i2;
+
+
+       if (!(currently_joined.ContainsKey(access1)))
+       {
+            currently_joined[access1] = new Dictionary<string, bool>();
+            currently_joined[access1][access2] = false;
+        }
+       else if (!(currently_joined[access1].ContainsKey(access2)))
+        {
+            currently_joined[access1][access2] = false;
+        }
+
+        if (!(currently_joined.ContainsKey(access2)))
+        {
+            currently_joined[access2] = new Dictionary<string, bool>();
+            currently_joined[access2][access1] = false;
+        }
+        else if (!(currently_joined[access2].ContainsKey(access1)))
+        {
+            currently_joined[access2][access1] = false;
+        }
+
+        return currently_joined[access1][access2];
     }
 
+    // Update is called once per frame
+    void Update()
+    {
+        if (prevPos == this.transform.position)
+        {
+            return;
+        }
+        prevPos = this.transform.position;
+
+        draw_object[] l = GameObject.FindObjectsOfType(typeof(draw_object)) as draw_object[];
+
+        foreach (var i in lines)
+        {
+            GameObject.Destroy(i);
+        }
+
+        foreach (var item in l)
+        {
+            if (item != this)
+            {
+
+                float seperation = (this.transform.position - item.transform.position).magnitude;
+                Debug.Log(seperation);
+                if (seperation > 3) {
+                    setLinkStatus(this.parentName, item.parentName, false);
+                }
+                else if (seperation < 0.5 || isLinked(this.parentName, item.parentName))
+
+                {
+                    setLinkStatus(this.parentName, item.parentName, true);
+
+                    var selected1 = this.GetComponentsInChildren<PointableObject>().Where(x => x.isSelected()).ToArray();
+                    var selected2 = item.GetComponentsInChildren<PointableObject>().Where(x => x.isSelected()).ToArray();
+
+                    if (selected1.Count() > 0 && selected2.Count() > 0)
+                    {
+                        foreach (var origin in selected1)
+                        {
+                            foreach (var destination in selected2)
+                            {
+
+                                var newObj = new GameObject();
+
+                                var line = newObj.AddComponent(typeof(LineRenderer)) as LineRenderer;
+                                line.transform.SetParent(this.transform);
+                                line.useWorldSpace = true;
+                                line.startWidth = 0.005F;
+                                line.endWidth = 0.005F;
+
+                                Vector3 p0 = origin.transform.parent.transform.position - origin.transform.parent.transform.TransformVector(new Vector3(0, 0, 0.05F));
+                                Vector3 p3 = destination.transform.parent.transform.position - origin.transform.parent.transform.TransformVector(new Vector3(0, 0, 0.05F));
+
+                                float dist = (p0 - p3).magnitude;
+
+                                Vector3 p1 = p0 + origin.transform.parent.transform.TransformVector(new Vector3(0, 0, dist));
+
+                                Vector3 p2 = p3 + destination.transform.parent.transform.TransformVector(new Vector3(0, 0, dist));
+
+                                Bezier test = new Bezier(p0, p1, p2, p3, 50);
+
+                                line.positionCount = test.points.Length;
+                                line.SetPositions(test.points);
+
+                                lines.Add(line);
+                                item.addLines(line);
+
+
+                            }
+                        }
+                    }
+
+                }
+
+
+            }
+
+        }
+    }
 
 
     internal void draw(PointableObject pointableObject, int level)
     {
-        Debug.Log(pointableObject.name);
+        
         string file;
         mapRenderer map = new mapRenderer();
+        this.parentName = pointableObject.name;
 
 
         if (level == (int)mapRenderer.LEVEL.STATE_LEVEL)
@@ -91,6 +206,7 @@ public class draw_object : MonoBehaviour
 
 
             map.drawMultiple(this.gameObject, file, level, pointableObject);
+
 
         }
         else
@@ -113,39 +229,4 @@ public class draw_object : MonoBehaviour
 
     }
 }
-
-
-    public class Node
-    {
-        public GameObject Value { get; set; }
-        public List<Node> Children { get; set; }
-        
-
-        public Node(GameObject data)
-        {
-            Value = data;
-            Children = new List<Node>();
-        }
-
-        public void addChild(GameObject data)
-        {
-            this.Children.Add(new Node(data));
-        }
-
-        public void delete()
-        {
-            try
-            {
-                GameObject.Destroy(Value);
-            }
-            catch
-            {
-                Children.ForEach(x => x.delete());
-                Children.Clear();
-            }
-                        
-
-        }
-}
-
 

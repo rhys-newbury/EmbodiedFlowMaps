@@ -7,7 +7,10 @@ using UnityEngine;
 public static class dataAccessor
 {
     private static Dictionary<string, Dictionary<string, float>> flow = new Dictionary<string, Dictionary<string, float>>();
+    //State -> County -> State -> County
     private static Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, float>>>> county_flow = new Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, float>>>>();
+    
+
     private static Dictionary<string, float> stateIncoming = new Dictionary<string, float>();
 
     public static void load()
@@ -89,9 +92,24 @@ public static class dataAccessor
                 current_county[state2] = new Dictionary<string, float>();
             }
 
-            current_county[state2][county2] = inc_data;
+             current_county[state2][county2] = inc_data;
+
+
+            if (!current_county.ContainsKey("America"))
+            {
+                current_county["America"] = new Dictionary<string, float>();
+            }
+
+            if (!current_county["America"].ContainsKey(state2))
+            {
+                current_county["America"][state2] = 0;
+            }
+
+            current_county["America"][state2] += inc_data;
 
         }
+
+        Debug.Log(county_flow);
 
     }
 
