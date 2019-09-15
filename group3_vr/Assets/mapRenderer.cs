@@ -41,7 +41,7 @@ public class mapRenderer
 
             //StreamReader inp_stm = new StreamReader(""C:\\Users\\Jesse\\Documents\\group3\\group3_vr\\data_processing_scripts\\building_data.csv");
 
-            StreamReader inp_stm = new StreamReader("D:\\vr\\group3_vr\\data_processing_scripts\\building_data.csv");
+            StreamReader inp_stm = new StreamReader("C:\\Users\\FIT3162\\Desktop\\group3_vr\\data_processing_scripts\\building_data.csv");
                 
             while (!inp_stm.EndOfStream)
             {
@@ -339,7 +339,6 @@ public class mapRenderer
 
             pointableObject.constructor(data.Item1, data.Item3, temp, data.Item2, parentName);
             pointableObject.setParent(gameObject.transform);
-
             children.Add(pointableObject);
             if (parent != null)
             {
@@ -356,6 +355,7 @@ public class mapRenderer
         foreach (var child in children)
         {
             child.SetPositionAndRotation(child.getTranslation(TmpcenterX, TmpcenterY), child.getAngle());
+            child.setSiblings(children);
             maximumY = Mathf.Max(maximumY, child.transform.parent.position.y);
         }
         

@@ -26,15 +26,24 @@ public class Country : PointableObject
         lines.ToList().ForEach(x => GameObject.Destroy(x));
         lines.Clear();
     }
+
+    internal override void addToList(string parentName, string name)
+    {
+
+        dataAccessor.addToList(parentName, name);
+
+    }
+
+
     public override void getInternalFlows(PointableObject origin)
     {
-        foreach (var state in dataAccessor.list_of_states)
+        foreach (var state in origin.siblings)
         {
             try {
-                if (state != origin.name)
+                if (state.Key != origin.name)
                 {
+                    var destination = state.Value;
 
-                    var destination = GameObject.Find(state).GetComponent("PointableObject") as PointableObject;
                     if (destination.isSelected())
                     {
 

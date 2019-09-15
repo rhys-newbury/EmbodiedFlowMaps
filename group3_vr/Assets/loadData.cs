@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -12,7 +13,7 @@ public static class dataAccessor
     public static void load()
     {
 
-        StreamReader inp_stm = new StreamReader("D:\\vr\\group3_vr\\data_processing_scripts\\inc.csv");
+        StreamReader inp_stm = new StreamReader("C:\\Users\\FIT3162\\Desktop\\group3_vr\\data_processing_scripts\\inc.csv");
 
         while (!inp_stm.EndOfStream)
         {
@@ -30,7 +31,7 @@ public static class dataAccessor
 
         }
 
-        StreamReader inp_stm2 = new StreamReader("D:\\vr\\group3_vr\\data_processing_scripts\\flow.csv");
+        StreamReader inp_stm2 = new StreamReader("C:\\Users\\FIT3162\\Desktop\\group3_vr\\data_processing_scripts\\flow.csv");
 
         while (!inp_stm2.EndOfStream)
         {
@@ -53,7 +54,7 @@ public static class dataAccessor
         }
 
 
-        StreamReader inp_stm3 = new StreamReader("D:\\vr\\group3_vr\\data_processing_scripts\\county_flow.csv");
+        StreamReader inp_stm3 = new StreamReader("C:\\Users\\FIT3162\\Desktop\\group3_vr\\data_processing_scripts\\county_flow.csv");
 
         while (!inp_stm3.EndOfStream)
         {
@@ -94,6 +95,16 @@ public static class dataAccessor
 
     }
 
+    internal static void addToList(string parentName, string name)
+    {
+        if (!list_of_counties.ContainsKey(parentName))
+        {
+            list_of_counties[parentName] = new HashSet<string>();
+        }
+
+        list_of_counties[parentName].Add(name);
+    }
+
     public static float getData(string State)
     {
         if (stateIncoming.ContainsKey(State))
@@ -101,7 +112,7 @@ public static class dataAccessor
             return stateIncoming[State];
         } else
         {
-            return Random.Range(0, 1000000);
+            return UnityEngine.Random.Range(0, 1000000);
         }
     }
 
@@ -129,9 +140,7 @@ public static class dataAccessor
 
     //public static string[] list_of_states = (new string[] { "Alabama", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "District of Columbia", "Florida", "Georgia", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota","Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "U.S. Virgin Islands", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming" });
 
-    public static List<string> list_of_states = new List<string>();
-
-    public static new Dictionary<string, List<string>> list_of_counties = new Dictionary<string, List<string>>();
+    public static Dictionary<string, HashSet<string>> list_of_counties = new Dictionary<string, HashSet<string>>();
 
 
     private static string codeToState(string code)

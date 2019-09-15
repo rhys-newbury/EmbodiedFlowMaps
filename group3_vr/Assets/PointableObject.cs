@@ -36,6 +36,7 @@ public class PointableObject : MonoBehaviour
 
     public Mesh mesh;
     internal PointableObject parent;
+    public Dictionary<String, PointableObject> siblings = new Dictionary<string, PointableObject>();
 
     public void Start()
     {
@@ -45,6 +46,11 @@ public class PointableObject : MonoBehaviour
     public virtual void getInternalFlows(PointableObject origin)
     {
 
+    }
+
+    internal object getParent()
+    {
+        throw new NotImplementedException();
     }
 
     public virtual void removeLines()
@@ -210,7 +216,7 @@ public class PointableObject : MonoBehaviour
     {
         T = new Triangulator(points);
         vertices3D = System.Array.ConvertAll<Vector2, Vector3>(points, v => v);
-   
+                  
    
         this.name = name;
         this.parentName = parentName;
@@ -231,8 +237,14 @@ public class PointableObject : MonoBehaviour
         this.objToSpawn.name = name;
         
         this.drawObject();
+
+        this.addToList(parentName, name);
     }
 
+   internal virtual void addToList(string parentName, string name)
+    {
+
+    }
 
 
     public void setParent(Transform parent)
@@ -317,6 +329,15 @@ public class PointableObject : MonoBehaviour
             GameObject.Destroy(this.wrapper);
         }
         catch { }
+    }
+
+    internal void setSiblings(List<PointableObject> children)
+    {
+
+        foreach (var sibling in children)
+        {
+            this.siblings[sibling.name] = sibling;
+        }
     }
 }
 
