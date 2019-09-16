@@ -44,7 +44,24 @@ public class detect_object_hit : MonoBehaviour
             if (touchpadPressed)
             {
                 //var t = VRTK.VRTK_DeviceFinder.DeviceTransform(VRTK_DeviceFinder.Devices.Headset);
-                obj.transform.position = obj.transform.position + pointer.transform.parent.transform.TransformDirection(new Vector3(0, 0, (touchpadAngle < 90 || touchpadAngle > 270) ? 0.01F : -0.01F));
+                if (touchpadAngle < 72 || touchpadAngle > 288)
+                {
+                    obj.transform.position = obj.transform.position + pointer.transform.parent.transform.TransformDirection(new Vector3(0, 0, 0.01F));
+                }
+                else if (touchpadAngle < 144)
+                {
+                    obj.transform.Rotate(new Vector3(0, -1, 0), Space.Self);
+                }
+                else if (touchpadAngle < 216)
+                {
+                    obj.transform.position = obj.transform.position + pointer.transform.parent.transform.TransformDirection(new Vector3(0, 0, -0.01F));
+
+                }
+                else if (touchpadAngle < 288)
+                {
+                    obj.transform.Rotate(new Vector3(0, 1, 0), Space.Self);
+
+                }
             }
 
             Rigidbody rb = obj.GetComponent<Rigidbody>();
@@ -118,7 +135,7 @@ public class detect_object_hit : MonoBehaviour
         controller.TouchpadAxisChanged += Controller_TouchpadAxisChanged;
         controller.TouchpadReleased += Controller_TouchpadReleased;
         controller.TouchpadPressed += Controller_TouchpadPressed;
-
+        controller.GripClicked += Controller_GripClicked;
         help_tooltip = gameObject.transform.GetChild(0).GetComponent<VRTK_ControllerTooltips>();
         help_tooltip.ToggleTips(false);
 
@@ -133,6 +150,15 @@ public class detect_object_hit : MonoBehaviour
         data_tooltip.ToggleTips(false);
 
     }
+
+    private void Controller_GripClicked(object sender, ControllerInteractionEventArgs e)
+    {
+        if (currentObject != null)
+        {
+            currentObject.report_grabbed(true);
+        }
+    }
+
 
     private void Controller_TouchpadPressed(object sender, ControllerInteractionEventArgs e)
     {

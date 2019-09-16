@@ -15,7 +15,7 @@ public class draw_object : MonoBehaviour
     private static bool startUp = true;
     private static List<draw_object> currentList = new List<draw_object>();
 
-    private Vector3 prevPos = new Vector3();
+    private Vector3 prevPos = new Vector3(0,0,0);
 
     private List<LineRenderer> lines = new List<LineRenderer>();
 
@@ -24,8 +24,12 @@ public class draw_object : MonoBehaviour
     public static bool update = false;
 
 
-   
+    public static List<draw_object> positonStack = new List<draw_object>();
+    private bool moved = false;
 
+    private Action<bool> report_grabbed;
+
+    
     private void Start()
     {      
 
@@ -51,10 +55,22 @@ public class draw_object : MonoBehaviour
         scaleAction.lockAxis = new Vector3State(false, false, true);
         scaleAction.uniformScaling = true;
 
-        
 
 
-        
+        report_grabbed = delegate (bool x)
+        {
+            if (!(this.moved))
+            {
+                this.stack_remove(this);
+                this.moved = true;
+            }
+        };
+
+
+
+
+
+
 
         if (startUp)
         {
@@ -67,7 +83,7 @@ public class draw_object : MonoBehaviour
             this.parentName = "America";
 
             mapRenderer map = new mapRenderer();
-            map.drawMultiple(this.gameObject, file,0);
+            map.drawMultiple(this.gameObject, report_grabbed, file,0);
 
             currentList.Add(this);
             startUp = false;
@@ -92,6 +108,11 @@ public class draw_object : MonoBehaviour
     {
         update = true;
 
+    }
+
+    internal static float getYPosition(int i)
+    {
+        return i * 0.2F;
     }
 
     static bool isLinked(string i1, string i2) 
@@ -134,6 +155,7 @@ public class draw_object : MonoBehaviour
         {
             return;
         }
+        
         update = false;
         prevPos = this.transform.position;
 
@@ -187,6 +209,20 @@ public class draw_object : MonoBehaviour
         }
     }
 
+    private void stack_remove(draw_object draw_object)
+    {
+        if (positonStack.Contains(draw_object))
+        {
+            var index = positonStack.IndexOf(draw_object);
+            
+            for (int i = index+1; i<positonStack.Count; i++)
+            {
+                positonStack[i].transform.position -= new Vector3(0, 0, 0.2F);
+            }
+
+            positonStack.Remove(draw_object);
+        }
+    }
 
     internal void draw(PointableObject pointableObject, int level)
     {
@@ -195,14 +231,26 @@ public class draw_object : MonoBehaviour
         mapRenderer map = new mapRenderer();
         this.parentName = pointableObject.name;
 
+        report_grabbed = delegate (bool x)
+        {
+            if (!(this.moved))
+            {
+                this.stack_remove(this);
+                this.moved = true;
+            }
+        };
+
 
         if (level == (int)mapRenderer.LEVEL.STATE_LEVEL)
         {
              file = "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.name + ".json";
 
 
-            map.drawMultiple(this.gameObject, file, level, pointableObject);
+            map.drawMultiple(this.gameObject, report_grabbed, file, level, pointableObject);
 
+            this.gameObject.transform.position += new Vector3(0, 0, getYPosition(positonStack.Count + 1));
+
+            positonStack.Add(this);
 
         }
         else
@@ -211,12 +259,14 @@ public class draw_object : MonoBehaviour
             foreach (var line in System.IO.File.ReadAllLines(file)) {
                 if (line.Contains(pointableObject.name))
                 {
-                    map.drawSingular(this.gameObject, line, pointableObject.parentName, level, pointableObject);
+                    map.drawSingular(this.gameObject, report_grabbed, line, pointableObject.parentName, level, pointableObject);
                     break;
                 }
             }
 
         }
+
+
 
 
 

@@ -18,6 +18,7 @@ public class PointableObject : MonoBehaviour
     private GameObject go;
     private GameObject objToSpawn;
     private Vector3[] vertices3D;
+    public Action<bool> report_grabbed;
     private Triangulator T;
     private Color color;
     private MeshRenderer meshRenderer;
@@ -212,12 +213,12 @@ public class PointableObject : MonoBehaviour
 
     }
 
-    internal void constructor(Vector2[] points, string name, GameObject objToSpawn, float[] bounds, string parentName)
+    internal void constructor(Vector2[] points, string name, GameObject objToSpawn, float[] bounds, string parentName, Action<bool> report_grabbed)
     {
         T = new Triangulator(points);
         vertices3D = System.Array.ConvertAll<Vector2, Vector3>(points, v => v);
-                  
-   
+
+        this.report_grabbed = report_grabbed;
         this.name = name;
         this.parentName = parentName;
         this.bounds = bounds;

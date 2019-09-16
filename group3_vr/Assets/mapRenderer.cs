@@ -24,8 +24,7 @@ public class mapRenderer
     private static Dictionary<String, Dictionary<String, List<List<String>>>> _buildingData = null;
 
     public static Dictionary<String, Dictionary<String, List<Buildings>>> buildingData = new Dictionary<String, Dictionary<String, List<Buildings>>>();
-
-
+    private Action<bool> report_grabbed;
 
     public enum LEVEL
     {
@@ -69,10 +68,11 @@ public class mapRenderer
         }
        
     }
-    public void drawSingular(GameObject gameObject, string inp_ln, string parentName, int level, PointableObject parent, float centerX = 0, float centerY = 0, int number = 0)
+    public void drawSingular(GameObject gameObject, Action<bool> report_grabbed, string inp_ln, string parentName, int level, PointableObject parent, float centerX = 0, float centerY = 0, int number = 0)
     {
         //bool done = false;
         int count = 0;
+        this.report_grabbed = report_grabbed;
 
 
         gameObject.transform.SetPositionAndRotation(new Vector3(number, 0, 0), new Quaternion(0, 0, 0, 1));
@@ -199,7 +199,7 @@ public class mapRenderer
 
             
 
-        pointableObject.constructor(data.Item1, data.Item3, temp, data.Item2, parentName);
+        pointableObject.constructor(data.Item1, data.Item3, temp, data.Item2, parentName, report_grabbed);
         pointableObject.setParent(gameObject.transform);
         pointableObject.parent = parent;
 
@@ -244,8 +244,9 @@ public class mapRenderer
 
 
     }
-    public void drawMultiple(GameObject gameObject, string dataFile, int level, PointableObject parent=null, float centerX=0, float centerY=0, int number=0)
+    public void drawMultiple(GameObject gameObject, Action<bool> report_grabbed, string dataFile, int level, PointableObject parent=null, float centerX=0, float centerY=0, int number=0)
     {
+
         //bool done = false;
         int count = 0;
         string parentName = dataFile.Split('\\')[dataFile.Split('\\').Count() - 1];
@@ -337,7 +338,7 @@ public class mapRenderer
             GameObject temp = new GameObject();
             PointableObject pointableObject = temp.AddComponent(getType(level)) as PointableObject;
 
-            pointableObject.constructor(data.Item1, data.Item3, temp, data.Item2, parentName);
+            pointableObject.constructor(data.Item1, data.Item3, temp, data.Item2, parentName, report_grabbed);
             pointableObject.setParent(gameObject.transform);
             children.Add(pointableObject);
             if (parent != null)
