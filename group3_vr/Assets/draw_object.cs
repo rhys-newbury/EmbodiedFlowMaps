@@ -21,6 +21,10 @@ public class draw_object : MonoBehaviour
 
     private static Dictionary<String, Dictionary<string, bool>> currently_joined = new Dictionary<String, Dictionary<string, bool>>();
     private string parentName;
+    public static bool update = false;
+
+
+   
 
     private void Start()
     {      
@@ -59,7 +63,7 @@ public class draw_object : MonoBehaviour
 
             dataAccessor.load();
 
-           string file = "C:\\Users\\FIT3162\\Desktop\\group3_vr\\mapGeoJSON\\America.txt";
+           string file = "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\America.txt";
             this.parentName = "America";
 
             mapRenderer map = new mapRenderer();
@@ -83,6 +87,13 @@ public class draw_object : MonoBehaviour
         currently_joined[i1][i2] = val;
         currently_joined[i2][i1] = val;
     }
+
+    internal static void deselectState()
+    {
+        update = true;
+
+    }
+
     static bool isLinked(string i1, string i2) 
     {
         string access1 = i1;
@@ -109,16 +120,21 @@ public class draw_object : MonoBehaviour
             currently_joined[access2][access1] = false;
         }
 
-        return currently_joined[access1][access2];
+        bool output = currently_joined[access1][access2] && currently_joined[access2][access1];
+        currently_joined[access1][access2] = output;
+        currently_joined[access2][access1] = output;
+        return output;
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (prevPos == this.transform.position)
+        if (prevPos == this.transform.position && !update)
         {
             return;
         }
+        update = false;
         prevPos = this.transform.position;
 
         draw_object[] l = GameObject.FindObjectsOfType(typeof(draw_object)) as draw_object[];
@@ -153,30 +169,10 @@ public class draw_object : MonoBehaviour
                             foreach (var destination in selected2)
                             {
 
-                                var newObj = new GameObject();
 
-                                var line = newObj.AddComponent(typeof(LineRenderer)) as LineRenderer;
-                                line.transform.SetParent(this.transform);
-                                line.useWorldSpace = true;
-                                line.startWidth = 0.005F;
-                                line.endWidth = 0.005F;
-
-                                Vector3 p0 = origin.transform.parent.transform.position - origin.transform.parent.transform.TransformVector(new Vector3(0, 0, 0.05F));
-                                Vector3 p3 = destination.transform.parent.transform.position - origin.transform.parent.transform.TransformVector(new Vector3(0, 0, 0.05F));
-
-                                float dist = (p0 - p3).magnitude;
-
-                                Vector3 p1 = p0 + origin.transform.parent.transform.TransformVector(new Vector3(0, 0, dist));
-
-                                Vector3 p2 = p3 + destination.transform.parent.transform.TransformVector(new Vector3(0, 0, dist));
-
-                                Bezier test = new Bezier(p0, p1, p2, p3, 50);
-
-                                line.positionCount = test.points.Length;
-                                line.SetPositions(test.points);
-
-                                lines.Add(line);
-                                item.addLines(line);
+                                Bezier b = new Bezier(this.transform, origin, destination);
+                                lines.Add(b.line);
+                                item.addLines(b.line);
 
 
                             }
@@ -202,7 +198,7 @@ public class draw_object : MonoBehaviour
 
         if (level == (int)mapRenderer.LEVEL.STATE_LEVEL)
         {
-             file = "C:\\Users\\FIT3162\\Desktop\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.name + ".json";
+             file = "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.name + ".json";
 
 
             map.drawMultiple(this.gameObject, file, level, pointableObject);
@@ -211,7 +207,7 @@ public class draw_object : MonoBehaviour
         }
         else
         {
-            file = "C:\\Users\\FIT3162\\Desktop\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.parentName + ".json";
+            file = "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.parentName + ".json";
             foreach (var line in System.IO.File.ReadAllLines(file)) {
                 if (line.Contains(pointableObject.name))
                 {

@@ -16,7 +16,7 @@ public static class dataAccessor
     public static void load()
     {
 
-        StreamReader inp_stm = new StreamReader("C:\\Users\\FIT3162\\Desktop\\group3_vr\\data_processing_scripts\\inc.csv");
+        StreamReader inp_stm = new StreamReader("C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\data_processing_scripts\\inc.csv");
 
         while (!inp_stm.EndOfStream)
         {
@@ -34,7 +34,7 @@ public static class dataAccessor
 
         }
 
-        StreamReader inp_stm2 = new StreamReader("C:\\Users\\FIT3162\\Desktop\\group3_vr\\data_processing_scripts\\flow.csv");
+        StreamReader inp_stm2 = new StreamReader("C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\data_processing_scripts\\flow.csv");
 
         while (!inp_stm2.EndOfStream)
         {
@@ -57,7 +57,7 @@ public static class dataAccessor
         }
 
 
-        StreamReader inp_stm3 = new StreamReader("C:\\Users\\FIT3162\\Desktop\\group3_vr\\data_processing_scripts\\county_flow.csv");
+        StreamReader inp_stm3 = new StreamReader("C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\data_processing_scripts\\county_flow.csv");
 
         while (!inp_stm3.EndOfStream)
         {

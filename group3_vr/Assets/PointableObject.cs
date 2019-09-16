@@ -91,18 +91,18 @@ public class PointableObject : MonoBehaviour
 
     internal bool onClick()
     {
-        this.selected = !this.selected;
-
-        if (this.selected)
+        
+        if (!this.selected)
         {
+            this.selected = true;
             createLine();
             this.getInternalFlows(this);
             return true;
         }
         else
         {
+            this.selected = false;
             destoryLine();
-            this.removeLines();
             return false;
         }
 
@@ -306,7 +306,10 @@ public class PointableObject : MonoBehaviour
     {
        
         this.selected = false;
+        draw_object.update = true;
+        this.removeLines();
         var line = objToSpawn.GetComponent<LineRenderer>();
+        draw_object.deselectState();
         Destroy(line);
 
 

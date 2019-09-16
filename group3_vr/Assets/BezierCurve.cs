@@ -12,11 +12,45 @@ public class Bezier : System.Object
     public float length = 0;
 
     public Vector3[] points;
+    public GameObject Obj;
+    public LineRenderer line;
 
     // Init function v0 = 1st point, v1 = handle of the 1st point , v2 = handle of the 2nd point, v3 = 2nd point
     // handle1 = v0 + v1
     // handle2 = v3 + v2
-    public Bezier(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 v3, int _calculatePoints = 0)
+    public Bezier(Transform parent, PointableObject origin, PointableObject destination)
+    {
+        Obj = new GameObject();
+
+        line = Obj.AddComponent(typeof(LineRenderer)) as LineRenderer;
+        line.transform.SetParent(parent);
+        line.useWorldSpace = true;
+        line.startWidth = 0.005F;
+        line.endWidth = 0.005F;
+
+        Vector3 p0 = origin.transform.parent.transform.position; //- origin.transform.parent.transform.TransformVector(new Vector3(0, 0, 0.07F));
+        Vector3 p3 = destination.transform.parent.transform.position; //- destination.transform.parent.transform.TransformVector(new Vector3(0, 0, 0.07F));
+
+        float dist = (p0 - p3).magnitude;
+
+        Vector3 p1 = p0 + origin.transform.parent.transform.TransformVector(new Vector3(0, 0, dist));
+
+        Vector3 p2 = p3 + destination.transform.parent.transform.TransformVector(new Vector3(0, 0, dist));
+
+        createBezier(p0, p1, p2, p3, 50);
+
+
+
+        line.positionCount = this.points.Length;
+        line.SetPositions(this.points);
+
+
+        line.useWorldSpace = false;
+
+    }
+
+
+    public void createBezier(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 v3, int _calculatePoints = 0)
     {
         this.p0 = v0;
         this.p1 = v1;
