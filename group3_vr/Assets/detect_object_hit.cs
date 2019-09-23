@@ -38,86 +38,81 @@ public class detect_object_hit : MonoBehaviour
         {
 
             var obj = GetComponent<VRTK_InteractGrab>().GetGrabbedObject();
-            //var pointable = obj.GetComponent<PointableObject>();
 
-
-            if (touchpadPressed)
-            {
-                //var t = VRTK.VRTK_DeviceFinder.DeviceTransform(VRTK_DeviceFinder.Devices.Headset);
-                if (touchpadAngle < 72 || touchpadAngle > 288)
-                {
-                    obj.transform.position = obj.transform.position + pointer.transform.parent.transform.TransformDirection(new Vector3(0, 0, 0.01F));
-                }
-                else if (touchpadAngle < 144)
-                {
-                    obj.transform.Rotate(new Vector3(0, -1, 0), Space.Self);
-                }
-                else if (touchpadAngle < 216)
-                {
-                    obj.transform.position = obj.transform.position + pointer.transform.parent.transform.TransformDirection(new Vector3(0, 0, -0.01F));
-
-                }
-                else if (touchpadAngle < 288)
-                {
-                    obj.transform.Rotate(new Vector3(0, 1, 0), Space.Self);
-
-                }
-            }
-
-            Rigidbody rb = obj.GetComponent<Rigidbody>();
-            Vector3 v3Velocity = rb.velocity;
-
+            if (touchpadPressed) touchPadMove(obj);
 
             var Time = System.DateTime.Now.Ticks;
-           // (Time - oldTime);
+           
+            //Time Limit between frames
+            if (Time-oldTime < 300000) {
 
-            if (Time-oldTime < 300000)
-            {
+                Vector3 newPos = obj.transform.position;
+                Vector3 delta = newPos - oldPos;
+                float speed = delta.magnitude / Time * (Mathf.Pow(10,20));
 
-                var newPos = obj.transform.position;
-                var delta = newPos - oldPos;
-
-                var speed = delta.magnitude / Time * (Mathf.Pow(10,20));
+                //Add to the velocity buffee
                 if (oldPos.magnitude != 0)
                 {
-                    //(speed);
-
                     velocityBuffer.RemoveAt(0);
                     velocityBuffer.Add(speed);
                 }
                 oldPos = newPos;
 
-
-                if (velocityBuffer.Sum() > 150 && velocityBuffer.Where((x) => x > 20).Count() > 3)
-                {
-
-                    int level = -1;
-                    //pointable.delete();
-
-                    foreach (var item in obj.GetComponentsInChildren<PointableObject>())
-                    {
-                        item.delete();
-                        item.parent.deselect();
-                        level = level == -1 ? item.getLevel() : level;
-                    }
-                    
-                    if (level > 0) GameObject.Destroy(obj);
-
+                //Condition for a throw to occur.
+                if (velocityBuffer.Sum() > 150 && velocityBuffer.Where((x) => x > 20).Count() > 3) {
+                    onThrow(obj);
                 }
 
             }
-            else
-            {
+            else {
+                //Reset the buffer
                 velocityBuffer = (new float[] { 0, 0, 0, 0, 0 }).ToList();
             }
-
+            //Update the time
             oldTime = Time;
-
-            ;
         }
         catch { }
 
     }
+
+    void onThrow(GameObject obj)
+    {
+        int level = -1;
+
+        foreach (var item in obj.GetComponentsInChildren<PointableObject>())
+        {
+            item.delete();
+            item.parent.deselect();
+            level = level == -1 ? item.getLevel() : level;
+        }
+
+        if (level > 0) GameObject.Destroy(obj);
+    }
+
+    void touchPadMove(GameObject obj)
+    {
+        //Left/Right -> Rotate
+        //Up/Down -> Back and forth in direction of pointer.
+        if (touchpadAngle < 72 || touchpadAngle > 288)
+        {
+            obj.transform.position = obj.transform.position + pointer.transform.parent.transform.TransformDirection(new Vector3(0, 0, 0.01F));
+        }
+        else if (touchpadAngle < 144)
+        {
+            obj.transform.Rotate(new Vector3(0, -1, 0), Space.Self);
+        }
+        else if (touchpadAngle < 216)
+        {
+            obj.transform.position = obj.transform.position + pointer.transform.parent.transform.TransformDirection(new Vector3(0, 0, -0.01F));
+        }
+        else if (touchpadAngle < 288)
+        {
+            obj.transform.Rotate(new Vector3(0, 1, 0), Space.Self);
+        }
+     
+
+    }
+
     void Awake()
     {
         //VRTK_ControllerEvents controller;
@@ -127,32 +122,32 @@ public class detect_object_hit : MonoBehaviour
         pointer.DestinationMarkerEnter += Pointer_DestinationMarkerEnter;
         pointer.DestinationMarkerExit += Pointer_DestinationMarkerExit;
 
-        //pointer.SelectionButtonPressed += Pointer_SelectionButtonPressed;
-
         controller = GetComponent<VRTK_ControllerEvents>();
         controller.TriggerPressed += Controller_TriggerPressed;
-
         controller.TouchpadAxisChanged += Controller_TouchpadAxisChanged;
         controller.TouchpadReleased += Controller_TouchpadReleased;
         controller.TouchpadPressed += Controller_TouchpadPressed;
         controller.GripClicked += Controller_GripClicked;
+
+        //Get the tooltips
         help_tooltip = gameObject.transform.GetChild(0).GetComponent<VRTK_ControllerTooltips>();
         help_tooltip.ToggleTips(false);
-
-          
-        change_text = delegate (string x)
-        {
-            data_tooltip.UpdateText(VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip, x);
-        };
-
 
         data_tooltip = gameObject.transform.GetChild(1).GetComponent<VRTK_ControllerTooltips>();
         data_tooltip.ToggleTips(false);
 
+
+        //Anonymous function to Update the data_tooltip text.
+        change_text = delegate (string x) {
+            data_tooltip.UpdateText(VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip, x);
+        };
+
+
+        
     }
 
-    private void Controller_GripClicked(object sender, ControllerInteractionEventArgs e)
-    {
+    private void Controller_GripClicked(object sender, ControllerInteractionEventArgs e) {
+        // Report that the current object is being grabbed. This can tell the stack it is being removed
         if (currentObject != null)
         {
             currentObject.report_grabbed(true);
@@ -160,40 +155,40 @@ public class detect_object_hit : MonoBehaviour
     }
 
 
-    private void Controller_TouchpadPressed(object sender, ControllerInteractionEventArgs e)
-    {
+    private void Controller_TouchpadPressed(object sender, ControllerInteractionEventArgs e) {
         this.touchpadPressed = true;
     }
 
-    private void Controller_TouchpadReleased(object sender, ControllerInteractionEventArgs e)
-    {
+    private void Controller_TouchpadReleased(object sender, ControllerInteractionEventArgs e) {
         this.touchpadPressed = false;
     }
 
-    private void Controller_TouchpadAxisChanged(object sender, ControllerInteractionEventArgs e)
-    {
+    private void Controller_TouchpadAxisChanged(object sender, ControllerInteractionEventArgs e) {
+        //Set the touchpad angle to the current angle
         this.touchpadAngle = e.touchpadAngle;
     }
 
-    private void Controller_TriggerPressed(object sender, ControllerInteractionEventArgs e)
-    {
+    private void Controller_TriggerPressed(object sender, ControllerInteractionEventArgs e) {
+
     //If still on an object
         if (currentObject != null)
         {
             //Do something on click
-            if (currentObject.onClick())
-            {
+            
+            if (currentObject.onClick()) {
+                //Add it to the list of current objects
                 currentList.Add(currentObject);
+
+                //Create the gameObject for the map and then draw it.
                 GameObject gameObject = new GameObject();
                 draw_object main = gameObject.AddComponent(typeof(draw_object)) as draw_object;
                 main.draw(currentObject, currentObject.getLevel()+1);
+
             }
-            else
-            {
+            else {
+                //On deselect Remove it from the current list and delete the object and its children 
                 currentList.Remove(currentObject);
                 currentObject.deleteChildren();
-
-
             }
         }
         else
@@ -204,47 +199,33 @@ public class detect_object_hit : MonoBehaviour
         }
     }
 
-    //private void Pointer_SelectionButtonPressed(object sender, ControllerInteractionEventArgs e)
-    //{
-    //   // draw_object.clear();
-    //    if (currentList.Count > 0)
-    //    {
-    //        draw_object.currentLevel++;
-    //        for (int i = 0; i < currentList.Count; i++)
-    //        {
+    private void Pointer_DestinationMarkerExit(object sender, DestinationMarkerEventArgs e) {
 
-    //            main.draw(currentList[i]);
-    //        }
-    //   // currentList.Clear();
-    //}
-    //}
-    private void Pointer_DestinationMarkerExit(object sender, DestinationMarkerEventArgs e)
-    {
-        try
-        {
-            if (!selectingObject)
-            {
+        try {
+            //Not selecting an object
+            if (!selectingObject) {
                 return;
             }
             selectingObject = false;
+            
+            //Tell the objet that the pointer has left
             currentObject = e.raycastHit.collider.gameObject.GetComponent("PointableObject") as PointableObject;
             currentObject.onPointLeave();
 
+            //Reset tooltips
             currentObject = null;
             data_tooltip.ToggleTips(false);
 
         }
-        catch
-        {
+        catch {
             return;
         }
 
     }
 
-    private void Pointer_DestinationMarkerEnter(object sender, DestinationMarkerEventArgs e)
-    {
-        try
-        {
+    private void Pointer_DestinationMarkerEnter(object sender, DestinationMarkerEventArgs e) {
+        //If the object being his is a PointableObject -> Activate the tooltips, and tell the object that the pointer has entered
+        try {
             currentObject = e.raycastHit.collider.gameObject.GetComponent("PointableObject") as PointableObject;
             selectingObject = true;
             currentObject.onPointEnter(change_text);

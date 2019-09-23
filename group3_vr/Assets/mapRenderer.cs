@@ -12,18 +12,26 @@ using UnityEngine.UI;
 public class mapRenderer
 {
 
+    //Set up some Regex to strip data from the GeoJSON
     private readonly Regex NAME_REGEX = new Regex(@"(?i)""name"":""(.*?)""");
     private readonly Regex COORDS_REGEX = new Regex(@"(?i),""coordinates"":\[\[(.*?)\]\]");
     private readonly Regex _convert = new Regex(@"(?i)\[(.*?)\],");
 
-    private static int MAPWIDTH = 1000;
-    private static int MAPHEIGHT = 50;
+    //Constnats for the map dimensions
+    private readonly static int MAPWIDTH = 1000;
+    private readonly static int MAPHEIGHT = 50;
 
+
+    //The size of the outer bounding box of the map in unity units
     private readonly float FINAL_AREA = 1;
 
+    //List of string data for the buildings. This can be converted in to actual buildings on county creation
     private static Dictionary<String, Dictionary<String, List<List<String>>>> _buildingData = null;
 
+    //List of buildings
     public static Dictionary<String, Dictionary<String, List<Buildings>>> buildingData = new Dictionary<String, Dictionary<String, List<Buildings>>>();
+
+
     private Action<bool> report_grabbed;
 
     public enum LEVEL
@@ -34,47 +42,42 @@ public class mapRenderer
     }
 
     public mapRenderer() {
-        if (_buildingData == null)
-        {
+        //Only do this once.
+        if (_buildingData == null) {
+            //Create a dictionary.
             _buildingData = new Dictionary<String, Dictionary<String, List<List<String>>>>();
-
-            //StreamReader inp_stm = new StreamReader(""C:\\Users\\Jesse\\Documents\\group3\\group3_vr\\data_processing_scripts\\building_data.csv");
 
             StreamReader inp_stm = new StreamReader("C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\data_processing_scripts\\building_data.csv");
                 
-            while (!inp_stm.EndOfStream)
-            {
-                string inp_ln = inp_stm.ReadLine();
-                ;
+            while (!inp_stm.EndOfStream) {
 
+                string inp_ln = inp_stm.ReadLine();
+                
                 List<String> data = inp_ln.Split(',').ToList();
 
-                
-
+                //Check for existance otherwise add a new dictionary
                 if (!_buildingData.ContainsKey(data[4])) {
                     _buildingData.Add(data[4], new Dictionary<string, List<List<string>>>());
                 }
                 Dictionary<String, List<List<String>>> stateData = _buildingData[data[4]];
 
-                if (!stateData.ContainsKey(data[3]))
-                {
+                
+                if (!stateData.ContainsKey(data[3])) {
                     stateData.Add(data[3], new List<List<string>>());
                 }
 
+                //Add the data to the state
                 stateData[data[3]].Add(data);
 
             }
-
         }
-       
     }
     public void drawSingular(GameObject gameObject, Action<bool> report_grabbed, string inp_ln, string parentName, int level, PointableObject parent, float centerX = 0, float centerY = 0, int number = 0)
     {
         //bool done = false;
         int count = 0;
         this.report_grabbed = report_grabbed;
-
-
+        
         gameObject.transform.SetPositionAndRotation(new Vector3(number, 0, 0), new Quaternion(0, 0, 0, 1));
 
         List<Tuple<Vector2[], float[], string>> drawingData = new List<Tuple<Vector2[], float[], string>>();
@@ -82,11 +85,11 @@ public class mapRenderer
         float maxX = -10000000, maxY = -10000000;
         float minX = 10000000, minY = 10000000;
 
+        //Get the data from the line using Regex
         string currentName = NAME_REGEX.Match(inp_ln).Groups[1].ToString();
-
         string coordinates = COORDS_REGEX.Match(inp_ln).Groups[1].ToString();
 
-
+        //Find all the x,y pairs
         MatchCollection matches = _convert.Matches(coordinates);
         Vector2[] vertices2D = new Vector2[matches.Count];
         int indices = 0;
@@ -99,9 +102,9 @@ public class mapRenderer
             string[] data = match.Groups[1].ToString().Split(',');
 
             (x, y) = convert(float.Parse(data[1]), float.Parse(data[0]));
-
             vertices2D[indices] = new Vector2(x, y);
 
+            //Update the maximum and minimum for this object
             maxX = Mathf.Max(x, maxX);
             maxY = Mathf.Max(y, maxY);
             minX = Mathf.Min(x, minX);
