@@ -15,15 +15,14 @@ public class Country : PointableObject
     {
         return 0;
     }
-    private List<GameObject> lines = new List<GameObject>();
-
+    private readonly List<GameObject> lines = new List<GameObject>();
     public override void addLine(GameObject line)
     {
         lines.Add(line);
     }
     public override void removeLines()
     {
-        lines.ToList().ForEach(x => GameObject.Destroy(x));
+        lines.ToList().ForEach(Destroy);
         lines.Clear();
     }
 
@@ -50,18 +49,15 @@ public class Country : PointableObject
 
                         Bezier b = new Bezier(this.transform, origin, destination);
 
-                        this.lines.Add(b.Obj);
-                        destination.addLine(b.Obj);
+                        this.lines.Add(b.obj);
+                        destination.addLine(b.obj);
 
                     }
 
                 }
             }
-            catch
-            {
-                ;
-            }
-            }
+            catch { }
+        }
 
     }
 
@@ -76,7 +72,7 @@ public class Country : PointableObject
             }
         }
         this.children.Clear();
-        GameObject.Destroy(p);
+        Destroy(p);
     }
 
 }

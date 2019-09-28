@@ -18,8 +18,8 @@ public class mapRenderer
     private readonly Regex _convert = new Regex(@"(?i)\[(.*?)\],");
 
     //Constnats for the map dimensions
-    private readonly static int MAPWIDTH = 1000;
-    private readonly static int MAPHEIGHT = 50;
+    private static readonly int MAPWIDTH = 1000;
+    private static readonly int MAPHEIGHT = 50;
 
 
     //The size of the outer bounding box of the map in unity units
@@ -47,7 +47,7 @@ public class mapRenderer
             //Create a dictionary.
             _buildingData = new Dictionary<String, Dictionary<String, List<List<String>>>>();
 
-            StreamReader inp_stm = new StreamReader("C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\data_processing_scripts\\building_data.csv");
+            StreamReader inp_stm = new StreamReader("D:\\vr\\group3_vr\\data_processing_scripts\\building_data.csv");
                 
             while (!inp_stm.EndOfStream) {
 
@@ -119,7 +119,7 @@ public class mapRenderer
 
         drawingData.Add(new Tuple<Vector2[], float[], string>(vertices2D, bounds, currentName));
     
-
+    
     var totalMaxX = Mathf.Max(drawingData.Select(x => x.Item2[0]).ToArray());
     var totalMaxY = Mathf.Max(drawingData.Select(x => x.Item2[1]).ToArray());
     var totalMinX = Mathf.Min(drawingData.Select(x => x.Item2[2]).ToArray());
@@ -188,10 +188,10 @@ public class mapRenderer
                     x *= factor;
                     y *= factor;
 
-                    newBuilding.gameObj.transform.SetPositionAndRotation(new Vector3(x,y, 0), new Quaternion(0, 0, 0, 1));
-                    newBuilding.gameObj.transform.parent = pointableObject.transform;
-                    newBuilding.data = float.Parse(b[5]);
-                    newBuilding.volume = float.Parse(b[6]);
+                    newBuilding.GameObj.transform.SetPositionAndRotation(new Vector3(x,y, 0), new Quaternion(0, 0, 0, 1));
+                    newBuilding.GameObj.transform.parent = pointableObject.transform;
+                    newBuilding.Data = float.Parse(b[5]);
+                    newBuilding.Volume = float.Parse(b[6]);
 
                     stateData[currentName].Add(newBuilding);
 
@@ -235,7 +235,7 @@ public class mapRenderer
 
     gameObject.transform.SetPositionAndRotation(new Vector3(0 - centerX, 1 - centerY, -2), children[0].getFinalAngle());
 
-    GameObject go = MonoBehaviour.Instantiate(Resources.Load("ObjectTooltip")) as GameObject;
+    GameObject go = UnityEngine.Object.Instantiate(Resources.Load("ObjectTooltip")) as GameObject;
     go.transform.parent = gameObject.transform;
     go.transform.SetPositionAndRotation(gameObject.transform.position, gameObject.transform.rotation);
     go.transform.position = new Vector3(go.transform.position.x, totalMinY - 0.1F, go.transform.position.z);
@@ -370,7 +370,7 @@ public class mapRenderer
 
         if (level != (int)LEVEL.COUNTY_LEVEL)
         {
-            GameObject objectToolTip = MonoBehaviour.Instantiate(Resources.Load("ObjectTooltip")) as GameObject;
+            GameObject objectToolTip = UnityEngine.Object.Instantiate(Resources.Load("ObjectTooltip")) as GameObject;
             objectToolTip.transform.parent = gameObject.transform;
 
             objectToolTip.transform.localPosition = new Vector3(0, maximumY + 0.15F, 0);
@@ -397,8 +397,8 @@ public class mapRenderer
     }
 
 
-    public static (float, float) convert(float latitude, float longitude)
-    {
+    //This function converts a latitude/longitude pair to x,y
+    public static (float, float) convert(float latitude, float longitude) {
 
         float x = (longitude + 180) * (MAPWIDTH / 360);
 

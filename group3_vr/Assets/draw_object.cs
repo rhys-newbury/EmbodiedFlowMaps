@@ -12,7 +12,7 @@ public class draw_object : MonoBehaviour
 {
 
     public static int currentLevel = 0;
-    private static bool startUp = true;
+    private static bool _startUp = true;
     private static List<draw_object> currentList = new List<draw_object>();
 
     private Vector3 prevPos = new Vector3(0,0,0);
@@ -27,7 +27,7 @@ public class draw_object : MonoBehaviour
     public static List<draw_object> positonStack = new List<draw_object>();
     private bool moved = false;
 
-    private Action<bool> report_grabbed;
+    private Action<bool> reportGrabbed;
 
     
     private void Start()
@@ -57,7 +57,7 @@ public class draw_object : MonoBehaviour
 
 
 
-        report_grabbed = delegate (bool x)
+        reportGrabbed = delegate (bool x)
         {
             if (!(this.moved))
             {
@@ -72,39 +72,39 @@ public class draw_object : MonoBehaviour
 
 
 
-        if (startUp)
+        if (_startUp)
         {
 
            // string file = "C:\\Users\\Jesse\\Documents\\group3\\group3_vr\\mapGeoJSON\\America.txt";
 
             dataAccessor.load();
 
-           string file = "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\America.txt";
+           string file = "D:\\vr\\group3_vr\\mapGeoJSON\\America.txt";
             this.parentName = "America";
 
             mapRenderer map = new mapRenderer();
-            map.drawMultiple(this.gameObject, report_grabbed, file,0);
+            map.drawMultiple(this.gameObject, reportGrabbed, file,0);
 
             currentList.Add(this);
-            startUp = false;
+            _startUp = false;
 
         }
 
 
     }
 
-    void addLines(LineRenderer l)
+    void AddLines(LineRenderer l)
     {
         this.lines.Add(l);
     }
-    static void setLinkStatus(string i1, string i2, bool val)
+    static void SetLinkStatus(string i1, string i2, bool val)
     {
         isLinked(i1, i2);
         currently_joined[i1][i2] = val;
         currently_joined[i2][i1] = val;
     }
 
-    internal static void deselectState()
+    internal static void DeselectState()
     {
         update = true;
 
@@ -121,10 +121,11 @@ public class draw_object : MonoBehaviour
         string access2 = i2;
 
 
-       if (!(currently_joined.ContainsKey(access1)))
-       {
-            currently_joined[access1] = new Dictionary<string, bool>();
-            currently_joined[access1][access2] = false;
+       if (!(currently_joined.ContainsKey(access1))) {
+            currently_joined[access1] = new Dictionary<string, bool>
+            {
+                [access2] = false
+            };
         }
        else if (!(currently_joined[access1].ContainsKey(access2)))
         {
@@ -133,8 +134,10 @@ public class draw_object : MonoBehaviour
 
         if (!(currently_joined.ContainsKey(access2)))
         {
-            currently_joined[access2] = new Dictionary<string, bool>();
-            currently_joined[access2][access1] = false;
+            currently_joined[access2] = new Dictionary<string, bool>
+            {
+                [access1] = false
+            };
         }
         else if (!(currently_joined[access2].ContainsKey(access1)))
         {
@@ -159,11 +162,11 @@ public class draw_object : MonoBehaviour
         update = false;
         prevPos = this.transform.position;
 
-        draw_object[] l = GameObject.FindObjectsOfType(typeof(draw_object)) as draw_object[];
+        draw_object[] l = FindObjectsOfType(typeof(draw_object)) as draw_object[];
 
         foreach (var i in lines)
         {
-            GameObject.Destroy(i);
+            Destroy(i);
         }
 
         foreach (var item in l)
@@ -174,17 +177,17 @@ public class draw_object : MonoBehaviour
                 float seperation = (this.transform.position - item.transform.position).magnitude;
                 Debug.Log(seperation);
                 if (seperation > 3) {
-                    setLinkStatus(this.parentName, item.parentName, false);
+                    SetLinkStatus(this.parentName, item.parentName, false);
                 }
                 else if (seperation < 0.5 || isLinked(this.parentName, item.parentName))
 
                 {
-                    setLinkStatus(this.parentName, item.parentName, true);
+                    SetLinkStatus(this.parentName, item.parentName, true);
 
                     var selected1 = this.GetComponentsInChildren<PointableObject>().Where(x => x.isSelected()).ToArray();
                     var selected2 = item.GetComponentsInChildren<PointableObject>().Where(x => x.isSelected()).ToArray();
 
-                    if (selected1.Count() > 0 && selected2.Count() > 0)
+                    if (selected1.Any() && selected2.Any())
                     {
                         foreach (var origin in selected1)
                         {
@@ -194,7 +197,7 @@ public class draw_object : MonoBehaviour
 
                                 Bezier b = new Bezier(this.transform, origin, destination);
                                 lines.Add(b.line);
-                                item.addLines(b.line);
+                                item.AddLines(b.line);
 
 
                             }
@@ -231,7 +234,7 @@ public class draw_object : MonoBehaviour
         mapRenderer map = new mapRenderer();
         this.parentName = pointableObject.name;
 
-        report_grabbed = delegate (bool x)
+        reportGrabbed = delegate (bool x)
         {
             if (!(this.moved))
             {
@@ -243,10 +246,10 @@ public class draw_object : MonoBehaviour
 
         if (level == (int)mapRenderer.LEVEL.STATE_LEVEL)
         {
-             file = "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.name + ".json";
+             file = "D:\\vr\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.name + ".json";
 
 
-            map.drawMultiple(this.gameObject, report_grabbed, file, level, pointableObject);
+            map.drawMultiple(this.gameObject, reportGrabbed, file, level, pointableObject);
 
             this.gameObject.transform.position += new Vector3(0, 0, getYPosition(positonStack.Count + 1));
 
@@ -255,11 +258,11 @@ public class draw_object : MonoBehaviour
         }
         else
         {
-            file = "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.parentName + ".json";
-            foreach (var line in System.IO.File.ReadAllLines(file)) {
+            file = "D:\\vr\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.parentName + ".json";
+            foreach (var line in File.ReadAllLines(file)) {
                 if (line.Contains(pointableObject.name))
                 {
-                    map.drawSingular(this.gameObject, report_grabbed, line, pointableObject.parentName, level, pointableObject);
+                    map.drawSingular(this.gameObject, reportGrabbed, line, pointableObject.parentName, level, pointableObject);
                     break;
                 }
             }

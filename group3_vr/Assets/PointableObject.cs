@@ -9,8 +9,9 @@ using VRTK;
 using System;
 using UnityEngine.UI;
 
-public class PointableObject : MonoBehaviour
+public class PointableObject : Pointable
 {
+    static readonly List<PointableObject> currentList = new List<PointableObject>();
 
     private string name;
     public string parentName;
@@ -26,7 +27,6 @@ public class PointableObject : MonoBehaviour
 
     protected List<PointableObject> children = new List<PointableObject>();
 
-    private readonly float ANGLE = 1 / Mathf.Sqrt(2);
 
     private float centroidX;
 
@@ -37,7 +37,7 @@ public class PointableObject : MonoBehaviour
 
     public Mesh mesh;
     internal PointableObject parent;
-    public Dictionary<String, PointableObject> siblings = new Dictionary<string, PointableObject>();
+    public Dictionary<string, PointableObject> siblings = new Dictionary<string, PointableObject>();
 
     public void Start()
     {
@@ -49,10 +49,79 @@ public class PointableObject : MonoBehaviour
 
     }
 
-    internal object getParent()
+    public override void OnThrow()
     {
-        throw new NotImplementedException();
+
+        int level = -1;
+        //On Throw delete each item in children
+        //Deselect the parent
+        foreach (var item in this.GetComponentsInChildren<PointableObject>())
+        {
+            item.delete();
+            item.parent.deselect();
+            level = level == -1 ? item.getLevel() : level;
+        }
+        //Do not destroy country
+        if (level > 0) Destroy(this);
     }
+
+    public override void OnUpdateTouchPadPressed(float touchpadAngle, Transform transformDirection)
+    {
+        //Left/Right -> Rotate
+        //Up/Down -> Back and forth in direction of pointer.
+        if (touchpadAngle< 72 || touchpadAngle> 288)
+        {
+            this.transform.position = this.transform.position + transformDirection.TransformDirection(new Vector3(0, 0, 0.01F));
+        }
+        else if (touchpadAngle< 144)
+        {
+            this.transform.Rotate(new Vector3(0, -1, 0), Space.Self);
+        }
+        else if (touchpadAngle< 216)
+        {
+            this.transform.position = this.transform.position + transformDirection.TransformDirection(new Vector3(0, 0, -0.01F));
+        }
+        else if (touchpadAngle< 288)
+        {
+            this.transform.Rotate(new Vector3(0, 1, 0), Space.Self);
+        }
+
+    }
+
+    public override void OnGripPressed()
+    {
+        this.report_grabbed(true);
+    }
+
+    public override void OnTriggerPressed()
+    {
+
+        if (!this.isSelected())
+        {
+            //Add it to the list of current objects
+            currentList.Add(this);
+
+            //Create the gameObject for the map and then draw it.
+            GameObject gameObject = new GameObject();
+            draw_object main = gameObject.AddComponent(typeof(draw_object)) as draw_object;
+            main.draw(this, this.getLevel() + 1);
+
+            this.selected = true;
+            createLine();
+            this.getInternalFlows(this);
+        }
+        else
+        {
+            //On deselect Remove it from the current list and delete the object and its children 
+            this.selected = false;
+            destoryLine();
+
+            currentList.Remove(this);
+            this.deleteChildren();
+        }
+
+    }
+
 
     public virtual void removeLines()
     {
@@ -74,7 +143,7 @@ public class PointableObject : MonoBehaviour
     }
 
 
-    public void onPointEnter(Action<string> change_text)
+    public override void OnPointerEnter(Action<string> change_text)
     {
         this.color.a = 0.3F;
         this.meshRenderer.material.color = this.color;
@@ -83,30 +152,11 @@ public class PointableObject : MonoBehaviour
     }
    
 
-    public void onPointLeave()
+    public override void OnPointerLeave()
     {
         this.color.a = 1F;
         this.meshRenderer.material.color = this.color;
         this.go.SetActive(false);
-    }
-
-    internal bool onClick()
-    {
-        
-        if (!this.selected)
-        {
-            this.selected = true;
-            createLine();
-            this.getInternalFlows(this);
-            return true;
-        }
-        else
-        {
-            this.selected = false;
-            destoryLine();
-            return false;
-        }
-
     }
 
     public bool isSelected()
@@ -155,10 +205,11 @@ public class PointableObject : MonoBehaviour
         indices2.AddRange(indices);
 
         //Mesh mesh = new Mesh();
-        this.mesh = new Mesh();
-
-        this.mesh.vertices = verticesList.ToArray();
-        this.mesh.triangles = indices2.ToArray();
+        this.mesh = new Mesh
+        {
+            vertices = verticesList.ToArray(),
+            triangles = indices2.ToArray()
+        };
 
         this.mesh.RecalculateNormals();
         this.mesh.RecalculateBounds();
@@ -190,16 +241,6 @@ public class PointableObject : MonoBehaviour
         destoryLine();
     }
 
-    internal virtual void destory()
-    {
-        GameObject.Destroy(this.wrapper);
-    }
-
-    public Mesh getMesh()
-    {
-        return this.mesh;
-    }
-
     public void SetPositionAndRotation(Vector3 pos, Quaternion angle)
     {
         this.transform.SetPositionAndRotation(pos, angle);
@@ -216,7 +257,7 @@ public class PointableObject : MonoBehaviour
     internal void constructor(Vector2[] points, string name, GameObject objToSpawn, float[] bounds, string parentName, Action<bool> report_grabbed)
     {
         T = new Triangulator(points);
-        vertices3D = System.Array.ConvertAll<Vector2, Vector3>(points, v => v);
+        vertices3D = Array.ConvertAll<Vector2, Vector3>(points, v => v);
 
         this.report_grabbed = report_grabbed;
         this.name = name;
@@ -260,7 +301,7 @@ public class PointableObject : MonoBehaviour
             var filtered = this.children.Where(x => x != null).ToList();
             var parent = filtered[0].transform.parent.transform.parent.gameObject;
             filtered.ForEach(x => x.delete());
-            GameObject.Destroy(parent);
+            Destroy(parent);
 
         }
     }
@@ -310,7 +351,7 @@ public class PointableObject : MonoBehaviour
         draw_object.update = true;
         this.removeLines();
         var line = objToSpawn.GetComponent<LineRenderer>();
-        draw_object.deselectState();
+        draw_object.DeselectState();
         Destroy(line);
 
 
@@ -329,8 +370,8 @@ public class PointableObject : MonoBehaviour
 
         try
         {
-            GameObject.Destroy(this.gameObject);
-            GameObject.Destroy(this.wrapper);
+            Destroy(this.gameObject);
+            Destroy(this.wrapper);
         }
         catch { }
     }
