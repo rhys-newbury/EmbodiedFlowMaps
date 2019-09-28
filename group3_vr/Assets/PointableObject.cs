@@ -93,10 +93,10 @@ public class PointableObject : Pointable
         if (!this.IsSelected())
         {
 
-            //Create the gameObject for the map and then draw it.
+            //Create the gameObject for the map and then Draw it.
             GameObject mapGameObject = new GameObject();
             draw_object main = mapGameObject.AddComponent(typeof(draw_object)) as draw_object;
-            main?.draw(this, this.GetLevel() + 1);
+            main?.Draw(this, this.GetLevel() + 1);
 
             this.selected = true;
             CreateLine();

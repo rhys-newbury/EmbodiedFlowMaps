@@ -13,8 +13,7 @@ public class detect_object_hit : MonoBehaviour
     private bool selectingObject;
     private Pointable currentObject;
         
-    //This list should be static, as this will allow it to work over both controllers
-    static readonly List<PointableObject> currentList = new List<PointableObject>();
+
     
     //The box currently being drawn
     private LineRenderer line;

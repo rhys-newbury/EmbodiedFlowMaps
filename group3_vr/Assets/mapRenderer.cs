@@ -74,199 +74,43 @@ public class mapRenderer
     }
     public void drawSingular(GameObject gameObject, Action<bool> report_grabbed, string inp_ln, string parentName, int level, PointableObject parent, float centerX = 0, float centerY = 0, int number = 0)
     {
-        //bool done = false;
-        int count = 0;
-        this.report_grabbed = report_grabbed;
-        
-        gameObject.transform.SetPositionAndRotation(new Vector3(number, 0, 0), new Quaternion(0, 0, 0, 1));
 
-        List<Tuple<Vector2[], float[], string>> drawingData = new List<Tuple<Vector2[], float[], string>>();
-
-        float maxX = -10000000, maxY = -10000000;
-        float minX = 10000000, minY = 10000000;
-
-        //Get the data from the line using Regex
-        string currentName = NAME_REGEX.Match(inp_ln).Groups[1].ToString();
-        string coordinates = COORDS_REGEX.Match(inp_ln).Groups[1].ToString();
-
-        //Find all the x,y pairs
-        MatchCollection matches = _convert.Matches(coordinates);
-        Vector2[] vertices2D = new Vector2[matches.Count];
-        int indices = 0;
-
-        foreach (Match match in matches)
-        {
-
-            float x, y;
-
-            string[] data = match.Groups[1].ToString().Split(',');
-
-            (x, y) = convert(float.Parse(data[1]), float.Parse(data[0]));
-            vertices2D[indices] = new Vector2(x, y);
-
-            //Update the maximum and minimum for this object
-            maxX = Mathf.Max(x, maxX);
-            maxY = Mathf.Max(y, maxY);
-            minX = Mathf.Min(x, minX);
-            minY = Mathf.Min(y, minY);
-
-            indices++;
-            count++;
-
-        }
-
-        float[] bounds = new float[] { maxX, maxY, minX, minY };
-
-        drawingData.Add(new Tuple<Vector2[], float[], string>(vertices2D, bounds, currentName));
-    
-    
-    var totalMaxX = Mathf.Max(drawingData.Select(x => x.Item2[0]).ToArray());
-    var totalMaxY = Mathf.Max(drawingData.Select(x => x.Item2[1]).ToArray());
-    var totalMinX = Mathf.Min(drawingData.Select(x => x.Item2[2]).ToArray());
-    var totalMinY = Mathf.Min(drawingData.Select(x => x.Item2[3]).ToArray());
-
-
-    var TmpcenterX = (totalMaxX + totalMinX) / 2;
-    var TmpcenterY = (totalMaxY + totalMinY) / 2;
-
-
-    var area = (totalMaxX - totalMinX) * (totalMaxY - totalMinY);
-
-    var factor = Mathf.Sqrt(FINAL_AREA / area);
-
-    drawingData = drawingData.Select(x => new Tuple<Vector2[], float[], string>(x.Item1.Select(y => new Vector2(y.x * factor, y.y * factor)).ToArray(),
-        new float[] { x.Item2[0] * factor, x.Item2[1] * factor, x.Item2[2] * factor, x.Item2[3] * factor },
-        x.Item3)).ToList();
-
-
-
-
-
-
-    totalMaxX = Mathf.Max(drawingData.Select(x => x.Item2[0]).ToArray());
-    totalMaxY = Mathf.Max(drawingData.Select(x => x.Item2[1]).ToArray());
-    totalMinX = Mathf.Min(drawingData.Select(x => x.Item2[2]).ToArray());
-    totalMinY = Mathf.Min(drawingData.Select(x => x.Item2[3]).ToArray());
-
-
-    TmpcenterX = (totalMaxX + totalMinX) / 2;
-    TmpcenterY = (totalMaxY + totalMinY) / 2;
-
-    area = (totalMaxX - totalMinX) * (totalMaxY - totalMinY);
-
-    var children = new List<PointableObject>();
-
-    foreach (var data in drawingData)
-    {
-
-        GameObject temp = new GameObject();
-        PointableObject pointableObject = temp.AddComponent(getType(level)) as PointableObject;
-
-            if (level == (int)LEVEL.COUNTY_LEVEL && (_buildingData.ContainsKey(parentName) && _buildingData[parentName].ContainsKey(currentName)))
-            {
-                    var buildingList = _buildingData[parentName][currentName];
-
-                    if (!buildingData.ContainsKey(parentName))
-                    {
-                        buildingData.Add(parentName, new Dictionary<string, List<Buildings>>());
-                    }
-                    Dictionary<String, List<Buildings>> stateData = buildingData[parentName];
-
-                    if (!stateData.ContainsKey(currentName))
-                    {
-                        stateData.Add(currentName, new List<Buildings>());
-                    }
-
-                stateData[currentName].Clear();
-
-
-                foreach (var b in buildingList)
-                    {
-                    var newBuilding = new Buildings();
-                    float x, y;
-                    (x, y) = convert(float.Parse(b[0]), float.Parse(b[1]));
-                    x *= factor;
-                    y *= factor;
-
-                    newBuilding.GameObj.transform.SetPositionAndRotation(new Vector3(x,y, 0), new Quaternion(0, 0, 0, 1));
-                    newBuilding.GameObj.transform.parent = pointableObject.transform;
-                    newBuilding.Data = float.Parse(b[5]);
-                    newBuilding.Volume = float.Parse(b[6]);
-
-                    stateData[currentName].Add(newBuilding);
-
-
-
-                }
-            }
-
-            
-
-        pointableObject.constructor(data.Item1, data.Item3, temp, data.Item2, parentName, report_grabbed);
-        pointableObject.setParent(gameObject.transform);
-        pointableObject.parent = parent;
-
-        parent.addChild(pointableObject);
-
-
-            children.Add(pointableObject);
-    }
-
-
-    MeshFilter[] meshFilters = gameObject.GetComponentsInChildren<MeshFilter>();
-    CombineInstance[] combine = new CombineInstance[meshFilters.Length];
-
-    int i = 0;
-    while (i < meshFilters.Length)
-    {
-        combine[i].mesh = meshFilters[i].sharedMesh;
-        combine[i].transform = meshFilters[i].transform.localToWorldMatrix;
-        i++;
+        drawMultipleThing(gameObject, report_grabbed, inp_ln,level, parentName, parent, centerX, centerY, number);
 
     }
-    MeshFilter mf = gameObject.AddComponent(typeof(MeshFilter)) as MeshFilter;
-    gameObject.GetComponent<MeshFilter>().mesh = new Mesh();
-    gameObject.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
 
-    foreach (var child in children)
+    public void drawMultiple(GameObject gameObject, Action<bool> report_grabbed, string dataFile, int level,
+        PointableObject parent = null, float centerX = 0, float centerY = 0, int number = 0)
     {
-        child.SetPositionAndRotation(child.getTranslation(TmpcenterX, TmpcenterY), child.getAngle());
-    }
+        string data = File.ReadAllText(dataFile);
 
-    gameObject.transform.SetPositionAndRotation(new Vector3(0 - centerX, 1 - centerY, -2), children[0].getFinalAngle());
-
-    GameObject go = UnityEngine.Object.Instantiate(Resources.Load("ObjectTooltip")) as GameObject;
-    go.transform.parent = gameObject.transform;
-    go.transform.SetPositionAndRotation(gameObject.transform.position, gameObject.transform.rotation);
-    go.transform.position = new Vector3(go.transform.position.x, totalMinY - 0.1F, go.transform.position.z);
-
-
-    VRTK_ObjectTooltip tooltip = go.GetComponent<VRTK_ObjectTooltip>() as VRTK_ObjectTooltip;
-    tooltip.displayText = parentName;
-
-
-
-    }
-    public void drawMultiple(GameObject gameObject, Action<bool> report_grabbed, string dataFile, int level, PointableObject parent=null, float centerX=0, float centerY=0, int number=0)
-    {
-
-        //bool done = false;
-        int count = 0;
         string parentName = dataFile.Split('\\')[dataFile.Split('\\').Count() - 1];
         parentName = parentName.Split('.')[0];
 
+
+        drawMultipleThing(gameObject, report_grabbed, data,level, parentName, parent, centerX, centerY, number);
+    }
+
+
+
+    public void drawMultipleThing(GameObject gameObject, Action<bool> report_grabbed, string dataFile, int level, string parentName, PointableObject parent=null, float centerX=0, float centerY=0, int number=0)
+    {
+
+        //bool done = false;
+        int count = 0;
+    
         gameObject.transform.SetPositionAndRotation(new Vector3(number, 0, 0), new Quaternion(0, 0, 0, 1));
 
         List<Tuple<Vector2[], float[], string>> drawingData = new List<Tuple<Vector2[], float[], string>>();
 
-        StreamReader inp_stm = new StreamReader(dataFile);
+        //StreamReader inp_stm = new StreamReader(dataFile);
 
-        while (!inp_stm.EndOfStream)
+        foreach (string inp_ln in dataFile.Split('\n'))
         {
             float maxX = -10000000, maxY = -10000000;
             float minX = 10000000, minY = 10000000;
 
-            string inp_ln = inp_stm.ReadLine();
+            //string inp_ln = inp_stm.ReadLine();
 
             string currentName = NAME_REGEX.Match(inp_ln).Groups[1].ToString();
 
@@ -341,15 +185,58 @@ public class mapRenderer
             GameObject temp = new GameObject();
             PointableObject pointableObject = temp.AddComponent(getType(level)) as PointableObject;
 
-            pointableObject.constructor(data.Item1, data.Item3, temp, data.Item2, parentName, report_grabbed);
-            pointableObject.setParent(gameObject.transform);
+            string currentName = data.Item3;
+
+            pointableObject.Constructor(data.Item1, data.Item3, temp, data.Item2, parentName, report_grabbed);
+            pointableObject.SetParent(gameObject.transform);
             children.Add(pointableObject);
             if (parent != null)
             {
-                parent.addChild(pointableObject);
+                parent.AddChild(pointableObject);
                 pointableObject.parent = parent;
             }
 
+            if (level == (int) LEVEL.COUNTY_LEVEL &&
+                (_buildingData.ContainsKey(parentName) && _buildingData[parentName].ContainsKey(currentName)))
+            {
+                var buildingList = _buildingData[parentName][currentName];
+
+                if (!buildingData.ContainsKey(parentName))
+                {
+                    buildingData.Add(parentName, new Dictionary<string, List<Buildings>>());
+                }
+
+                Dictionary<String, List<Buildings>> stateData = buildingData[parentName];
+
+                if (!stateData.ContainsKey(currentName))
+                {
+                    stateData.Add(currentName, new List<Buildings>());
+                }
+
+                stateData[currentName].Clear();
+
+
+                foreach (var b in buildingList)
+                {
+                    var newBuilding = new Buildings();
+                    float x, y;
+                    (x, y) = convert(float.Parse(b[0]), float.Parse(b[1]));
+                    x *= factor;
+                    y *= factor;
+
+                    newBuilding.GameObj.transform.SetPositionAndRotation(new Vector3(x, y, 0),
+                        new Quaternion(0, 0, 0, 1));
+                    newBuilding.GameObj.transform.parent = pointableObject.transform;
+                    newBuilding.Data = float.Parse(b[5]);
+                    newBuilding.Volume = float.Parse(b[6]);
+
+                    stateData[currentName].Add(newBuilding);
+
+
+
+                }
+
+            }
         }
 
 
@@ -358,14 +245,14 @@ public class mapRenderer
 
         foreach (var child in children)
         {
-            child.SetPositionAndRotation(child.getTranslation(TmpcenterX, TmpcenterY), child.getAngle());
-            child.setSiblings(children);
+            child.SetPositionAndRotation(child.GetTranslation(TmpcenterX, TmpcenterY), child.GetAngle());
+            child.SetSiblings(children);
             maximumY = Mathf.Max(maximumY, child.transform.parent.position.y);
         }
         
 
 
-        gameObject.transform.SetPositionAndRotation(new Vector3(0-centerX, 1-centerY, -2), children[0].getFinalAngle());
+        gameObject.transform.SetPositionAndRotation(new Vector3(0-centerX, 1-centerY, -2), children[0].GetFinalAngle());
 
 
         if (level != (int)LEVEL.COUNTY_LEVEL)
@@ -383,7 +270,7 @@ public class mapRenderer
             tooltipData.drawLineTo = objectToolTip.transform;
         }
 
-        gameObject.transform.SetPositionAndRotation(new Vector3(0 - centerX, 1 - centerY, -2), children[0].getFinalAngle());
+        gameObject.transform.SetPositionAndRotation(new Vector3(0 - centerX, 1 - centerY, -2), children[0].GetFinalAngle());
 
         //GameObject go = MonoBehaviour.Instantiate(Resources.Load("ObjectTooltip")) as GameObject;
         //go.transform.parent = gameObject.transform;

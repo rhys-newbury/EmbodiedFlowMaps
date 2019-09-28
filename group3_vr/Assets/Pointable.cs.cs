@@ -6,7 +6,7 @@ using UnityEngine;
 public class Pointable : MonoBehaviour
 {
     public virtual void OnUpdateTouchPadPressed(float touchPadAngle, Transform transformDirection) { }
-    public virtual void OnPointerEnter(Action<string> change_text) { }
+    public virtual void OnPointerEnter(Action<string> changeText) { }
     public virtual void OnPointerLeave() { }
 
     public virtual void OnTriggerPressed(){ }

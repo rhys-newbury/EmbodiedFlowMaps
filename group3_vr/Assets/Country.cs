@@ -11,22 +11,22 @@ using UnityEngine.UI;
 public class Country : PointableObject
 {
 
-    public override int getLevel()
+    public override int GetLevel()
     {
         return 0;
     }
     private readonly List<GameObject> lines = new List<GameObject>();
-    public override void addLine(GameObject line)
+    public override void AddLine(GameObject line)
     {
         lines.Add(line);
     }
-    public override void removeLines()
+    public override void RemoveLines()
     {
         lines.ToList().ForEach(Destroy);
         lines.Clear();
     }
 
-    internal override void addToList(string parentName, string name)
+    internal override void AddToList(string parentName, string name)
     {
 
         dataAccessor.addToList(parentName, name);
@@ -34,7 +34,7 @@ public class Country : PointableObject
     }
 
 
-    public override void getInternalFlows(PointableObject origin)
+    public override void GetInternalFlows(PointableObject origin)
     {
         foreach (var state in origin.siblings)
         {
@@ -43,14 +43,14 @@ public class Country : PointableObject
                 {
                     var destination = state.Value;
 
-                    if (destination.isSelected())
+                    if (destination.IsSelected())
                     {
 
 
                         Bezier b = new Bezier(this.transform, origin, destination);
 
                         this.lines.Add(b.obj);
-                        destination.addLine(b.obj);
+                        destination.AddLine(b.obj);
 
                     }
 
@@ -61,14 +61,14 @@ public class Country : PointableObject
 
     }
 
-    internal override void delete()
+    internal override void Delete()
     {
         var p = children.Count > 0 ? this.children[0].transform.parent.transform.parent.gameObject : null;
         foreach (var child in this.children)
         {
             if  (child != null )
             {
-                    child.delete();
+                    child.Delete();
             }
         }
         this.children.Clear();

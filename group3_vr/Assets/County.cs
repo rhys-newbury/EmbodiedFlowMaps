@@ -61,23 +61,16 @@ public class County : PointableObject
     public void Update()
     {
 
-        var l = buildingData[this.parentName][this.name];
-
-        
+        var l = buildingData[this.parentName]?[this.name];
 
         foreach (var building in l)
         {
 
             journeyLength = Vector3.Distance(building.CapacityCube.transform.localScale, new Vector3(0.01f, 0.5f, 0.01f));
 
-
-
-
             float distCovered = (Time.time - startTime) * speed;
 
-
             float fracJourney = distCovered / journeyLength;
-
 
             building.CapacityCube.transform.localScale = Vector3.Lerp(building.CapacityCube.transform.localScale, new Vector3(0.01f, 0.5f + building.Volume / 1000, 0.01f), fracJourney);
 
@@ -127,19 +120,7 @@ public class County : PointableObject
 
 
             }
-
-           // cube.GetComponent<MeshRenderer>().material = Resources.Load("Materials/Glass", typeof(Material)) as Material;
             
-
-            //cube.transform.position = this.transform.parent.position;
-
-            //cube.transform.position += new Vector3(0f, 0.2f, 0f);
-
-            //cube.transform.SetParent(this.transform);
-
-            //dummyScaler.transform.SetParent(this.transform);
-
-
         }
 
 

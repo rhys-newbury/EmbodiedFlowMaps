@@ -1,19 +1,14 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using System.IO;
-using System.Text.RegularExpressions;
-using UnityEngine.EventSystems;
 using VRTK;
 using System;
 
 public class draw_object : MonoBehaviour
 {
 
-    public static int currentLevel = 0;
     private static bool _startUp = true;
-    private static List<draw_object> currentList = new List<draw_object>();
 
     private Vector3 prevPos = new Vector3(0,0,0);
 
@@ -21,11 +16,11 @@ public class draw_object : MonoBehaviour
 
     private static Dictionary<String, Dictionary<string, bool>> currently_joined = new Dictionary<String, Dictionary<string, bool>>();
     private string parentName;
-    public static bool update = false;
+    public static bool update;
 
 
     public static List<draw_object> positonStack = new List<draw_object>();
-    private bool moved = false;
+    private bool moved;
 
     private Action<bool> reportGrabbed;
 
@@ -57,7 +52,7 @@ public class draw_object : MonoBehaviour
 
 
 
-        reportGrabbed = delegate (bool x)
+        this.reportGrabbed = delegate (bool x)
         {
             if (!(this.moved))
             {
@@ -67,25 +62,16 @@ public class draw_object : MonoBehaviour
         };
 
 
-
-
-
-
-
         if (_startUp)
         {
-
-           // string file = "C:\\Users\\Jesse\\Documents\\group3\\group3_vr\\mapGeoJSON\\America.txt";
-
             dataAccessor.load();
 
-           string file = "D:\\vr\\group3_vr\\mapGeoJSON\\America.txt";
+            string file = "D:\\vr\\group3_vr\\mapGeoJSON\\America.txt";
             this.parentName = "America";
 
             mapRenderer map = new mapRenderer();
             map.drawMultiple(this.gameObject, reportGrabbed, file,0);
 
-            currentList.Add(this);
             _startUp = false;
 
         }
@@ -99,7 +85,7 @@ public class draw_object : MonoBehaviour
     }
     static void SetLinkStatus(string i1, string i2, bool val)
     {
-        isLinked(i1, i2);
+        IsLinked(i1, i2);
         currently_joined[i1][i2] = val;
         currently_joined[i2][i1] = val;
     }
@@ -107,15 +93,14 @@ public class draw_object : MonoBehaviour
     internal static void DeselectState()
     {
         update = true;
-
     }
 
-    internal static float getYPosition(int i)
+    internal static float GetYPosition(int i)
     {
         return i * 0.2F;
     }
 
-    static bool isLinked(string i1, string i2) 
+    static bool IsLinked(string i1, string i2) 
     {
         string access1 = i1;
         string access2 = i2;
@@ -127,8 +112,7 @@ public class draw_object : MonoBehaviour
                 [access2] = false
             };
         }
-       else if (!(currently_joined[access1].ContainsKey(access2)))
-        {
+       else if (!(currently_joined[access1].ContainsKey(access2))) {
             currently_joined[access1][access2] = false;
         }
 
@@ -179,13 +163,13 @@ public class draw_object : MonoBehaviour
                 if (seperation > 3) {
                     SetLinkStatus(this.parentName, item.parentName, false);
                 }
-                else if (seperation < 0.5 || isLinked(this.parentName, item.parentName))
+                else if (seperation < 0.5 || IsLinked(this.parentName, item.parentName))
 
                 {
                     SetLinkStatus(this.parentName, item.parentName, true);
 
-                    var selected1 = this.GetComponentsInChildren<PointableObject>().Where(x => x.isSelected()).ToArray();
-                    var selected2 = item.GetComponentsInChildren<PointableObject>().Where(x => x.isSelected()).ToArray();
+                    var selected1 = this.GetComponentsInChildren<PointableObject>().Where(x => x.IsSelected()).ToArray();
+                    var selected2 = item.GetComponentsInChildren<PointableObject>().Where(x => x.IsSelected()).ToArray();
 
                     if (selected1.Any() && selected2.Any())
                     {
@@ -193,13 +177,9 @@ public class draw_object : MonoBehaviour
                         {
                             foreach (var destination in selected2)
                             {
-
-
                                 Bezier b = new Bezier(this.transform, origin, destination);
                                 lines.Add(b.line);
                                 item.AddLines(b.line);
-
-
                             }
                         }
                     }
@@ -212,37 +192,26 @@ public class draw_object : MonoBehaviour
         }
     }
 
-    private void stack_remove(draw_object draw_object)
+    private void stack_remove(draw_object drawObject)
     {
-        if (positonStack.Contains(draw_object))
+        if (positonStack.Contains(drawObject))
         {
-            var index = positonStack.IndexOf(draw_object);
+            var index = positonStack.IndexOf(drawObject);
             
             for (int i = index+1; i<positonStack.Count; i++)
             {
                 positonStack[i].transform.position -= new Vector3(0, 0, 0.2F);
             }
-
-            positonStack.Remove(draw_object);
+            positonStack.Remove(drawObject);
         }
     }
 
-    internal void draw(PointableObject pointableObject, int level)
+    internal void Draw(PointableObject pointableObject, int level)
     {
         
         string file;
         mapRenderer map = new mapRenderer();
         this.parentName = pointableObject.name;
-
-        reportGrabbed = delegate (bool x)
-        {
-            if (!(this.moved))
-            {
-                this.stack_remove(this);
-                this.moved = true;
-            }
-        };
-
 
         if (level == (int)mapRenderer.LEVEL.STATE_LEVEL)
         {
@@ -250,15 +219,14 @@ public class draw_object : MonoBehaviour
 
 
             map.drawMultiple(this.gameObject, reportGrabbed, file, level, pointableObject);
-
-            this.gameObject.transform.position += new Vector3(0, 0, getYPosition(positonStack.Count + 1));
-
+            this.gameObject.transform.position += new Vector3(0, 0, GetYPosition(positonStack.Count + 1));
             positonStack.Add(this);
 
         }
         else
         {
             file = "D:\\vr\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.parentName + ".json";
+
             foreach (var line in File.ReadAllLines(file)) {
                 if (line.Contains(pointableObject.name))
                 {
@@ -272,8 +240,6 @@ public class draw_object : MonoBehaviour
 
 
 
-
-        currentList.Add(this);
       
 
     }
