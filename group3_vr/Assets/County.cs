@@ -52,7 +52,7 @@ public class County : PointableObject
 
     }
 
-    public override int getLevel()
+    public override int GetLevel()
     {
         return 2;
     }
@@ -91,18 +91,18 @@ public class County : PointableObject
 
     }
 
-    public override Quaternion getAngle()
+    public override Quaternion GetAngle()
     {
         return Angle;
     }
 
-    public override Quaternion getFinalAngle()
+    public override Quaternion GetFinalAngle()
     {
         return FinalAngle;
     }
 
 
-    public override Vector3 getTranslation(float x, float y)
+    public override Vector3 GetTranslation(float x, float y)
     {
         return new Vector3(x, 0.28F*y, -0.96F*y);
     }
