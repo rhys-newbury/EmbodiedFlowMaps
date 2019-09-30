@@ -122,6 +122,8 @@ public class detect_object_hit : MonoBehaviour
         controller.TouchpadReleased += Controller_TouchpadReleased;
         controller.TouchpadPressed += Controller_TouchpadPressed;
 
+        controller.GripClicked += Controller_GripClicked;
+
         help_tooltip = gameObject.transform.GetChild(0).GetComponent<VRTK_ControllerTooltips>();
         help_tooltip.ToggleTips(false);
 
@@ -135,6 +137,26 @@ public class detect_object_hit : MonoBehaviour
         data_tooltip = gameObject.transform.GetChild(1).GetComponent<VRTK_ControllerTooltips>();
         data_tooltip.ToggleTips(false);
 
+    }
+
+    private void Controller_GripClicked(object sender, ControllerInteractionEventArgs e)
+    {
+        try
+        {
+            if (!selectingObject)
+            {
+                return;
+            }
+            selectingObject = false;
+            currentObject.onPointLeave();
+            currentObject = null;
+            data_tooltip.ToggleTips(false);
+
+        }
+        catch
+        {
+            return;
+        }
     }
 
     private void Controller_TouchpadPressed(object sender, ControllerInteractionEventArgs e)
@@ -232,7 +254,7 @@ public class detect_object_hit : MonoBehaviour
 
         catch { }
 
-        
+
     }
 
 }
