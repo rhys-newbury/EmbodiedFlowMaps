@@ -11,24 +11,68 @@ using UnityEngine.UI;
 public class Country : PointableObject
 {
 
-    public override int getLevel()
+    public override int GetLevel()
     {
         return 0;
     }
-
-    internal override void delete()
+    private readonly List<GameObject> lines = new List<GameObject>();
+    public override void AddLine(GameObject line)
     {
-        if (children.Count > 0) Debug.Log(children[0]);
+        lines.Add(line);
+    }
+    public override void RemoveLines()
+    {
+        lines.ToList().ForEach(Destroy);
+        lines.Clear();
+    }
+
+    internal override void AddToList(string parentName, string name)
+    {
+
+        dataAccessor.addToList(parentName, name);
+
+    }
+
+
+    public override void GetInternalFlows(PointableObject origin)
+    {
+        foreach (var state in origin.siblings)
+        {
+            try {
+                if (state.Key != origin.name)
+                {
+                    var destination = state.Value;
+
+                    if (destination.IsSelected())
+                    {
+
+
+                        Bezier b = new Bezier(this.transform, origin, destination);
+
+                        this.lines.Add(b.obj);
+                        destination.AddLine(b.obj);
+
+                    }
+
+                }
+            }
+            catch { }
+        }
+
+    }
+
+    internal override void Delete()
+    {
         var p = children.Count > 0 ? this.children[0].transform.parent.transform.parent.gameObject : null;
         foreach (var child in this.children)
         {
             if  (child != null )
             {
-                    child.delete();
+                    child.Delete();
             }
         }
         this.children.Clear();
-        GameObject.Destroy(p);
+        Destroy(p);
     }
 
 }

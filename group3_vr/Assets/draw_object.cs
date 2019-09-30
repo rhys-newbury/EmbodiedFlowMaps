@@ -1,21 +1,30 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using System.IO;
-using System.Text.RegularExpressions;
-using UnityEngine.EventSystems;
 using VRTK;
 using System;
 
 public class draw_object : MonoBehaviour
 {
 
-    public static int currentLevel = 0;
-    private static bool startUp = true;
-    private static List<draw_object> currentList = new List<draw_object>();
+    private static bool _startUp = true;
+
+    private Vector3 prevPos = new Vector3(0,0,0);
+
+    private List<LineRenderer> lines = new List<LineRenderer>();
+
+    private static Dictionary<String, Dictionary<string, bool>> currently_joined = new Dictionary<String, Dictionary<string, bool>>();
+    private string parentName;
+    public static bool update;
 
 
+    public static List<draw_object> positonStack = new List<draw_object>();
+    private bool moved;
+
+    private Action<bool> reportGrabbed;
+
+    
     private void Start()
     {      
 
@@ -40,66 +49,188 @@ public class draw_object : MonoBehaviour
 
         scaleAction.lockAxis = new Vector3State(false, false, true);
         scaleAction.uniformScaling = true;
-        
 
-        if (startUp)
+
+
+        this.reportGrabbed = delegate (bool x)
         {
+            if (!(this.moved))
+            {
+                this.stack_remove(this);
+                this.moved = true;
+            }
+        };
 
-            string file = "C:\\Users\\Jesse\\Documents\\group3_vr\\group3_vr\\mapGeoJSON\\America.txt";
 
+        if (_startUp)
+        {
             dataAccessor.load();
 
-           // string file = "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\America.txt";
+            string file = "D:\\vr\\group3_vr\\mapGeoJSON\\America.txt";
+            this.parentName = "America";
 
             mapRenderer map = new mapRenderer();
-            map.drawMultiple(this.gameObject, file,0);
+            map.drawMultiple(this.gameObject, reportGrabbed, file,0);
 
-            currentList.Add(this);
-            startUp = false;
+            _startUp = false;
 
         }
 
 
     }
-    public static void clear()
+
+    void AddLines(LineRenderer l)
     {
-        //foreach (draw_object drawObject in currentList) {
-        //    //int childs = drawObject.gameObject.transform.childCount;
-        //    //for (var i = childs - 1; i >= 0; i--)
-        //    //{
-        //    //    Destroy(drawObject.gameObject.transform.GetChild(i).gameObject);
-        //    //}
-        //    //Destroy()
-        //    Destroy(drawObject.gameObject);
-        //}
-       
-      //      currentList.Clear();
+        this.lines.Add(l);
+    }
+    static void SetLinkStatus(string i1, string i2, bool val)
+    {
+        IsLinked(i1, i2);
+        currently_joined[i1][i2] = val;
+        currently_joined[i2][i1] = val;
     }
 
-
-
-    internal void draw(PointableObject pointableObject, int level)
+    internal static void DeselectState()
     {
-        Debug.Log(pointableObject.name);
+        update = true;
+    }
+
+    internal static float GetYPosition(int i)
+    {
+        return i * 0.2F;
+    }
+
+    static bool IsLinked(string i1, string i2) 
+    {
+        string access1 = i1;
+        string access2 = i2;
+
+
+       if (!(currently_joined.ContainsKey(access1))) {
+            currently_joined[access1] = new Dictionary<string, bool>
+            {
+                [access2] = false
+            };
+        }
+       else if (!(currently_joined[access1].ContainsKey(access2))) {
+            currently_joined[access1][access2] = false;
+        }
+
+        if (!(currently_joined.ContainsKey(access2)))
+        {
+            currently_joined[access2] = new Dictionary<string, bool>
+            {
+                [access1] = false
+            };
+        }
+        else if (!(currently_joined[access2].ContainsKey(access1)))
+        {
+            currently_joined[access2][access1] = false;
+        }
+
+        bool output = currently_joined[access1][access2] && currently_joined[access2][access1];
+        currently_joined[access1][access2] = output;
+        currently_joined[access2][access1] = output;
+        return output;
+
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (prevPos == this.transform.position && !update)
+        {
+            return;
+        }
+        
+        update = false;
+        prevPos = this.transform.position;
+
+        draw_object[] l = FindObjectsOfType(typeof(draw_object)) as draw_object[];
+
+        foreach (var i in lines)
+        {
+            Destroy(i);
+        }
+
+        foreach (var item in l)
+        {
+            if (item != this)
+            {
+
+                float seperation = (this.transform.position - item.transform.position).magnitude;
+                Debug.Log(seperation);
+                if (seperation > 3) {
+                    SetLinkStatus(this.parentName, item.parentName, false);
+                }
+                else if (seperation < 0.5 || IsLinked(this.parentName, item.parentName))
+
+                {
+                    SetLinkStatus(this.parentName, item.parentName, true);
+
+                    var selected1 = this.GetComponentsInChildren<PointableObject>().Where(x => x.IsSelected()).ToArray();
+                    var selected2 = item.GetComponentsInChildren<PointableObject>().Where(x => x.IsSelected()).ToArray();
+
+                    if (selected1.Any() && selected2.Any())
+                    {
+                        foreach (var origin in selected1)
+                        {
+                            foreach (var destination in selected2)
+                            {
+                                Bezier b = new Bezier(this.transform, origin, destination);
+                                lines.Add(b.line);
+                                item.AddLines(b.line);
+                            }
+                        }
+                    }
+
+                }
+
+
+            }
+
+        }
+    }
+
+    private void stack_remove(draw_object drawObject)
+    {
+        if (positonStack.Contains(drawObject))
+        {
+            var index = positonStack.IndexOf(drawObject);
+            
+            for (int i = index+1; i<positonStack.Count; i++)
+            {
+                positonStack[i].transform.position -= new Vector3(0, 0, 0.2F);
+            }
+            positonStack.Remove(drawObject);
+        }
+    }
+
+    internal void Draw(PointableObject pointableObject, int level)
+    {
+        
         string file;
         mapRenderer map = new mapRenderer();
-
+        this.parentName = pointableObject.name;
 
         if (level == (int)mapRenderer.LEVEL.STATE_LEVEL)
         {
-             file = "C:\\Users\\Jesse\\Documents\\group3_vr\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.name + ".json";
+             file = "D:\\vr\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.name + ".json";
 
 
-            map.drawMultiple(this.gameObject, file, level, pointableObject);
+            map.drawMultiple(this.gameObject, reportGrabbed, file, level, pointableObject);
+            this.gameObject.transform.position += new Vector3(0, 0, GetYPosition(positonStack.Count + 1));
+            positonStack.Add(this);
 
         }
         else
         {
-            file = "C:\\Users\\Jesse\\Documents\\group3_vr\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.parentName + ".json";
-            foreach (var line in System.IO.File.ReadAllLines(file)) {
+            file = "D:\\vr\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.parentName + ".json";
+
+            foreach (var line in File.ReadAllLines(file)) {
                 if (line.Contains(pointableObject.name))
                 {
-                    map.drawSingular(this.gameObject, line, pointableObject.parentName, level, pointableObject);
+                    map.drawSingular(this.gameObject, reportGrabbed, line, pointableObject.parentName, level, pointableObject);
                     break;
                 }
             }
@@ -108,44 +239,9 @@ public class draw_object : MonoBehaviour
 
 
 
-        currentList.Add(this);
+
       
 
     }
 }
-
-
-    public class Node
-    {
-        public GameObject Value { get; set; }
-        public List<Node> Children { get; set; }
-        
-
-        public Node(GameObject data)
-        {
-            Value = data;
-            Children = new List<Node>();
-        }
-
-        public void addChild(GameObject data)
-        {
-            this.Children.Add(new Node(data));
-        }
-
-        public void delete()
-        {
-            try
-            {
-                GameObject.Destroy(Value);
-            }
-            catch
-            {
-                Children.ForEach(x => x.delete());
-                Children.Clear();
-            }
-                        
-
-        }
-}
-
 

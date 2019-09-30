@@ -4,13 +4,13 @@ using System;
 
 public class Buildings : MonoBehaviour
 {
-    public float volume { get; set; }
-    public float data { get; set; }
-    public GameObject gameObj { get; private set; } 
+    public float Volume { get; set; }
+    public float Data { get; set; }
+    public GameObject GameObj { get; } 
 
-    public GameObject capacityCube { get; set; }
+    public GameObject CapacityCube { get; set; }
 
-    public GameObject volumeCube { get; set; }
+    public GameObject VolumeCube { get; set; }
 
     public GameObject go;
 
@@ -37,6 +37,7 @@ public class Buildings : MonoBehaviour
         tooltipData.drawLineTo = objectToolTip.transform;
 
         tooltipData.displayText = "I'm a building";
+
 
 
     }
