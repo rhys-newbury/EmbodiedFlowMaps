@@ -1,7 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
+using System.Linq;
+using System.IO;
+using System.Text.RegularExpressions;
+using UnityEngine.EventSystems;
+using VRTK;
+using System;
+using UnityEngine.UI;
 using static mapRenderer;
 
 
@@ -12,7 +18,10 @@ public class County : PointableObject
     private static Quaternion Angle = new Quaternion(0, 0.6F, 0.8F, 0);
     private static Quaternion FinalAngle = new Quaternion(0, 0, 1, 0);
 
-    private List<GameObject> buildings = new List<GameObject>();
+
+
+
+    public List<Buildings> buildings = new List<Buildings>();
 
     public float speed = 0.05f;
 
@@ -21,6 +30,8 @@ public class County : PointableObject
     GameObject dataCube;
     GameObject dummyScaler;
 
+
+    // Variables for applying scale transformations
 
     private float startTime;
 
@@ -48,15 +59,32 @@ public class County : PointableObject
 
         createDataBuildings();
 
-        
 
+        // Rhys fixed this with his eyes
+
+        // Creates tooltips for the buildings. Displays volume and capacity information for each facility
+        
+        foreach(var building in buildings)
+        {
+            VRTK_ObjectTooltip tooltipData = building.tooltip;
+            tooltipData.displayText = "Capacity: " + building.volume.ToString() + "\nVolume: " + building.data.ToString();
+            Text[] backend = tooltipData.GetComponentsInChildren<Text>() as Text[];
+            backend.ToList().ForEach(x => x.text = "Capacity: " + building.volume.ToString() + "\nVolume: " + building.data.ToString());
+
+        }
     }
 
+
+
+    // Returns level for map. In this case this is the county level which is referenced as 2
     public override int getLevel()
     {
         return 2;
     }
 
+
+
+    // Animates the buildings to scale upwards once county is created
 
     public void Update()
     {
@@ -69,8 +97,6 @@ public class County : PointableObject
         {
 
             journeyLength = Vector3.Distance(building.capacityCube.transform.localScale, new Vector3(0.01f, 0.5f, 0.01f));
-
-
 
 
             float distCovered = (Time.time - startTime) * speed;
@@ -141,9 +167,10 @@ public class County : PointableObject
     }
 
 
+
+    // Creates building the capacity cube for the building objects. Assigns materials, position and parent.
     public void createBuildings()
     {
-
 
         startTime += 0.1f;
 
@@ -154,7 +181,7 @@ public class County : PointableObject
                 //building.cube.name = "CONTAINER";
                 //building.capacityCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 building.capacityCube.GetComponent<MeshRenderer>().material = Resources.Load("Materials/Glass", typeof(Material)) as Material;
-                building.capacityCube.transform.position = building.gameObj.transform.position;
+                building.capacityCube.transform.position = building.gameObj.transform.position + new Vector3(0f, 0.2f, 0f);
                 building.capacityCube.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
                 building.capacityCube.transform.SetParent(this.transform);
 
@@ -176,6 +203,8 @@ public class County : PointableObject
         }
 
 
+
+    // Creates the volume cube for the building objects. Sets material, position and parent
     public void createDataBuildings()
 
     {
@@ -186,14 +215,11 @@ public class County : PointableObject
         foreach (var building in l)
         {
 
-            
-
-
-            building.volumeCube.transform.position = building.gameObj.transform.position;
+            building.volumeCube.transform.position = building.gameObj.transform.position  + new Vector3(0f, 0.28f, 0f);
 
 
 
-           // building.volumeCube.transform.position += new Vector3(0f, -0.1f, 0f);
+            // building.volumeCube.transform.position += new Vector3(0f, -0.1f, 0f);
 
             building.volumeCube.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
 
@@ -204,6 +230,9 @@ public class County : PointableObject
 
 
             building.volumeCube.GetComponent<MeshRenderer>().material = Resources.Load("Materials/GlowingGreen", typeof(Material)) as Material;
+
+           
+            buildings.Add(building);
 
             //dummyScaler.transform.position = pos += new Vector3(0f, -0.16f, 0f);
 

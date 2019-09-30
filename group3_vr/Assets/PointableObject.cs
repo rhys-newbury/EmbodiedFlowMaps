@@ -176,7 +176,7 @@ public class PointableObject : MonoBehaviour
         return this.mesh;
     }
 
-    public void SetPositionAndRotation(Vector3 pos, Quaternion angle)
+    public void SetPositionAndRotation(Vector3 pos, Quaternion angle)    
     {
         this.transform.SetPositionAndRotation(pos, angle);
 
