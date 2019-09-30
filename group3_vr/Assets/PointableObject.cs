@@ -1,15 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-using System.IO;
-using System.Text.RegularExpressions;
-using UnityEngine.EventSystems;
 using VRTK;
 using System;
-using UnityEngine.UI;
 
-public class PointableObject : MonoBehaviour
+public class PointableObject : Pointable
 {
 
     private string name;
@@ -18,103 +13,174 @@ public class PointableObject : MonoBehaviour
     private GameObject go;
     private GameObject objToSpawn;
     private Vector3[] vertices3D;
+    public Action<bool> reportGrabbed;
     private Triangulator T;
     private Color color;
     private MeshRenderer meshRenderer;
-    private float[] bounds;
+    private float centerX, centerY;
 
     protected List<PointableObject> children = new List<PointableObject>();
 
-    private readonly float ANGLE = 1 / Mathf.Sqrt(2);
 
     private float centroidX;
 
     private float centroidY;
-    private float ZShift;
+    private float zShift;
 
-    private bool selected = false;
+    private bool selected;
 
     public Mesh mesh;
     internal PointableObject parent;
+    public Dictionary<string, PointableObject> siblings = new Dictionary<string, PointableObject>();
 
     public void Start()
     {
 
     }
 
-    public string getName()
+    public virtual void GetInternalFlows(PointableObject origin)
+    {
+
+    }
+
+    public override void OnThrow()
+    {
+
+        int level = -1;
+        //On Throw Delete each item in children
+        //Deselect the parent
+        foreach (var item in this.GetComponentsInChildren<PointableObject>())
+        {
+            item.Delete();
+            item.parent.Deselect();
+            level = level == -1 ? item.GetLevel() : level;
+        }
+        //Do not destroy country
+        if (level > 0) Destroy(this);
+    }
+
+    public override void OnUpdateTouchPadPressed(float touchpadAngle, Transform transformDirection)
+    {
+        //Left/Right -> Rotate
+        //Up/Down -> Back and forth in direction of pointer.
+        if (touchpadAngle< 72 || touchpadAngle> 288)
+        {
+            this.transform.position = this.transform.position + transformDirection.TransformDirection(new Vector3(0, 0, 0.01F));
+        }
+        else if (touchpadAngle< 144)
+        {
+            this.transform.Rotate(new Vector3(0, -1, 0), Space.Self);
+        }
+        else if (touchpadAngle< 216)
+        {
+            this.transform.position = this.transform.position + transformDirection.TransformDirection(new Vector3(0, 0, -0.01F));
+        }
+        else if (touchpadAngle< 288)
+        {
+            this.transform.Rotate(new Vector3(0, 1, 0), Space.Self);
+        }
+
+    }
+
+    public override void OnGripPressed()
+    {
+        this.reportGrabbed(true);
+    }
+
+    public override void OnTriggerPressed()
+    {
+
+        if (!this.IsSelected())
+        {
+
+            //Create the gameObject for the map and then Draw it.
+            GameObject mapGameObject = new GameObject();
+            draw_object main = mapGameObject.AddComponent(typeof(draw_object)) as draw_object;
+            main?.Draw(this, this.GetLevel() + 1);
+
+            this.selected = true;
+            CreateLine();
+            this.GetInternalFlows(this);
+        }
+        else
+        {
+            //On Deselect Remove it from the current list and Delete the object and its children 
+            this.selected = false;
+            DestoryLine();
+
+
+            this.DeleteChildren();
+        }
+
+    }
+
+
+    public virtual void RemoveLines()
+    {
+
+    }
+
+    public virtual void AddLine(GameObject line)
+    {
+
+    }
+
+    public string GetName()
     {
         return this.name;
     }
 
-    public virtual int getLevel() {
+    public virtual int GetLevel() {
         return 0;
     }
 
 
-    public void onPointEnter(Action<string> change_text)
+    public override void OnPointerEnter(Action<string> changeText)
     {
         this.color.a = 0.3F;
         this.meshRenderer.material.color = this.color;
-        change_text(this.getName());
+        changeText(this.GetName());
         this.go.SetActive(true);
     }
    
 
-    public void onPointLeave()
+    public override void OnPointerLeave()
     {
         this.color.a = 1F;
         this.meshRenderer.material.color = this.color;
         this.go.SetActive(false);
     }
 
-    internal bool onClick()
-    {
-        this.selected = !this.selected;
-
-        if (this.selected)
-        {
-            createLine();
-            return true;
-        }
-        else
-        {
-            destoryLine();
-            return false;
-        }
-
-    }
-
-    public bool isSelected()
+    public bool IsSelected()
     {
         return this.selected;
     }
 
-    private void drawObject()
+    private void DrawObject()
     {
 
         List<Vector3> verticesList = new List<Vector3>(vertices3D);
         List<Vector3> verticesExtrudedList = new List<Vector3>();
         List<int> indices = new List<int>();
 
-        var originalVertexCount = vertices3D.Count();
+        var originalVertexCount = vertices3D.Length;
 
         for (int i = 0; i < verticesList.Count; i++)
         {
             verticesExtrudedList.Add(new Vector3(verticesList[i].x, verticesList[i].y, 0.1F));
         }
 
-        //add the extruded parts to the end of verteceslist
+        //add the extruded parts to the end of vertices list
         verticesList.AddRange(verticesExtrudedList);
 
         for (int i = 0; i < originalVertexCount; i++)
         {
 
-            int N = originalVertexCount;
+            int n = originalVertexCount;
             int i1 = i;
-            int i2 = (i1 + 1) % N;
-            int i3 = i1 + N;
-            int i4 = i2 + N;
+            int i2 = (i1 + 1) % n;
+            int i3 = i1 + n;
+            int i4 = i2 + n;
 
             indices.Add(i1);
             indices.Add(i3);
@@ -131,20 +197,17 @@ public class PointableObject : MonoBehaviour
         indices2.AddRange(indices);
 
         //Mesh mesh = new Mesh();
-        this.mesh = new Mesh();
-
-        this.mesh.vertices = verticesList.ToArray();
-        this.mesh.triangles = indices2.ToArray();
+        this.mesh = new Mesh
+        {
+            vertices = verticesList.ToArray(),
+            triangles = indices2.ToArray()
+        };
 
         this.mesh.RecalculateNormals();
         this.mesh.RecalculateBounds();
 
         //Color meshColor = UnityEngine.Random.ColorHSV();
         Color meshColor = dataAccessor.getColour(dataAccessor.getData(this.name));
-
-        var colors = Enumerable.Range(0, verticesList.Count)
-         .Select(i => meshColor)
-         .ToArray();
 
         // Set up game object with mesh;
         meshRenderer = objToSpawn.AddComponent<MeshRenderer>();
@@ -155,33 +218,22 @@ public class PointableObject : MonoBehaviour
         var filter = objToSpawn.AddComponent<MeshFilter>();
         filter.mesh = this.mesh;
 
-        var collider = objToSpawn.AddComponent<MeshCollider>();
-        collider.sharedMesh = this.mesh;
+        var mapcollider = objToSpawn.AddComponent<MeshCollider>();
+        mapcollider.sharedMesh = this.mesh;
 
     }
 
-    internal void deselect()
+    internal void Deselect()
     {
         this.selected = false;
-        destoryLine();
-    }
-
-    internal virtual void destory()
-    {
-        GameObject.Destroy(this.wrapper);
-    }
-
-    public Mesh getMesh()
-    {
-        return this.mesh;
+        DestoryLine();
     }
 
     public void SetPositionAndRotation(Vector3 pos, Quaternion angle)
     {
         this.transform.SetPositionAndRotation(pos, angle);
 
-        float centerX = (this.bounds[0] + this.bounds[2]) / 2F;
-        float centerY = (this.bounds[1] + this.bounds[3]) / 2F;
+
 
         this.wrapper.transform.SetPositionAndRotation(this.transform.TransformPoint(new Vector3(centerX, centerY, -0.05F)), new Quaternion(0, 0, 0, 1));
 
@@ -189,21 +241,22 @@ public class PointableObject : MonoBehaviour
 
     }
 
-    internal void constructor(Vector2[] points, string name, GameObject objToSpawn, float[] bounds, string parentName)
+    internal void Constructor(Vector2[] points, string name, GameObject objToSpawn, float[] bounds, string parentName, Action<bool> reportGrabbed)
     {
         T = new Triangulator(points);
-        vertices3D = System.Array.ConvertAll<Vector2, Vector3>(points, v => v);
-   
-   
+        vertices3D = Array.ConvertAll<Vector2, Vector3>(points, v => v);
+
+        this.reportGrabbed = reportGrabbed;
         this.name = name;
         this.parentName = parentName;
-        this.bounds = bounds;
+        this.centerX = (bounds[0] + bounds[2]) / 2F;
+        this.centerY = (bounds[1] + bounds[3]) / 2F;
 
         this.wrapper = new GameObject();
 
         this.go = Instantiate(Resources.Load("ObjectTooltip")) as GameObject;
         go.transform.parent = this.wrapper.transform;
-        VRTK_ObjectTooltip tooltip = go.GetComponent<VRTK_ObjectTooltip>() as VRTK_ObjectTooltip;
+        VRTK_ObjectTooltip tooltip = go.GetComponent<VRTK_ObjectTooltip>();
         tooltip.alwaysFaceHeadset = true;
         tooltip.displayText = this.name;
         tooltip.alwaysFaceHeadset = true;
@@ -213,29 +266,35 @@ public class PointableObject : MonoBehaviour
         this.objToSpawn = objToSpawn;
         this.objToSpawn.name = name;
         
-        this.drawObject();
+        this.DrawObject();
+
+        this.AddToList(parentName, name);
+    }
+
+   internal virtual void AddToList(string parentName, string name)
+    {
+
     }
 
 
-
-    public void setParent(Transform parent)
+    public void SetParent(Transform parent)
     {
         this.wrapper.transform.SetParent(parent);
     }
 
-    internal void deleteChildren()
+    internal void DeleteChildren()
     {
         if (this.children.Count > 0)
         {
             var filtered = this.children.Where(x => x != null).ToList();
             var parent = filtered[0].transform.parent.transform.parent.gameObject;
-            filtered.ForEach(x => x.delete());
-            GameObject.Destroy(parent);
+            filtered.ForEach(x => x.Delete());
+            Destroy(parent);
 
         }
     }
 
-    public void createLine()
+    public void CreateLine()
     {
         var line = objToSpawn.AddComponent<LineRenderer>();
         line.useWorldSpace = false;
@@ -243,9 +302,9 @@ public class PointableObject : MonoBehaviour
         tempVertices3D.Add(vertices3D[0]);
         //Chuck her in front of the country so its visible
         tempVertices3D = tempVertices3D.Select(x => new Vector3(x.x, x.y, -0.01F)).ToList();
-        var FinaltempVertices3D = tempVertices3D.ToArray();
-        line.positionCount = FinaltempVertices3D.Count();
-        line.SetPositions(FinaltempVertices3D);
+        var finaltempVertices3D = tempVertices3D.ToArray();
+        line.positionCount = finaltempVertices3D.Length;
+        line.SetPositions(finaltempVertices3D);
 
         line.material = new Material(Shader.Find("Sprites/Default"));
         line.startColor = Color.red;
@@ -256,166 +315,63 @@ public class PointableObject : MonoBehaviour
 
     }
 
-    public virtual Quaternion getAngle()
+    public virtual Quaternion GetAngle()
     {
         return new Quaternion(0, 1, 0, 0);
     }
 
-    public virtual Vector3 getTranslation(float x, float y)
+    public virtual Vector3 GetTranslation(float x, float y)
     {
         return new Vector3(x, -y, 0);
     }
 
-    public virtual Quaternion getFinalAngle()
+    public virtual Quaternion GetFinalAngle()
     {
         return new Quaternion(0,0,0,1);
     }
 
 
 
-    public void destoryLine()
+    public void DestoryLine()
     {
        
         this.selected = false;
+        draw_object.update = true;
+        this.RemoveLines();
         var line = objToSpawn.GetComponent<LineRenderer>();
+        draw_object.DeselectState();
         Destroy(line);
 
 
     }
 
-    internal void addChild(PointableObject gameObject)
+    internal void AddChild(PointableObject gameObject)
     {
         this.children.Add(gameObject);
             
     }
 
-    internal virtual void delete()
+    internal virtual void Delete()
     {
-            this.children.ForEach(x => x.delete());
+            this.children.ForEach(x => x.Delete());
             this.children.Clear();
-            GameObject.Destroy(this.gameObject);
-            GameObject.Destroy(this.wrapper);
+
+        try
+        {
+            Destroy(this.gameObject);
+            Destroy(this.wrapper);
+        }
+        catch { }
+    }
+
+    internal void SetSiblings(List<PointableObject> children)
+    {
+
+        foreach (var sibling in children)
+        {
+            this.siblings[sibling.name] = sibling;
+        }
     }
 }
 
 
-
-
-
-public class Triangulator
-{
-    protected List<Vector2> m_points = new List<Vector2>();
-
-    public Triangulator(Vector2[] points)
-    {
-        m_points = new List<Vector2>(points);
-    }
-
-    public int[] Triangulate()
-    {
-        List<int> indices = new List<int>();
-
-        int n = m_points.Count;
-        if (n < 3)
-            return indices.ToArray();
-
-        int[] V = new int[n];
-        if (Area() > 0)
-        {
-            for (int v = 0; v < n; v++)
-                V[v] = v;
-        }
-        else
-        {
-            for (int v = 0; v < n; v++)
-                V[v] = (n - 1) - v;
-        }
-
-        int nv = n;
-        int count = 2 * nv;
-        for (int v = nv - 1; nv > 2;)
-        {
-            if ((count--) <= 0)
-                return indices.ToArray();
-
-            int u = v;
-            if (nv <= u)
-                u = 0;
-            v = u + 1;
-            if (nv <= v)
-                v = 0;
-            int w = v + 1;
-            if (nv <= w)
-                w = 0;
-
-            if (Snip(u, v, w, nv, V))
-            {
-                int a, b, c, s, t;
-                a = V[u];
-                b = V[v];
-                c = V[w];
-                indices.Add(a);
-                indices.Add(b);
-                indices.Add(c);
-                for (s = v, t = v + 1; t < nv; s++, t++)
-                    V[s] = V[t];
-                nv--;
-                count = 2 * nv;
-            }
-        }
-
-        indices.Reverse();
-        return indices.ToArray();
-    }
-
-    private float Area()
-    {
-        int n = m_points.Count;
-        float A = 0.0f;
-        for (int p = n - 1, q = 0; q < n; p = q++)
-        {
-            Vector2 pval = m_points[p];
-            Vector2 qval = m_points[q];
-            A += pval.x * qval.y - qval.x * pval.y;
-        }
-        return (A * 0.5f);
-    }
-
-    private bool Snip(int u, int v, int w, int n, int[] V)
-    {
-        int p;
-        Vector2 A = m_points[V[u]];
-        Vector2 B = m_points[V[v]];
-        Vector2 C = m_points[V[w]];
-        if (Mathf.Epsilon > (((B.x - A.x) * (C.y - A.y)) - ((B.y - A.y) * (C.x - A.x))))
-            return false;
-        for (p = 0; p < n; p++)
-        {
-            if ((p == u) || (p == v) || (p == w))
-                continue;
-            Vector2 P = m_points[V[p]];
-            if (InsideTriangle(A, B, C, P))
-                return false;
-        }
-        return true;
-    }
-
-    private bool InsideTriangle(Vector2 A, Vector2 B, Vector2 C, Vector2 P)
-    {
-        float ax, ay, bx, by, cx, cy, apx, apy, bpx, bpy, cpx, cpy;
-        float cCROSSap, bCROSScp, aCROSSbp;
-
-        ax = C.x - B.x; ay = C.y - B.y;
-        bx = A.x - C.x; by = A.y - C.y;
-        cx = B.x - A.x; cy = B.y - A.y;
-        apx = P.x - A.x; apy = P.y - A.y;
-        bpx = P.x - B.x; bpy = P.y - B.y;
-        cpx = P.x - C.x; cpy = P.y - C.y;
-
-        aCROSSbp = ax * bpy - ay * bpx;
-        cCROSSap = cx * apy - cy * apx;
-        bCROSScp = bx * cpy - by * cpx;
-
-        return ((aCROSSbp >= 0.0f) && (bCROSScp >= 0.0f) && (cCROSSap >= 0.0f));
-    }
-}
