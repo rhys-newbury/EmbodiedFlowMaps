@@ -16,29 +16,46 @@ public class Buildings : MonoBehaviour
 
     public VRTK_ObjectTooltip tooltip;
 
-    
-
-
+   
 
     public Buildings()
     {
+
         gameObj = new GameObject();
 
         capacityCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
         volumeCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-
         GameObject objectToolTip = MonoBehaviour.Instantiate(Resources.Load("ObjectTooltip")) as GameObject;
-        objectToolTip.transform.parent = (capacityCube.transform);
-        objectToolTip.transform.SetPositionAndRotation(capacityCube.transform.position, capacityCube.transform.rotation);
-        //objectToolTip.transform.position = new Vector3(objectToolTip.transform.position.x, 0.1f, objectToolTip.transform.position.z);
 
-        VRTK_ObjectTooltip tooltipData = objectToolTip.GetComponent<VRTK_ObjectTooltip>() as VRTK_ObjectTooltip;
-        tooltipData.drawLineFrom = objectToolTip.transform;
-        tooltipData.drawLineTo = objectToolTip.transform;
 
-        tooltipData.displayText = "I'm a building";
+        tooltip = objectToolTip.GetComponent<VRTK_ObjectTooltip>() as VRTK_ObjectTooltip;
+        tooltip.transform.SetParent((gameObj.transform));
+
+        tooltip.transform.SetPositionAndRotation(capacityCube.transform.position, capacityCube.transform.rotation);
+
+
+        tooltip.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+
+        tooltip.transform.localPosition -= new Vector3(0f, 0f, 0.2f);
+
+        tooltip.transform.localEulerAngles += new Vector3(-70, 0, 0); 
+
+        //tooltipData.alwaysFaceHeadset = true;
+        tooltip.drawLineFrom = capacityCube.transform;
+        tooltip.drawLineTo = capacityCube.transform;
+
+
+
+        tooltip.displayText = "I'm a building";
+
+
 
 
 
     }
+
+
+
+
+
 }

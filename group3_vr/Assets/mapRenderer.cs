@@ -48,6 +48,7 @@ public class mapRenderer
             _buildingData = new Dictionary<String, Dictionary<String, List<List<String>>>>();
 
             StreamReader inp_stm = new StreamReader("D:\\vr\\group3_vr\\data_processing_scripts\\building_data.csv");
+
                 
             while (!inp_stm.EndOfStream) {
 
@@ -241,7 +242,6 @@ public class mapRenderer
 
 
 
-        var maximumY = -100F;
 
         foreach (var child in children)
         {

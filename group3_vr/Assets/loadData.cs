@@ -18,6 +18,7 @@ public static class dataAccessor
 
         StreamReader inp_stm = new StreamReader("D:\\vr\\group3_vr\\data_processing_scripts\\inc.csv");
 
+
         while (!inp_stm.EndOfStream)
         {
             string inp_ln = inp_stm.ReadLine();
@@ -35,6 +36,7 @@ public static class dataAccessor
         }
 
         StreamReader inp_stm2 = new StreamReader("D:\\vr\\group3_vr\\data_processing_scripts\\flow.csv");
+
 
         while (!inp_stm2.EndOfStream)
         {
