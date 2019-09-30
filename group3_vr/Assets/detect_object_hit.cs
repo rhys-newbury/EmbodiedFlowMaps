@@ -213,7 +213,10 @@ public class detect_object_hit : MonoBehaviour
             helpTooltip.ToggleTips(false);
             helpTooltipState = false;
         }
+
         catch { }
+
+
     }
 
 }

@@ -209,7 +209,7 @@ public class PointableObject : Pointable
         DestoryLine();
     }
 
-    public void SetPositionAndRotation(Vector3 pos, Quaternion angle)
+    public void SetPositionAndRotation(Vector3 pos, Quaternion angle)    
     {
         this.transform.SetPositionAndRotation(pos, angle);
 
