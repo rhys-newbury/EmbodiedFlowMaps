@@ -22,14 +22,14 @@ public class Buildings : MonoBehaviour
 
     public Buildings()
     {
-        gameObj = new GameObject();
+        GameObj = new GameObject();
 
-        capacityCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        volumeCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        CapacityCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        VolumeCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
 
         GameObject objectToolTip = MonoBehaviour.Instantiate(Resources.Load("ObjectTooltip")) as GameObject;
-        objectToolTip.transform.parent = (capacityCube.transform);
-        objectToolTip.transform.SetPositionAndRotation(capacityCube.transform.position, capacityCube.transform.rotation);
+        objectToolTip.transform.parent = (CapacityCube.transform);
+        objectToolTip.transform.SetPositionAndRotation(CapacityCube.transform.position, CapacityCube.transform.rotation);
         //objectToolTip.transform.position = new Vector3(objectToolTip.transform.position.x, 0.1f, objectToolTip.transform.position.z);
 
         VRTK_ObjectTooltip tooltipData = objectToolTip.GetComponent<VRTK_ObjectTooltip>() as VRTK_ObjectTooltip;

@@ -73,12 +73,35 @@ public class detect_object_hit : MonoBehaviour
 
     }
 
+    public void OnUpdateTouchPadPressed(float touchpadAngle, Transform transformDirection, GameObject obj)
+    {
+        //Left/Right -> Rotate
+        //Up/Down -> Back and forth in direction of pointer.
+        if (touchpadAngle < 72 || touchpadAngle > 288)
+        {
+            obj.transform.position = obj.transform.position + transformDirection.TransformDirection(new Vector3(0, 0, 0.01F));
+        }
+        else if (touchpadAngle < 144)
+        {
+            obj.transform.Rotate(new Vector3(0, -1, 0), Space.Self);
+        }
+        else if (touchpadAngle < 216)
+        {
+            obj.transform.position = obj.transform.position + transformDirection.TransformDirection(new Vector3(0, 0, -0.01F));
+        }
+        else if (touchpadAngle < 288)
+        {
+            obj.transform.Rotate(new Vector3(0, 1, 0), Space.Self);
+        }
+
+    }
+
 
     void TouchPadMove(GameObject obj)
     {
-        currentObject = obj.GetComponent("Pointable") as Pointable;
-        currentObject?.OnUpdateTouchPadPressed(touchpadAngle, pointer.transform.parent.transform);
+        OnUpdateTouchPadPressed(touchpadAngle, pointer.transform.parent.transform, obj);
     }
+ 
 
     void Awake()
     {
@@ -99,8 +122,8 @@ public class detect_object_hit : MonoBehaviour
 
         controller.GripClicked += Controller_GripClicked;
 
-        help_tooltip = gameObject.transform.GetChild(0).GetComponent<VRTK_ControllerTooltips>();
-        help_tooltip.ToggleTips(false);
+        helpTooltip = gameObject.transform.GetChild(0).GetComponent<VRTK_ControllerTooltips>();
+        helpTooltip.ToggleTips(false);
 
 
         dataToolTip = gameObject.transform.GetChild(1).GetComponent<VRTK_ControllerTooltips>();
@@ -118,9 +141,9 @@ public class detect_object_hit : MonoBehaviour
         // Report that the current object is being grabbed. This can tell the stack it is being removed
         currentObject?.OnGripPressed();
         selectingObject = false;
-        currentObject?.onPointLeave();
+        currentObject?.OnPointerLeave();
         currentObject = null;
-        data_tooltip.ToggleTips(false);
+        dataToolTip.ToggleTips(false);
     }
 
 

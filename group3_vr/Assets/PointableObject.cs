@@ -60,28 +60,7 @@ public class PointableObject : Pointable
     }
 
 
-    public override void OnUpdateTouchPadPressed(float touchpadAngle, Transform transformDirection)
-    {
-        //Left/Right -> Rotate
-        //Up/Down -> Back and forth in direction of pointer.
-        if (touchpadAngle< 72 || touchpadAngle> 288)
-        {
-            this.transform.position = this.transform.position + transformDirection.TransformDirection(new Vector3(0, 0, 0.01F));
-        }
-        else if (touchpadAngle< 144)
-        {
-            this.transform.Rotate(new Vector3(0, -1, 0), Space.Self);
-        }
-        else if (touchpadAngle< 216)
-        {
-            this.transform.position = this.transform.position + transformDirection.TransformDirection(new Vector3(0, 0, -0.01F));
-        }
-        else if (touchpadAngle< 288)
-        {
-            this.transform.Rotate(new Vector3(0, 1, 0), Space.Self);
-        }
-
-    }
+ 
 
     public override void OnGripPressed()
     {

@@ -100,14 +100,14 @@ public class County : PointableObject
         return new Vector3(x, 0.28F*y, -0.96F*y);
     }
 
-    public override void onPointLeave()
+    public override void OnPointerLeave()
     {
         this.go.SetActive(false);
     }
 
-    public override void onPointEnter(Action<string> change_text)
+    public override void OnPointerEnter(Action<string> change_text)
     {
-        change_text(this.getName());
+        change_text(this.GetName());
         this.go.SetActive(true);
 
     }

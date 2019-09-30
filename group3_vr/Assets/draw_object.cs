@@ -5,6 +5,8 @@ using System.IO;
 using VRTK;
 using System;
 
+
+
 public class draw_object : MonoBehaviour
 {
 
@@ -23,6 +25,16 @@ public class draw_object : MonoBehaviour
     private bool moved;
 
     private Action<bool> reportGrabbed;
+
+    public Animation anim;
+    AnimationClip animationClip;
+
+    public bool animationStarted = false;
+
+    public bool animationFinished = true;
+
+    public Vector3 startPos;
+
 
     
     private void Start()
@@ -50,12 +62,21 @@ public class draw_object : MonoBehaviour
         scaleAction.lockAxis = new Vector3State(false, false, true);
         scaleAction.uniformScaling = true;
 
+        anim = gameObject.AddComponent<Animation>();
+        AnimationCurve translateX = AnimationCurve.EaseInOut(0.0f, 0.0f, 0.5f, -0.05f);
+        animationClip = new AnimationClip();
+        animationClip.legacy = true;
+        animationClip.SetCurve("", typeof(Transform), "localPosition.z", translateX);
+        anim.AddClip(animationClip, "test");
+        Debug.Log(anim.GetClipCount());
 
 
         this.reportGrabbed = delegate (bool x)
         {
             if (!(this.moved))
             {
+                this.transform.localScale = new Vector3(1F, 1F, 1F);
+
                 this.stack_remove(this);
                 this.moved = true;
             }
@@ -66,7 +87,7 @@ public class draw_object : MonoBehaviour
         {
             dataAccessor.load();
 
-            string file = "D:\\vr\\group3_vr\\mapGeoJSON\\America.txt";
+            string file = "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\America.txt";
             this.parentName = "America";
 
             mapRenderer map = new mapRenderer();
@@ -97,7 +118,7 @@ public class draw_object : MonoBehaviour
 
     internal static float GetYPosition(int i)
     {
-        return i * 0.2F;
+        return i * 0.05F;
     }
 
     static bool IsLinked(string i1, string i2) 
@@ -200,22 +221,71 @@ public class draw_object : MonoBehaviour
             
             for (int i = index+1; i<positonStack.Count; i++)
             {
-                positonStack[i].transform.position -= new Vector3(0, 0, 0.2F);
+                if (positonStack.Count < 10)
+                {
+                    positonStack[i].animationStarted = true;
+                    positonStack[i].startPos = positonStack[i].transform.localPosition;
+                    positonStack[i].anim.Play("test");
+                }
+                else
+                {
+                    positonStack[i].transform.position -= new Vector3(0, 0, 0.05F);
+                }
             }
+
             positonStack.Remove(drawObject);
         }
     }
 
+    private bool animWasPlaying = false;
+    private int resetCount = 0;
+    private void LateUpdate()
+    {
+
+        if (anim.isPlaying || animWasPlaying)
+        {
+            animWasPlaying = true;
+            transform.localPosition += startPos;
+            if (anim.isPlaying)
+            {
+                resetCount = 0;
+            }
+            else
+            {
+                resetCount += 1;
+            }
+
+        }
+
+
+        if (resetCount >= 1)
+        {
+            animWasPlaying = false;
+        }
+    }
+
+
     internal void Draw(PointableObject pointableObject, int level)
     {
-        
+
+        this.reportGrabbed = delegate (bool x)
+        {
+            if (!(this.moved))
+            {
+                this.transform.localScale = new Vector3(1F, 1F, 1F);
+
+                this.stack_remove(this);
+                this.moved = true;
+            }
+        };
+
         string file;
         mapRenderer map = new mapRenderer();
         this.parentName = pointableObject.name;
 
         if (level == (int)mapRenderer.LEVEL.STATE_LEVEL)
         {
-             file = "D:\\vr\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.name + ".json";
+             file = "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.name + ".json";
 
 
             map.drawMultiple(this.gameObject, reportGrabbed, file, level, pointableObject);
@@ -225,7 +295,7 @@ public class draw_object : MonoBehaviour
         }
         else
         {
-            file = "D:\\vr\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.parentName + ".json";
+            file = "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.parentName + ".json";
 
             foreach (var line in File.ReadAllLines(file)) {
                 if (line.Contains(pointableObject.name))
@@ -236,6 +306,8 @@ public class draw_object : MonoBehaviour
             }
 
         }
+
+        this.transform.localScale = new Vector3(0.25F, 0.25F, 0.25F);
 
 
 
