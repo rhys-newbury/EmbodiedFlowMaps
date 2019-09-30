@@ -41,18 +41,19 @@ public class mapRenderer
         COUNTY_LEVEL
     }
 
+    public static bool checkForBuildings(string County, string State)
+    {
+        return _buildingData.ContainsKey(State) && _buildingData[State].ContainsKey(County);
+    }
+
     public mapRenderer() {
         //Only do this once.
         if (_buildingData == null) {
             //Create a dictionary.
             _buildingData = new Dictionary<String, Dictionary<String, List<List<String>>>>();
 
-<<<<<<< HEAD
             StreamReader inp_stm = new StreamReader("C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\data_processing_scripts\\building_data.csv");
-=======
-            StreamReader inp_stm = new StreamReader("D:\\vr\\group3_vr\\data_processing_scripts\\building_data.csv");
 
->>>>>>> 590436d180d475d6cba8bb64669d48fe302a0bb9
                 
             while (!inp_stm.EndOfStream) {
 
@@ -241,12 +242,14 @@ public class mapRenderer
 
                 }
 
+
+
             }
         }
 
 
 
-
+        float maximumY = 0;
         foreach (var child in children)
         {
             child.SetPositionAndRotation(child.GetTranslation(TmpcenterX, TmpcenterY), child.GetAngle());

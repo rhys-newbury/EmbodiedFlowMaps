@@ -68,9 +68,9 @@ public class County : PointableObject
         foreach(var building in buildings)
         {
             VRTK_ObjectTooltip tooltipData = building.tooltip;
-            tooltipData.displayText = "Capacity: " + building.volume.ToString() + "\nVolume: " + building.data.ToString();
+            tooltipData.displayText = "Capacity: " + building.Volume.ToString() + "\nVolume: " + building.Data.ToString();
             Text[] backend = tooltipData.GetComponentsInChildren<Text>() as Text[];
-            backend.ToList().ForEach(x => x.text = "Capacity: " + building.volume.ToString() + "\nVolume: " + building.data.ToString());
+            backend.ToList().ForEach(x => x.text = "Capacity: " + building.Volume.ToString() + "\nVolume: " + building.Data.ToString());
 
         }
     }
@@ -102,7 +102,7 @@ public class County : PointableObject
 
             building.CapacityCube.transform.localScale = Vector3.Lerp(building.CapacityCube.transform.localScale, new Vector3(0.01f, 0.5f + building.Volume / 1000, 0.01f), fracJourney);
 
-            building.VolumeCube.transform.localScale = Vector3.Lerp(building.CapacityCube.transform.localScale, new Vector3(0.01f, 0.2f + building.Data / 1000, 0.01f), 0.5f);
+            building.VolumeCube.transform.localScale = Vector3.Lerp(building.CapacityCube.transform.localScale, new Vector3(0.01f, building.Data / 1000, 0.01f), 0.5f);
 
         }
 
@@ -152,10 +152,10 @@ public class County : PointableObject
             {
 
 
-                building.CapacityCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                //building.CapacityCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 building.CapacityCube.GetComponent<MeshRenderer>().material = Resources.Load("Materials/Glass", typeof(Material)) as Material;
-                building.CapacityCube.transform.position = building.GameObj.transform.position + new Vector3(0f, 0.2f, 0f);
-                building.CapacityCube.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
+            building.CapacityCube.transform.position = building.GameObj.transform.position + new Vector3(0f, 0.08f, 0f);
+            building.CapacityCube.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
                 building.CapacityCube.transform.SetParent(this.transform);
 
 
@@ -174,11 +174,11 @@ public class County : PointableObject
         foreach (var building in l)
         {
 
-            
-            building.VolumeCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+
+            //building.VolumeCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
 
 
-            building.VolumeCube.transform.position = building.GameObj.transform.position + new Vector3(0f, 0.28f, 0f);
+            building.VolumeCube.transform.position = building.GameObj.transform.position + new Vector3(0f, 0.05f, 0f);
 
 
             // building.volumeCube.transform.position += new Vector3(0f, -0.1f, 0f);

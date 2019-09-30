@@ -32,9 +32,9 @@ public class Buildings : MonoBehaviour
 
 
         tooltip = objectToolTip.GetComponent<VRTK_ObjectTooltip>() as VRTK_ObjectTooltip;
-        tooltip.transform.SetParent((gameObj.transform));
+        tooltip.transform.SetParent((GameObj.transform));
 
-        tooltip.transform.SetPositionAndRotation(capacityCube.transform.position, capacityCube.transform.rotation);
+        tooltip.transform.SetPositionAndRotation(CapacityCube.transform.position, CapacityCube.transform.rotation);
 
 
         tooltip.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
@@ -44,8 +44,8 @@ public class Buildings : MonoBehaviour
         tooltip.transform.localEulerAngles += new Vector3(-70, 0, 0); 
 
         //tooltipData.alwaysFaceHeadset = true;
-        tooltip.drawLineFrom = capacityCube.transform;
-        tooltip.drawLineTo = capacityCube.transform;
+        tooltip.drawLineFrom = CapacityCube.transform;
+        tooltip.drawLineTo = CapacityCube.transform;
 
 
 

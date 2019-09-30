@@ -296,15 +296,18 @@ public class draw_object : MonoBehaviour
         else
         {
             file = "C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.parentName + ".json";
+            if (mapRenderer.checkForBuildings(pointableObject.name, pointableObject.parentName))
+            {
 
-            foreach (var line in File.ReadAllLines(file)) {
-                if (line.Contains(pointableObject.name))
+                foreach (var line in File.ReadAllLines(file))
                 {
-                    map.drawSingular(this.gameObject, reportGrabbed, line, pointableObject.parentName, level, pointableObject);
-                    break;
+                    if (line.Contains(pointableObject.name))
+                    {
+                        map.drawSingular(this.gameObject, reportGrabbed, line, pointableObject.parentName, level, pointableObject);
+                        break;
+                    }
                 }
             }
-
         }
 
         this.transform.localScale = new Vector3(0.25F, 0.25F, 0.25F);
