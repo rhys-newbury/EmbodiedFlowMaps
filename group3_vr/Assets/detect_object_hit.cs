@@ -118,10 +118,8 @@ public class detect_object_hit : MonoBehaviour
         controller.TouchpadReleased += Controller_TouchpadReleased;
         controller.TouchpadPressed += Controller_TouchpadPressed;
         controller.GripClicked += Controller_GripClicked;
-
-
-        controller.GripClicked += Controller_GripClicked;
-
+        
+        
         helpTooltip = gameObject.transform.GetChild(0).GetComponent<VRTK_ControllerTooltips>();
         helpTooltip.ToggleTips(false);
 
@@ -136,6 +134,8 @@ public class detect_object_hit : MonoBehaviour
         };
                       
     }
+
+
 
     private void Controller_GripClicked(object sender, ControllerInteractionEventArgs e) {
         // Report that the current object is being grabbed. This can tell the stack it is being removed

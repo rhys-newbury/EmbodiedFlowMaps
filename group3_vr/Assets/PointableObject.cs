@@ -187,7 +187,7 @@ public class PointableObject : Pointable
         this.mesh.RecalculateBounds();
 
         //Color meshColor = UnityEngine.Random.ColorHSV();
-        Color meshColor = dataAccessor.getColour(dataAccessor.getData(this.name));
+        Color meshColor = dataAccessor.getColour(dataAccessor.getData(this.name, this.parentName));
 
         // Set up game object with mesh;
         meshRenderer = objToSpawn.AddComponent<MeshRenderer>();

@@ -13,29 +13,55 @@ public static class dataAccessor
 
     private static Dictionary<string, float> stateIncoming = new Dictionary<string, float>();
 
+    private static Dictionary<string,  Dictionary<string, float>> countyIncoming = new Dictionary<string, Dictionary<string, float>>();
+
+
+
     public static void load()
     {
 
-        StreamReader inp_stm = new StreamReader("C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\data_processing_scripts\\inc.csv");
+        StreamReader inp_stm = new StreamReader("D:\\vr\\group3_vr\\data_processing_scripts\\inc.csv");
+
+        countyIncoming.Add("America", new Dictionary<string, float>());
+
 
 
         while (!inp_stm.EndOfStream)
         {
             string inp_ln = inp_stm.ReadLine();
 
-
-
             string[] data = inp_ln.Split(',');
             string state = codeToState(data[0]);
             float inc_data = float.Parse(data[1]);
 
-            stateIncoming.Add(state, inc_data);
-
+            countyIncoming["America"].Add(state, inc_data);
 
 
         }
 
-        StreamReader inp_stm2 = new StreamReader("C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\data_processing_scripts\\flow.csv");
+        StreamReader cinp_stm = new StreamReader("D:\\vr\\group3_vr\\data_processing_scripts\\county_in.csv");
+
+
+        while (!cinp_stm.EndOfStream)
+        {
+            string inp_ln = cinp_stm.ReadLine();
+
+            string[] data = inp_ln.Split(',');
+            string state = data[1];
+            string county = data[0];
+
+
+            float inc_data = float.Parse(data[2]);
+
+            if (!countyIncoming.ContainsKey(state))
+            {
+                countyIncoming.Add(state, new Dictionary<string, float>());
+            }
+            
+            countyIncoming[state].Add(county, inc_data);
+        }
+
+        StreamReader inp_stm2 = new StreamReader("D:\\vr\\group3_vr\\data_processing_scripts\\flow.csv");
 
 
         while (!inp_stm2.EndOfStream)
@@ -59,7 +85,7 @@ public static class dataAccessor
         }
 
 
-        StreamReader inp_stm3 = new StreamReader("C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\data_processing_scripts\\county_flow.csv");
+        StreamReader inp_stm3 = new StreamReader("D:\\vr\\group3_vr\\data_processing_scripts\\county_flow.csv");
 
         while (!inp_stm3.EndOfStream)
         {
@@ -111,7 +137,6 @@ public static class dataAccessor
 
         }
 
-        Debug.Log(county_flow);
 
     }
 
@@ -125,21 +150,25 @@ public static class dataAccessor
         list_of_counties[parentName].Add(name);
     }
 
-    public static float getData(string State)
+    public static float getData(string current, string parent)
     {
-        if (stateIncoming.ContainsKey(State))
+        if (countyIncoming.ContainsKey(parent) && countyIncoming[parent].ContainsKey(current))
         {
-            return stateIncoming[State];
+            return countyIncoming[parent][current];
         } else
         {
-            return UnityEngine.Random.Range(0, 1000000);
+            return -1;
         }
     }
 
     public static Color getColour(float data)
     {
         Color out_;
-        if (data > 0 && data < 85000)
+        if (data == -1)
+        {
+            ColorUtility.TryParseHtmlString("#000000", out out_);
+        }
+        else if (data > 0 && data < 85000)
         {
             ColorUtility.TryParseHtmlString("#fee5d9", out out_);
         }
