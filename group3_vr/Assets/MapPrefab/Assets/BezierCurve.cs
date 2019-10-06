@@ -40,6 +40,7 @@ public class Bezier : System.Object
         CreateBezier(p0, p1, p2, p3, 50);
 
 
+
         line.positionCount = this.points.Length;
         line.SetPositions(this.points);
 
@@ -80,14 +81,12 @@ public class Bezier : System.Object
     //where _num is the desired output of points and _precision is how good we want matching to be
     public void CalculatePoints(int num)
     {
-        points = new Vector3[num+3];
-        points[0] = this.p0;
-        points[num + 2] = this.p3;
+        points = new Vector3[num+1];
 
         for (int p = 0; p <= num; p++)
         {
             Vector3 newPoint = GetPointAtTime((float)p / num); //get next point
-            points[p+1] = newPoint;
+            points[p] = newPoint;
 
         }
 

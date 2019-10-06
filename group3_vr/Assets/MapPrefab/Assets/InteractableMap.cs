@@ -49,7 +49,21 @@ public class PointableObject : Pointable
               
     }
 
+    public override void OnThrow()
+    {
 
+        int level = -1;
+        //On Throw Delete each item in children
+        //Deselect the parent
+        foreach (var item in this.GetComponentsInChildren<PointableObject>())
+        {
+            item.Delete();
+            item.parent.Deselect();
+            level = level == -1 ? item.GetLevel() : level;
+        }
+        //Do not destroy country
+        if (level > 0) Destroy(this);
+    }
 
 
  

@@ -8,7 +8,7 @@ using System;
 
 //This class is in charge of the laser pointers and interacting with them
 
-public class ControllerInteraction : MonoBehaviour
+public class detect_object_hit : MonoBehaviour
 {
     private bool selectingObject;
     private Pointable currentObject;
@@ -43,7 +43,7 @@ public class ControllerInteraction : MonoBehaviour
             long time = DateTime.Now.Ticks;
            
             //Time Limit between frames
-            if (time-oldTime < 600000) {
+            if (time-oldTime < 300000) {
 
                 Vector3 newPos = obj.transform.position;
                 Vector3 delta = newPos - oldPos;
@@ -58,7 +58,7 @@ public class ControllerInteraction : MonoBehaviour
                 oldPos = newPos;
                 //Condition for a throw to occur.
                 if (velocityBuffer.Sum() > 150 && velocityBuffer.Count((x) => x > 20) > 3) {
-                    obj.GetComponentInChildren<MapContainer>()?.OnThrow();
+                    obj.GetComponent<Pointable>()?.OnThrow();
                 }
 
             }

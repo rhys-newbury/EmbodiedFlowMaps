@@ -40,25 +40,29 @@ public class mapRenderer
     public void drawSingular(GameObject gameObject, Action<bool> report_grabbed, string inp_ln, string parentName, int level, PointableObject parent, float centerX = 0, float centerY = 0, int number = 0)
     {
 
-        drawMultipleThing(gameObject, report_grabbed, inp_ln,level, parentName, parent, centerX, centerY, number);
+        drawMultipleThing(gameObject, report_grabbed, inp_ln,level, parentName, new Vector3(1,1,1), parent, true, centerX, centerY, number);
 
     }
 
-    public void drawMultiple(GameObject gameObject, Action<bool> report_grabbed, string dataFile, int level,
+    public void drawMultiple(GameObject gameObject, Action<bool> report_grabbed, string dataFile, int level, bool haveTooltip, Vector3 scale, string parentName="",
         PointableObject parent = null, float centerX = 0, float centerY = 0, int number = 0)
     {
         string data = File.ReadAllText(dataFile);
 
-        string parentName = dataFile.Split('\\')[dataFile.Split('\\').Count() - 1];
-        parentName = parentName.Split('.')[0];
+        if (parentName == "")
+        {
+            parentName = dataFile.Split('\\')[dataFile.Split('\\').Count() - 1];
+            parentName = parentName.Split('.')[0];
+        }
 
 
-        drawMultipleThing(gameObject, report_grabbed, data,level, parentName, parent, centerX, centerY, number);
+        drawMultipleThing(gameObject, report_grabbed, data,level, parentName,scale, parent, haveTooltip, centerX, centerY, number);
     }
 
 
 
-    public void drawMultipleThing(GameObject gameObject, Action<bool> report_grabbed, string dataFile, int level, string parentName, PointableObject parent=null, float centerX=0, float centerY=0, int number=0)
+    public void drawMultipleThing(GameObject gameObject, Action<bool> report_grabbed, string dataFile, int level, string parentName, Vector3 scale,PointableObject parent=null, bool haveTooltip=true
+        ,float centerX=0, float centerY=0, int number=0)
     {
 
         //bool done = false;
@@ -228,7 +232,7 @@ public class mapRenderer
         gameObject.transform.SetPositionAndRotation(new Vector3(0-centerX, 1-centerY, -2), children[0].GetFinalAngle());
 
 
-        if (level != (int)LEVEL.COUNTY_LEVEL)
+        if (level != (int)LEVEL.COUNTY_LEVEL && haveTooltip)
         {
             GameObject objectToolTip = UnityEngine.Object.Instantiate(Resources.Load("ObjectTooltip")) as GameObject;
             objectToolTip.transform.parent = gameObject.transform;
@@ -254,6 +258,8 @@ public class mapRenderer
         //VRTK_ObjectTooltip tooltip = go.GetComponent<VRTK_ObjectTooltip>() as VRTK_ObjectTooltip;
         //tooltip.displayText = parentName;
 
+        gameObject.transform.localPosition = new Vector3(0, 0, 0);
+        gameObject.transform.localScale = scale;
     }
 
 

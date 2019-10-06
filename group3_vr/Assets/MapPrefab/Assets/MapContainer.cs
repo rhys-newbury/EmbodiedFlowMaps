@@ -35,8 +35,6 @@ public class MapContainer : MonoBehaviour
 
     public Vector3 startPos;
 
-    MapController controller;
-
 
     
     private void Start()
@@ -84,39 +82,21 @@ public class MapContainer : MonoBehaviour
             }
         };
 
-        controller = this.transform.root.GetComponent<MapController>();
 
-        if (_startUp)
+        if (this.transform.root.GetComponent<MapController>().startUp)
         {
             Debug.Log(this.transform.root);
-            string file = controller.mainMap;
+            string file = this.transform.root.GetComponent<MapController>().mainMap;
             this.parentName = "America";
 
             mapRenderer map = new mapRenderer();
-            map.drawMultiple(this.gameObject, reportGrabbed, file,0);
+            map.drawMultiple(this.gameObject, reportGrabbed, file,0, this.transform.root.GetComponent<MapController>().haveTooltip, this.transform.root.GetComponent<MapController>().mapScale, parentName);
 
-            _startUp = false;
+            this.transform.root.GetComponent<MapController>().startUp = false;
 
         }
 
 
-
-    }
-
-    public void OnThrow()
-    {
-
-        int level = -1;
-        //On Throw Delete each item in children
-        //Deselect the parent
-        foreach (var item in this.GetComponentsInChildren<PointableObject>())
-        {
-            item.Delete();
-            item.parent.Deselect();
-            level = level == -1 ? item.GetLevel() : level;
-        }
-        //Do not destroy country
-        if (level > 0) Destroy(this.gameObject);
     }
 
     void AddLines(LineRenderer l)
@@ -144,13 +124,7 @@ public class MapContainer : MonoBehaviour
     {
         string access1 = i1;
         string access2 = i2;
-        Debug.Log(i1);
-        Debug.Log(i2);
 
-        if (i2 is null || i1 is null)
-        {
-            return false;
-        }
 
        if (!(currently_joined.ContainsKey(access1))) {
             currently_joined[access1] = new Dictionary<string, bool>
@@ -174,7 +148,7 @@ public class MapContainer : MonoBehaviour
             currently_joined[access2][access1] = false;
         }
 
-        bool output = currently_joined[access1][access2] || currently_joined[access2][access1];
+        bool output = currently_joined[access1][access2] && currently_joined[access2][access1];
         currently_joined[access1][access2] = output;
         currently_joined[access2][access1] = output;
         return output;
@@ -207,18 +181,11 @@ public class MapContainer : MonoBehaviour
                 float seperation = (this.transform.position - item.transform.position).magnitude;
                 Debug.Log(seperation);
                 if (seperation > 3) {
-                    if (this.parentName is null || item.parentName is null)
-                    {
-                        Debug.Log("strange");
-                    }
                     SetLinkStatus(this.parentName, item.parentName, false);
-                    
                 }
-
                 else if (seperation < 0.5 || IsLinked(this.parentName, item.parentName))
 
                 {
-
                     SetLinkStatus(this.parentName, item.parentName, true);
 
                     var selected1 = this.GetComponentsInChildren<PointableObject>().Where(x => x.IsSelected()).ToArray();
@@ -230,28 +197,9 @@ public class MapContainer : MonoBehaviour
                         {
                             foreach (var destination in selected2)
                             {
-
-                                //var controller = this.transform.root.GetComponentInChildren<MapController>();
-
-                                if (controller.county_flow.ContainsKey(origin.parentName) && controller.county_flow[origin.parentName].ContainsKey(origin.name)
-                                    && controller.county_flow[origin.parentName][origin.name].ContainsKey(destination.parentName) &&
-                                    controller.county_flow[origin.parentName][origin.name][destination.parentName].ContainsKey(destination.name))
-                                {
-
-                                    Bezier b = new Bezier(this.transform, origin, destination);
-                                    lines.Add(b.line);
-                                    item.AddLines(b.line);
-                                }
-
-                                if (controller.county_flow.ContainsKey(destination.parentName) && controller.county_flow[destination.parentName].ContainsKey(destination.name)
-                                && controller.county_flow[destination.parentName][destination.name].ContainsKey(origin.parentName) &&
-                                controller.county_flow[destination.parentName][destination.name][origin.parentName].ContainsKey(origin.name))
-                                {
-
-                                    Bezier b = new Bezier(this.transform, origin, destination);
-                                    lines.Add(b.line);
-                                    item.AddLines(b.line);
-                                }
+                                Bezier b = new Bezier(this.transform, origin, destination);
+                                lines.Add(b.line);
+                                item.AddLines(b.line);
                             }
                         }
                     }
@@ -334,17 +282,12 @@ public class MapContainer : MonoBehaviour
         mapRenderer map = new mapRenderer();
         this.parentName = pointableObject.name;
 
-        if (this.parentName is null)
-        {
-            Debug.Log("Dasdas");
-        }
-
         if (level == (int)mapRenderer.LEVEL.STATE_LEVEL)
         {
-             file = this.transform.root.GetComponent<MapController>()?.pathToStates + pointableObject.name + ".json";
+             file = this.transform.root.GetComponent<MapController>().pathToStates + pointableObject.name + ".json";
 
 
-            map.drawMultiple(this.gameObject, reportGrabbed, file, level, pointableObject);
+            map.drawMultiple(this.gameObject, reportGrabbed, file, level, true, this.transform.root.GetComponent<MapController>().mapScale, "", pointableObject);
             this.gameObject.transform.position += new Vector3(0, 0, GetYPosition(positonStack.Count + 1));
             positonStack.Add(this);
 
