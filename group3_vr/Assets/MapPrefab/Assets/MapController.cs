@@ -17,14 +17,14 @@ public class MapController : MonoBehaviour
     public static Color empty_colour = new Color(0,0,0);
 
 
-    private static Dictionary<string, Dictionary<string, float>> flow = new Dictionary<string, Dictionary<string, float>>();
+    private Dictionary<string, Dictionary<string, float>> flow = new Dictionary<string, Dictionary<string, float>>();
     //State -> County -> State -> County
-    private static Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, float>>>> county_flow = new Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, float>>>>();
+    public Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, float>>>> county_flow = new Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, float>>>>();
 
 
-    private static Dictionary<string, float> stateIncoming = new Dictionary<string, float>();
+    private Dictionary<string, float> stateIncoming = new Dictionary<string, float>();
 
-    private static Dictionary<string, Dictionary<string, float>> countyIncoming = new Dictionary<string, Dictionary<string, float>>();
+    private Dictionary<string, Dictionary<string, float>> countyIncoming = new Dictionary<string, Dictionary<string, float>>();
 
     //List of string data for the buildings. This can be converted in to actual buildings on county creation
     private Dictionary<String, Dictionary<String, List<List<String>>>> _buildingData = null;
@@ -85,6 +85,9 @@ public class MapController : MonoBehaviour
 
         StreamReader inp_stm2 = new StreamReader(pathToData + "flow.csv");
 
+        county_flow["America"] = new Dictionary<string, Dictionary<string, Dictionary<string, float>>>();
+
+
         while (!inp_stm2.EndOfStream)
         {
             string inp_ln = inp_stm2.ReadLine();
@@ -101,7 +104,21 @@ public class MapController : MonoBehaviour
                 flow[state1] = new Dictionary<string, float>();
             }
 
-            flow[state1][state2] = inc_data;
+
+
+            if(!county_flow["America"].ContainsKey(state1))
+            {
+                county_flow["America"].Add(state1,new Dictionary<string, Dictionary<string, float>>());
+            }
+
+            if (!county_flow["America"][state1].ContainsKey("America"))
+            {
+                county_flow["America"][state1].Add("America", new Dictionary<string, float>());
+            }
+
+
+            county_flow["America"][state1]["America"].Add(state2, inc_data);
+                       
 
         }
 
@@ -156,6 +173,8 @@ public class MapController : MonoBehaviour
             current_county["America"][state2] += inc_data;
 
         }
+
+        Debug.Log(county_flow);
 
 
         //Create a dictionary.
