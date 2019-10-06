@@ -20,7 +20,7 @@ public static class dataAccessor
     public static void load()
     {
 
-        StreamReader inp_stm = new StreamReader("D:\\vr\\group3_vr\\data_processing_scripts\\inc.csv");
+        StreamReader inp_stm = new StreamReader("C:\\Users\\FIT3162\\Desktop\\group3_vr\\data_processing_scripts\\inc.csv");
 
         countyIncoming.Add("America", new Dictionary<string, float>());
 
@@ -39,7 +39,7 @@ public static class dataAccessor
 
         }
 
-        StreamReader cinp_stm = new StreamReader("D:\\vr\\group3_vr\\data_processing_scripts\\county_in.csv");
+        StreamReader cinp_stm = new StreamReader("C:\\Users\\FIT3162\\Desktop\\group3_vr\\data_processing_scripts\\county_in.csv");
 
 
         while (!cinp_stm.EndOfStream)
@@ -61,7 +61,7 @@ public static class dataAccessor
             countyIncoming[state].Add(county, inc_data);
         }
 
-        StreamReader inp_stm2 = new StreamReader("D:\\vr\\group3_vr\\data_processing_scripts\\flow.csv");
+        StreamReader inp_stm2 = new StreamReader("C:\\Users\\FIT3162\\Desktop\\group3_vr\\data_processing_scripts\\flow.csv");
 
 
         while (!inp_stm2.EndOfStream)
@@ -85,7 +85,7 @@ public static class dataAccessor
         }
 
 
-        StreamReader inp_stm3 = new StreamReader("D:\\vr\\group3_vr\\data_processing_scripts\\county_flow.csv");
+        StreamReader inp_stm3 = new StreamReader("C:\\Users\\FIT3162\\Desktop\\group3_vr\\data_processing_scripts\\county_flow.csv");
 
         while (!inp_stm3.EndOfStream)
         {

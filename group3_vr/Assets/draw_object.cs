@@ -87,7 +87,7 @@ public class draw_object : MonoBehaviour
         {
             dataAccessor.load();
 
-            string file = "D:\\vr\\group3_vr\\mapGeoJSON\\America.txt";
+            string file = "C:\\Users\\FIT3162\\Desktop\\group3_vr\\mapGeoJSON\\America.txt";
             this.parentName = "America";
 
             mapRenderer map = new mapRenderer();
@@ -285,7 +285,7 @@ public class draw_object : MonoBehaviour
 
         if (level == (int)mapRenderer.LEVEL.STATE_LEVEL)
         {
-             file = "D:\\vr\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.name + ".json";
+             file = "C:\\Users\\FIT3162\\Desktop\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.name + ".json";
 
 
             map.drawMultiple(this.gameObject, reportGrabbed, file, level, pointableObject);
@@ -295,7 +295,7 @@ public class draw_object : MonoBehaviour
         }
         else
         {
-            file = "D:\\vr\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.parentName + ".json";
+            file = "C:\\Users\\FIT3162\\Desktop\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.parentName + ".json";
             if (mapRenderer.checkForBuildings(pointableObject.name, pointableObject.parentName))
             {
 
