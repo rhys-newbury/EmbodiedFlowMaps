@@ -12,9 +12,9 @@ public class MapController : MonoBehaviour
     public string pathToData;
 
     public Legend CountyLegend;
-    public GameObject StateLegend;
+    public Legend FlowLegend;
 
-    public static Color empty_colour = new Color(0,0,0);
+    public static Color empty_colour = new Color(0,0,0,0.2F);
 
 
     private Dictionary<string, Dictionary<string, float>> flow = new Dictionary<string, Dictionary<string, float>>();
@@ -140,6 +140,8 @@ public class MapController : MonoBehaviour
 
         StreamReader inp_stm2 = new StreamReader(pathToData + "flow.csv");
 
+        county_flow["America"] = new Dictionary<string, Dictionary<string, Dictionary<string, float>>>();
+
         while (!inp_stm2.EndOfStream)
         {
             string inp_ln = inp_stm2.ReadLine();
@@ -151,12 +153,20 @@ public class MapController : MonoBehaviour
             string state2 = codeToState(data[1]);
             float inc_data = float.Parse(data[2]);
 
-            if (!flow.ContainsKey(state1))
+            
+
+            if (!county_flow["America"].ContainsKey(state1))
             {
-                flow[state1] = new Dictionary<string, float>();
+                county_flow["America"].Add(state1, new Dictionary<string, Dictionary<string, float>>());
             }
 
-            flow[state1][state2] = inc_data;
+            if (!county_flow["America"][state1].ContainsKey("America"))
+            {
+                county_flow["America"][state1].Add("America",new Dictionary<string, float>());
+
+            }
+
+            county_flow["America"][state1]["America"][state2] = inc_data;
 
         }
 
@@ -290,6 +300,37 @@ public class MapController : MonoBehaviour
         }
     }
 
+    public float getFlowData(string current1, string parent1, string current2, string parent2)
+    {
+        try
+        {
+            return Mathf.Max(county_flow[parent1][current1][parent2][current2], county_flow[parent2][current2][parent1][current1]);
+        }
+        catch
+        {
+            try
+            {
+                return county_flow[parent2][current2][parent1][current1];
+            }
+
+            catch
+            {
+                try
+                {
+                    return county_flow[parent1][current1][parent2][current2];
+
+                }
+                catch
+                {
+                    return -1;
+                }
+            }
+
+            }
+  
+        }
+    
+
     internal Color getCountryColour(float data)
     {
 
@@ -309,9 +350,56 @@ public class MapController : MonoBehaviour
         {
             return CountyLegend.Colour3;
         }
-        else
+
+        else if (data > CountyLegend.ClassSeperator3 && data < CountyLegend.ClassSeperator4)
         {
             return CountyLegend.Colour4;
+        }
+        else if (data > CountyLegend.ClassSeperator4 && data < CountyLegend.ClassSeperator5)
+        {
+            return CountyLegend.Colour5;
+        }
+        else if (data > CountyLegend.ClassSeperator5 && data < CountyLegend.ClassSeperator6)
+        {
+            return CountyLegend.Colour6;
+        }
+        else
+        {
+            return CountyLegend.Colour7;
+        }
+    }
+
+    internal Material getFlowColour(float data)
+    {
+
+        if (data > 0 && data < FlowLegend.ClassSeperator1)
+        {
+            return Resources.Load("Materials/GlowingBlue1", typeof(Material)) as Material;
+        }
+        else if (data > FlowLegend.ClassSeperator1 && data < FlowLegend.ClassSeperator2)
+        {
+            return Resources.Load("Materials/GlowingBlue2", typeof(Material)) as Material;
+        }
+        else if (data > FlowLegend.ClassSeperator2 && data < FlowLegend.ClassSeperator3)
+        {
+            return Resources.Load("Materials/GlowingBlue3", typeof(Material)) as Material;
+        }
+
+        else if (data > FlowLegend.ClassSeperator3 && data < FlowLegend.ClassSeperator4)
+        {
+            return Resources.Load("Materials/GlowingBlue4", typeof(Material)) as Material;
+        }
+        else if (data > FlowLegend.ClassSeperator4 && data < FlowLegend.ClassSeperator5)
+        {
+            return Resources.Load("Materials/GlowingBlue5", typeof(Material)) as Material;
+        }
+        else if (data > FlowLegend.ClassSeperator5 && data < FlowLegend.ClassSeperator6)
+        {
+            return Resources.Load("Materials/GlowingBlue6", typeof(Material)) as Material;
+        }
+        else
+        {
+            return Resources.Load("Materials/GlowingBlue7", typeof(Material)) as Material;
         }
     }
 

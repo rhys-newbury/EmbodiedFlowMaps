@@ -51,6 +51,8 @@ public class Country : PointableObject
 
                         this.lines.Add(b.obj);
                         destination.AddLine(b.obj);
+                        b.line.material = origin.getMapContainer().getFlowColour(origin.getMapContainer().getFlowData(origin.name, origin.parentName, destination.name, destination.parentName));
+
 
                     }
 

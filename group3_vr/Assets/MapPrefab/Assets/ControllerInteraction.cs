@@ -8,7 +8,7 @@ using System;
 
 //This class is in charge of the laser pointers and interacting with them
 
-public class detect_object_hit : MonoBehaviour
+public class ControllerInteraction : MonoBehaviour
 {
     private bool selectingObject;
     private Pointable currentObject;
@@ -58,8 +58,9 @@ public class detect_object_hit : MonoBehaviour
                 oldPos = newPos;
                 //Condition for a throw to occur.
                 if (velocityBuffer.Sum() > 150 && velocityBuffer.Count((x) => x > 20) > 3) {
-                    obj.GetComponent<Pointable>()?.OnThrow();
+                    obj.GetComponentInChildren<MapContainer>()?.OnThrow();
                 }
+                
 
             }
             else {

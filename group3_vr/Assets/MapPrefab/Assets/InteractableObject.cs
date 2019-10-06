@@ -11,6 +11,5 @@ public class Pointable : MonoBehaviour
 
     public virtual void OnTriggerPressed(){ }
     public virtual void OnGripPressed() { }
-    public virtual void OnThrow() { }
 
 }

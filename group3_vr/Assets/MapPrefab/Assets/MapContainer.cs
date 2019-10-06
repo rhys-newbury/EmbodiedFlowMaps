@@ -40,9 +40,13 @@ public class MapContainer : MonoBehaviour
 
     public Vector3 startPos;
 
+    public void OnDestroy()
+    {
+        if (positonStack.Contains(this)) positonStack.Remove(this);
+       if (countyStack.Contains(this)) countyStack.Remove(this);
+    }
 
 
-    
     private void Start()
     {      
 
@@ -97,7 +101,7 @@ public class MapContainer : MonoBehaviour
         };
 
 
-        if (this.transform.root.GetComponent<MapController>().startUp)
+        if (this.transform.root.GetComponent<MapController>() == null || this.transform.root.GetComponent<MapController>().startUp)
         {
             Debug.Log(this.transform.root);
             string file = this.transform.root.GetComponent<MapController>().mainMap;
@@ -109,6 +113,25 @@ public class MapContainer : MonoBehaviour
             this.transform.root.GetComponent<MapController>().startUp = false;
 
         }
+
+
+    }
+
+    public void OnThrow()
+    {
+
+        int level = -1;
+        //On Throw Delete each item in children
+        //Deselect the parent
+        foreach (var item in this.GetComponentsInChildren<PointableObject>())
+        {
+            item.Delete();
+            item.parent.Deselect();
+            level = level == -1 ? item.GetLevel() : level;
+        }
+        //Do not destroy country
+        
+        if (level > 0) Destroy(this.gameObject);
 
 
     }
@@ -219,6 +242,20 @@ public class MapContainer : MonoBehaviour
                                 Bezier b = new Bezier(this.transform, origin, destination);
                                 lines.Add(b.line);
                                 item.AddLines(b.line);
+                                try
+                                {
+                                    b.line.material = origin.getMapContainer().getFlowColour(origin.getMapContainer().getFlowData(origin.name, origin.parentName, destination.name, destination.parentName));
+
+                                }
+                                catch
+                                {
+                                    b.line.material = Resources.Load("Materials/GlowingBlue1", typeof(Material)) as Material;
+
+                                }
+
+
+
+
                             }
                         }
                     }

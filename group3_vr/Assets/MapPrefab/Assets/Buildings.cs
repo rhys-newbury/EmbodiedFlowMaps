@@ -25,7 +25,7 @@ public class Buildings : MonoBehaviour
         CapacityCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
         VolumeCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
 
-        GameObject objectToolTip = MonoBehaviour.Instantiate(Resources.Load("ObjectTooltip")) as GameObject;
+        GameObject objectToolTip = MonoBehaviour.Instantiate(Resources.Load("CountyTooltip")) as GameObject;
         objectToolTip.transform.parent = (CapacityCube.transform);
         objectToolTip.transform.SetPositionAndRotation(CapacityCube.transform.position, CapacityCube.transform.rotation);
         //objectToolTip.transform.position = new Vector3(objectToolTip.transform.position.x, 0.1f, objectToolTip.transform.position.z);
@@ -37,7 +37,7 @@ public class Buildings : MonoBehaviour
         tooltip.transform.SetPositionAndRotation(CapacityCube.transform.position, CapacityCube.transform.rotation);
 
 
-        tooltip.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+        tooltip.transform.localScale = new Vector3(-0.5f, 0.5f, 0.5f);
 
         tooltip.transform.localPosition -= new Vector3(0f, 0f, 0.2f);
 

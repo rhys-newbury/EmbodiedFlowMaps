@@ -16,6 +16,7 @@ public class PointableObject : Pointable
     public Action<bool> reportGrabbed;
     private Triangulator T;
     private Color color;
+    private float alpha;
     private MeshRenderer meshRenderer;
     private float centerX, centerY;
 
@@ -49,21 +50,7 @@ public class PointableObject : Pointable
               
     }
 
-    public override void OnThrow()
-    {
-
-        int level = -1;
-        //On Throw Delete each item in children
-        //Deselect the parent
-        foreach (var item in this.GetComponentsInChildren<PointableObject>())
-        {
-            item.Delete();
-            item.parent.Deselect();
-            level = level == -1 ? item.GetLevel() : level;
-        }
-        //Do not destroy country
-        if (level > 0) Destroy(this);
-    }
+    
 
 
  
@@ -126,14 +113,30 @@ public class PointableObject : Pointable
     {
         this.color.a = 0.3F;
         this.meshRenderer.material.color = this.color;
-        changeText(this.GetName());
+        VRTK_ObjectTooltip tooltip = go.GetComponent<VRTK_ObjectTooltip>();
+
+        if (this.getMapContainer().getData(this.name, this.parentName) == -1)
+        {
+            changeText(this.GetName() + " has no " + (MapController.isIncoming ? " Incoming " : " Outgoing ") + "Flow");
+            tooltip.displayText = this.GetName() + " has no " + (MapController.isIncoming ? " Incoming " : " Outgoing ") + "Flow";
+
+
+        }
+        else
+        {
+            changeText(this.GetName() + (MapController.isIncoming ? " Incoming " : " Outgoing ") + "Flow of:" + this.getMapContainer().getData(this.name, this.parentName).ToString());
+            tooltip.displayText = this.GetName() + (MapController.isIncoming ? " Incoming " : " Outgoing ") + "Flow of:" + this.getMapContainer().getData(this.name, this.parentName).ToString();
+
+        }
         this.go.SetActive(true);
+
+
     }
-   
+
 
     public override void OnPointerLeave()
     {
-        this.color.a = 1F;
+        this.color.a = this.alpha;
         this.meshRenderer.material.color = this.color;
         this.go.SetActive(false);
     }
@@ -195,11 +198,12 @@ public class PointableObject : Pointable
 
         //Color meshColor = UnityEngine.Random.ColorHSV();
         Color meshColor = this.getMapContainer().getCountryColour(this.getMapContainer().getData(this.name, this.parentName));
+        this.alpha = meshColor.a;
+        this.color = meshColor;
 
         // Set up game object with mesh;
         meshRenderer = objToSpawn.AddComponent<MeshRenderer>();
         meshRenderer.material = new Material(Shader.Find("Sprites/Default"));
-        this.color = meshColor;
         meshRenderer.material.color = this.color;
 
         var filter = objToSpawn.AddComponent<MeshFilter>();
@@ -213,6 +217,7 @@ public class PointableObject : Pointable
     public void updateColour()
     {
         Color meshColor = this.getMapContainer().getCountryColour(this.getMapContainer().getData(this.name, this.parentName));
+        this.alpha = meshColor.a;
         this.color = meshColor;
         meshRenderer.material.color = this.color;
 
