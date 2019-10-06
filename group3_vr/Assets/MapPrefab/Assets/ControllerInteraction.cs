@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using VRTK;
-using static draw_object;
+using static MapContainer;
 using System;
 
 //This class is in charge of the laser pointers and interacting with them

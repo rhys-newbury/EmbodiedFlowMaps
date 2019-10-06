@@ -43,9 +43,9 @@ public class PointableObject : Pointable
 
     }
 
-    public MapContainer getMapContainer()
+    public MapController getMapContainer()
     {
-        return this.transform.root.GetComponent<MapContainer>();
+        return this.transform.root.GetComponent<MapController>();
               
     }
 
@@ -82,7 +82,7 @@ public class PointableObject : Pointable
             //Create the gameObject for the map and then Draw it.
             GameObject mapGameObject = new GameObject();
             mapGameObject.transform.parent = this.transform.root;
-            draw_object main = mapGameObject.AddComponent(typeof(draw_object)) as draw_object;
+            MapContainer main = mapGameObject.AddComponent(typeof(MapContainer)) as MapContainer;
             main?.Draw(this, this.GetLevel() + 1);
 
             this.selected = true;
@@ -324,10 +324,10 @@ public class PointableObject : Pointable
     {
        
         this.selected = false;
-        draw_object.update = true;
+        MapContainer.update = true;
         this.RemoveLines();
         var line = objToSpawn.GetComponent<LineRenderer>();
-        draw_object.DeselectState();
+        MapContainer.DeselectState();
         Destroy(line);
 
 

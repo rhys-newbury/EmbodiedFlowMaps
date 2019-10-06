@@ -47,14 +47,6 @@ public class Buildings : MonoBehaviour
         tooltip.drawLineFrom = CapacityCube.transform;
         tooltip.drawLineTo = CapacityCube.transform;
 
-
-
-        tooltip.displayText = "I'm a building";
-
-
-
-
-
     }
 
 

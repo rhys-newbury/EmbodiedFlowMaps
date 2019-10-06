@@ -7,7 +7,7 @@ using System;
 
 
 
-public class draw_object : MonoBehaviour
+public class MapContainer : MonoBehaviour
 {
 
     private static bool _startUp = true;
@@ -21,7 +21,7 @@ public class draw_object : MonoBehaviour
     public static bool update;
 
 
-    public static List<draw_object> positonStack = new List<draw_object>();
+    public static List<MapContainer> positonStack = new List<MapContainer>();
     private bool moved;
 
     private Action<bool> reportGrabbed;
@@ -85,8 +85,8 @@ public class draw_object : MonoBehaviour
 
         if (_startUp)
         {
-
-            string file = this.transform.root.GetComponent<MapContainer>().mainMap;
+            Debug.Log(this.transform.root);
+            string file = this.transform.root.GetComponent<MapController>().mainMap;
             this.parentName = "America";
 
             mapRenderer map = new mapRenderer();
@@ -166,7 +166,7 @@ public class draw_object : MonoBehaviour
         update = false;
         prevPos = this.transform.position;
 
-        draw_object[] l = FindObjectsOfType(typeof(draw_object)) as draw_object[];
+        MapContainer[] l = FindObjectsOfType(typeof(MapContainer)) as MapContainer[];
 
         foreach (var i in lines)
         {
@@ -212,7 +212,7 @@ public class draw_object : MonoBehaviour
         }
     }
 
-    private void stack_remove(draw_object drawObject)
+    private void stack_remove(MapContainer drawObject)
     {
         if (positonStack.Contains(drawObject))
         {
@@ -284,7 +284,7 @@ public class draw_object : MonoBehaviour
 
         if (level == (int)mapRenderer.LEVEL.STATE_LEVEL)
         {
-             file = this.transform.root.GetComponent<MapContainer>().pathToStates + pointableObject.name + ".json";
+             file = this.transform.root.GetComponent<MapController>().pathToStates + pointableObject.name + ".json";
 
 
             map.drawMultiple(this.gameObject, reportGrabbed, file, level, pointableObject);
@@ -294,8 +294,8 @@ public class draw_object : MonoBehaviour
         }
         else
         {
-            file = this.transform.root.GetComponent<MapContainer>().pathToStates + pointableObject.parentName + ".json";
-            if (this.transform.root.GetComponent<MapContainer>().checkForBuildings(pointableObject.name, pointableObject.parentName))
+            file = this.transform.root.GetComponent<MapController>().pathToStates + pointableObject.parentName + ".json";
+            if (this.transform.root.GetComponent<MapController>().checkForBuildings(pointableObject.name, pointableObject.parentName))
             {
 
                 foreach (var line in File.ReadAllLines(file))

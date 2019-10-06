@@ -5,14 +5,14 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 
-public class MapContainer : MonoBehaviour
+public class MapController : MonoBehaviour
 { 
     public string mainMap;
     public string pathToStates;
     public string pathToData;
 
     public Legend CountyLegend;
-    public GameObject State;
+    public GameObject StateLegend;
 
     public static Color empty_colour = new Color(0,0,0);
 
@@ -160,8 +160,8 @@ public class MapContainer : MonoBehaviour
 
         //Create a dictionary.
         _buildingData = new Dictionary<String, Dictionary<String, List<List<String>>>>();
+        StreamReader inp_stm5 = new StreamReader(pathToData + "building_data.csv");
 
-        StreamReader inp_stm5 = new StreamReader("C:\\Users\\FIT3161\\Desktop\\group3\\group3_vr\\data_processing_scripts\\building_data.csv");
 
 
         while (!inp_stm5.EndOfStream)
