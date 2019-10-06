@@ -210,6 +210,14 @@ public class PointableObject : Pointable
 
     }
 
+    public void updateColour()
+    {
+        Color meshColor = this.getMapContainer().getCountryColour(this.getMapContainer().getData(this.name, this.parentName));
+        this.color = meshColor;
+        meshRenderer.material.color = this.color;
+
+    }
+
     internal void Deselect()
     {
         this.selected = false;

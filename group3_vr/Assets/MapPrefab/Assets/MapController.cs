@@ -22,15 +22,21 @@ public class MapController : MonoBehaviour
     private Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, float>>>> county_flow = new Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, float>>>>();
 
 
-    private Dictionary<string, float> stateIncoming = new Dictionary<string, float>();
 
     private Dictionary<string, Dictionary<string, float>> countyIncoming = new Dictionary<string, Dictionary<string, float>>();
+
+    private Dictionary<string, Dictionary<string, float>> countyOutcoming = new Dictionary<string, Dictionary<string, float>>();
+
+
 
     //List of string data for the buildings. This can be converted in to actual buildings on county creation
     private Dictionary<String, Dictionary<String, List<List<String>>>> _buildingData = null;
 
     //List of buildings
     public Dictionary<String, Dictionary<String, List<Buildings>>> buildingData = new Dictionary<String, Dictionary<String, List<Buildings>>>();
+
+    public static bool isIncoming = true;
+
 
 
     public bool checkForBuildings(string County, string State)
@@ -89,6 +95,48 @@ public class MapController : MonoBehaviour
 
             countyIncoming[state].Add(county, inc_data);
         }
+
+
+        StreamReader out_stm = new StreamReader(pathToData + "out.csv");
+
+        countyOutcoming.Add("America", new Dictionary<string, float>());
+
+        while (!out_stm.EndOfStream)
+        {
+            string out_ln = out_stm.ReadLine();
+
+            string[] data = out_ln.Split(',');
+            string state = codeToState(data[0]);
+            float out_data = float.Parse(data[1]);
+
+            countyOutcoming["America"].Add(state, out_data);
+
+
+        }
+        StreamReader cout_stm = new StreamReader(pathToData + "county_out.csv");
+
+        while (!cout_stm.EndOfStream)
+        {
+            string cout_ln = cout_stm.ReadLine();
+
+            string[] data = cout_ln.Split(',');
+            string state = data[1];
+            string county = data[0];
+
+
+            float cout_data = float.Parse(data[2]);
+
+            if (!countyOutcoming.ContainsKey(state))
+            {
+                countyOutcoming.Add(state, new Dictionary<string, float>());
+            }
+
+            countyOutcoming[state].Add(county, cout_data);
+        }
+
+
+
+
 
         StreamReader inp_stm2 = new StreamReader(pathToData + "flow.csv");
 
@@ -217,13 +265,28 @@ public class MapController : MonoBehaviour
 
     public float getData(string current, string parent)
     {
-        if (countyIncoming.ContainsKey(parent) && countyIncoming[parent].ContainsKey(current))
+        if (isIncoming)
         {
-            return countyIncoming[parent][current];
+            if (countyIncoming.ContainsKey(parent) && countyIncoming[parent].ContainsKey(current))
+            {
+                return countyIncoming[parent][current];
+            }
+            else
+            {
+                return -1;
+            }
         }
         else
         {
-            return -1;
+            if (countyOutcoming.ContainsKey(parent) && countyOutcoming[parent].ContainsKey(current))
+            {
+                return countyOutcoming[parent][current];
+            }
+            else
+            {
+                return -1;
+            }
+
         }
     }
 

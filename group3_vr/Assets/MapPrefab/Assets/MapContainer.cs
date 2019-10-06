@@ -22,6 +22,8 @@ public class MapContainer : MonoBehaviour
 
 
     public static List<MapContainer> positonStack = new List<MapContainer>();
+    public static List<MapContainer> countyStack = new List<MapContainer>();
+
     private bool moved;
 
     private Action<bool> reportGrabbed;
@@ -29,11 +31,15 @@ public class MapContainer : MonoBehaviour
     public Animation anim;
     AnimationClip animationClip;
 
+    public Animation animZ;
+    AnimationClip animationClipZ;
+
     public bool animationStarted = false;
 
     public bool animationFinished = true;
 
     public Vector3 startPos;
+
 
 
     
@@ -67,7 +73,15 @@ public class MapContainer : MonoBehaviour
         animationClip = new AnimationClip();
         animationClip.legacy = true;
         animationClip.SetCurve("", typeof(Transform), "localPosition.z", translateX);
-        anim.AddClip(animationClip, "test");
+        anim.AddClip(animationClip, "ZMovement");
+        Debug.Log(anim.GetClipCount());
+
+        //animZ = gameObject.AddComponent<Animation>();
+        AnimationCurve translateY = AnimationCurve.EaseInOut(0.0f, 0.1f, 0.0f, -0.05f);
+        animationClipZ = new AnimationClip();
+        animationClipZ.legacy = true;
+        animationClipZ.SetCurve("", typeof(Transform), "localPosition.y", translateY);
+        anim.AddClip(animationClipZ, "YMovement");
         Debug.Log(anim.GetClipCount());
 
 
@@ -119,6 +133,11 @@ public class MapContainer : MonoBehaviour
     {
         return i * 0.05F;
     }
+    internal static float GetCountyPosition(int i)
+    {
+        return i * 0.1F;
+    }
+
 
     static bool IsLinked(string i1, string i2) 
     {
@@ -214,6 +233,7 @@ public class MapContainer : MonoBehaviour
 
     private void stack_remove(MapContainer drawObject)
     {
+        
         if (positonStack.Contains(drawObject))
         {
             var index = positonStack.IndexOf(drawObject);
@@ -224,7 +244,7 @@ public class MapContainer : MonoBehaviour
                 {
                     positonStack[i].animationStarted = true;
                     positonStack[i].startPos = positonStack[i].transform.localPosition;
-                    positonStack[i].anim.Play("test");
+                    positonStack[i].anim.Play("ZMovement");
                 }
                 else
                 {
@@ -234,7 +254,20 @@ public class MapContainer : MonoBehaviour
 
             positonStack.Remove(drawObject);
         }
-    }
+        else if (countyStack.Contains(drawObject))
+        {
+
+            var index = countyStack.IndexOf(drawObject);
+
+            for (int i = index + 1; i < countyStack.Count; i++)
+            {
+                    countyStack[i].transform.position -= new Vector3(0, 0.1F, 0);
+            }
+
+            countyStack.Remove(drawObject);
+
+        }
+    } 
 
     private bool animWasPlaying = false;
     private int resetCount = 0;
@@ -292,6 +325,7 @@ public class MapContainer : MonoBehaviour
             positonStack.Add(this);
 
         }
+        
         else
         {
             file = this.transform.root.GetComponent<MapController>().pathToStates + pointableObject.parentName + ".json";
@@ -307,6 +341,9 @@ public class MapContainer : MonoBehaviour
                     }
                 }
             }
+            
+            this.gameObject.transform.position += new Vector3(0, GetCountyPosition(countyStack.Count + 1), 0);
+            countyStack.Add(this);
         }
 
         this.transform.localScale = new Vector3(0.25F, 0.25F, 0.25F);
