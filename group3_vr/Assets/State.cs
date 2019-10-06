@@ -14,7 +14,7 @@ public class State : PointableObject
     internal override void AddToList(string parentName, string name)
     {
 
-        dataAccessor.addToList(parentName, name);
+        this.getMapContainer().addToList(parentName, name);
 
     }
 

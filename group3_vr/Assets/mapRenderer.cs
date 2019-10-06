@@ -25,12 +25,7 @@ public class mapRenderer
     //The size of the outer bounding box of the map in unity units
     private readonly float FINAL_AREA = 1;
 
-    //List of string data for the buildings. This can be converted in to actual buildings on county creation
-    private static Dictionary<String, Dictionary<String, List<List<String>>>> _buildingData = null;
-
-    //List of buildings
-    public static Dictionary<String, Dictionary<String, List<Buildings>>> buildingData = new Dictionary<String, Dictionary<String, List<Buildings>>>();
-
+  
 
     private Action<bool> report_grabbed;
 
@@ -41,43 +36,7 @@ public class mapRenderer
         COUNTY_LEVEL
     }
 
-    public static bool checkForBuildings(string County, string State)
-    {
-        return _buildingData.ContainsKey(State) && _buildingData[State].ContainsKey(County);
-    }
 
-    public mapRenderer() {
-        //Only do this once.
-        if (_buildingData == null) {
-            //Create a dictionary.
-            _buildingData = new Dictionary<String, Dictionary<String, List<List<String>>>>();
-
-            StreamReader inp_stm = new StreamReader("C:\\Users\\FIT3162\\Desktop\\group3_vr\\data_processing_scripts\\building_data.csv");
-
-                
-            while (!inp_stm.EndOfStream) {
-
-                string inp_ln = inp_stm.ReadLine();
-                
-                List<String> data = inp_ln.Split(',').ToList();
-
-                //Check for existance otherwise add a new dictionary
-                if (!_buildingData.ContainsKey(data[4])) {
-                    _buildingData.Add(data[4], new Dictionary<string, List<List<string>>>());
-                }
-                Dictionary<String, List<List<String>>> stateData = _buildingData[data[4]];
-
-                
-                if (!stateData.ContainsKey(data[3])) {
-                    stateData.Add(data[3], new List<List<string>>());
-                }
-
-                //Add the data to the state
-                stateData[data[3]].Add(data);
-
-            }
-        }
-    }
     public void drawSingular(GameObject gameObject, Action<bool> report_grabbed, string inp_ln, string parentName, int level, PointableObject parent, float centerX = 0, float centerY = 0, int number = 0)
     {
 
@@ -189,38 +148,43 @@ public class mapRenderer
         {
 
             GameObject temp = new GameObject();
+            temp.transform.parent = gameObject.transform;
+
             PointableObject pointableObject = temp.AddComponent(getType(level)) as PointableObject;
 
             string currentName = data.Item3;
+            pointableObject.SetParent(gameObject.transform);
 
             pointableObject.Constructor(data.Item1, data.Item3, temp, data.Item2, parentName, report_grabbed);
-            pointableObject.SetParent(gameObject.transform);
             children.Add(pointableObject);
             if (parent != null)
             {
                 parent.AddChild(pointableObject);
                 pointableObject.parent = parent;
             }
+            var _buildingData = pointableObject.getMapContainer().getBuildingData();
+            
 
             if (level == (int) LEVEL.COUNTY_LEVEL &&
                 (_buildingData.ContainsKey(parentName) && _buildingData[parentName].ContainsKey(currentName)))
             {
                 var buildingList = _buildingData[parentName][currentName];
 
-                if (!buildingData.ContainsKey(parentName))
-                {
-                    buildingData.Add(parentName, new Dictionary<string, List<Buildings>>());
-                }
+                //if (!buildingData.ContainsKey(parentName))
+                //{
+                //    buildingData.Add(parentName, new Dictionary<string, List<Buildings>>());
+                //}
 
-                Dictionary<String, List<Buildings>> stateData = buildingData[parentName];
+                //Dictionary<String, List<Buildings>> stateData = buildingData[parentName];
 
-                if (!stateData.ContainsKey(currentName))
-                {
-                    stateData.Add(currentName, new List<Buildings>());
-                }
+                //if (!stateData.ContainsKey(currentName))
+                //{
+                //    stateData.Add(currentName, new List<Buildings>());
+                //}
 
-                stateData[currentName].Clear();
+               List<Buildings> final_list = new List<Buildings>();
 
+                var county = temp.GetComponent<County>();
 
                 foreach (var b in buildingList)
                 {
@@ -236,11 +200,13 @@ public class mapRenderer
                     newBuilding.Data = float.Parse(b[5]);
                     newBuilding.Volume = float.Parse(b[6]);
 
-                    stateData[currentName].Add(newBuilding);
+                    final_list.Add(newBuilding);
 
-
-
+                    //stateData[currentName].Add(newBuilding);
+                                       
                 }
+
+                county.buildings = final_list;
 
 
 

@@ -85,9 +85,8 @@ public class draw_object : MonoBehaviour
 
         if (_startUp)
         {
-            dataAccessor.load();
 
-            string file = "C:\\Users\\FIT3162\\Desktop\\group3_vr\\mapGeoJSON\\America.txt";
+            string file = this.transform.root.GetComponent<MapContainer>().mainMap;
             this.parentName = "America";
 
             mapRenderer map = new mapRenderer();
@@ -285,7 +284,7 @@ public class draw_object : MonoBehaviour
 
         if (level == (int)mapRenderer.LEVEL.STATE_LEVEL)
         {
-             file = "C:\\Users\\FIT3162\\Desktop\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.name + ".json";
+             file = this.transform.root.GetComponent<MapContainer>().pathToStates + pointableObject.name + ".json";
 
 
             map.drawMultiple(this.gameObject, reportGrabbed, file, level, pointableObject);
@@ -295,8 +294,8 @@ public class draw_object : MonoBehaviour
         }
         else
         {
-            file = "C:\\Users\\FIT3162\\Desktop\\group3_vr\\mapGeoJSON\\state_map\\" + pointableObject.parentName + ".json";
-            if (mapRenderer.checkForBuildings(pointableObject.name, pointableObject.parentName))
+            file = this.transform.root.GetComponent<MapContainer>().pathToStates + pointableObject.parentName + ".json";
+            if (this.transform.root.GetComponent<MapContainer>().checkForBuildings(pointableObject.name, pointableObject.parentName))
             {
 
                 foreach (var line in File.ReadAllLines(file))

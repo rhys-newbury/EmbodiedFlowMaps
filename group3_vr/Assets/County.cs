@@ -88,9 +88,8 @@ public class County : PointableObject
     public void Update()
     {
 
-        var l = buildingData[this.parentName]?[this.name];
 
-        foreach (var building in l)
+        foreach (var building in this.buildings)
         {
 
             journeyLength = Vector3.Distance(building.CapacityCube.transform.localScale, new Vector3(0.01f, 0.5f, 0.01f));
@@ -146,9 +145,8 @@ public class County : PointableObject
 
         startTime += 0.1f;
 
-        var l = buildingData[this.parentName][this.name];
 
-            foreach (var building in l)
+            foreach (var building in this.buildings)
             {
 
 
@@ -169,9 +167,8 @@ public class County : PointableObject
     {
 
 
-        var l = buildingData[this.parentName][this.name];
 
-        foreach (var building in l)
+        foreach (var building in this.buildings)
         {
 
 
@@ -194,7 +191,6 @@ public class County : PointableObject
             building.VolumeCube.GetComponent<MeshRenderer>().material = Resources.Load("Materials/GlowingGreen", typeof(Material)) as Material;
 
            
-            buildings.Add(building);
 
             //dummyScaler.transform.position = pos += new Vector3(0f, -0.16f, 0f);
 

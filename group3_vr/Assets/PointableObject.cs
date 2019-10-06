@@ -43,6 +43,12 @@ public class PointableObject : Pointable
 
     }
 
+    public MapContainer getMapContainer()
+    {
+        return this.transform.root.GetComponent<MapContainer>();
+              
+    }
+
     public override void OnThrow()
     {
 
@@ -75,6 +81,7 @@ public class PointableObject : Pointable
 
             //Create the gameObject for the map and then Draw it.
             GameObject mapGameObject = new GameObject();
+            mapGameObject.transform.parent = this.transform.root;
             draw_object main = mapGameObject.AddComponent(typeof(draw_object)) as draw_object;
             main?.Draw(this, this.GetLevel() + 1);
 
@@ -187,7 +194,7 @@ public class PointableObject : Pointable
         this.mesh.RecalculateBounds();
 
         //Color meshColor = UnityEngine.Random.ColorHSV();
-        Color meshColor = dataAccessor.getColour(dataAccessor.getData(this.name, this.parentName));
+        Color meshColor = this.getMapContainer().getCountryColour(this.getMapContainer().getData(this.name, this.parentName));
 
         // Set up game object with mesh;
         meshRenderer = objToSpawn.AddComponent<MeshRenderer>();
@@ -232,7 +239,6 @@ public class PointableObject : Pointable
         this.centerX = (bounds[0] + bounds[2]) / 2F;
         this.centerY = (bounds[1] + bounds[3]) / 2F;
 
-        this.wrapper = new GameObject();
 
         this.go = Instantiate(Resources.Load("ObjectTooltip")) as GameObject;
         go.transform.parent = this.wrapper.transform;
@@ -259,6 +265,8 @@ public class PointableObject : Pointable
 
     public void SetParent(Transform parent)
     {
+
+        this.wrapper = new GameObject();
         this.wrapper.transform.SetParent(parent);
     }
 

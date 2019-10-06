@@ -81,9 +81,9 @@ public class Bezier : System.Object
     //where _num is the desired output of points and _precision is how good we want matching to be
     public void CalculatePoints(int num)
     {
-        points = new Vector3[num];
+        points = new Vector3[num+1];
 
-        for (int p = 0; p < num; p++)
+        for (int p = 0; p <= num; p++)
         {
             Vector3 newPoint = GetPointAtTime((float)p / num); //get next point
             points[p] = newPoint;
