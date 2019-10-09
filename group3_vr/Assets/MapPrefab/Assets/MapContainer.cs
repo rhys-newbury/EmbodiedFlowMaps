@@ -18,6 +18,7 @@ public class MapContainer : MonoBehaviour
 
     private static Dictionary<String, Dictionary<string, bool>> currently_joined = new Dictionary<String, Dictionary<string, bool>>();
     private string parentName;
+    private MapController mapController;
     private int level;
     public static bool update;
 
@@ -105,6 +106,7 @@ public class MapContainer : MonoBehaviour
             if (!(this.moved))
             {
                 this.transform.localScale = new Vector3(1F, 1F, 1F);
+                this.transform.parent = this.transform.root.GetComponent<MapController>().transform;
 
                 this.stack_remove(this, 0);
                 this.moved = true;
@@ -311,12 +313,12 @@ public class MapContainer : MonoBehaviour
     {
         if (level == (int)(int)mapRenderer.LEVEL.STATE_LEVEL)
         {
-            this.transform.root.GetComponent<MapController>().StateStack.stack_remove(this);
+            this.mapController.StateStack.stack_remove(this);
 
         }
         else
         {
-            this.transform.root.GetComponent<MapController>().CountyStack.stack_remove(this);
+            this.mapController.CountyStack.stack_remove(this);
 
         }
     }
@@ -325,11 +327,14 @@ public class MapContainer : MonoBehaviour
     internal void Draw(PointableObject pointableObject, int level)
     {
 
+        this.mapController = this.transform.root.GetComponent<MapController>();
+
         this.reportGrabbed = delegate (bool x)
         {
             if (!(this.moved))
             {
                 this.transform.localScale = new Vector3(1F, 1F, 1F);
+                this.transform.parent = this.mapController.transform;
 
                 this.stack_remove(this, level);
                 this.moved = true;
@@ -339,6 +344,7 @@ public class MapContainer : MonoBehaviour
         string file;
         mapRenderer map = new mapRenderer();
         this.parentName = pointableObject.name;
+
         this.level = level;
 
         if (level == (int)mapRenderer.LEVEL.STATE_LEVEL)
