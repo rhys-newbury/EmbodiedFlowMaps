@@ -18,11 +18,11 @@ public class MapContainer : MonoBehaviour
 
     private static Dictionary<String, Dictionary<string, bool>> currently_joined = new Dictionary<String, Dictionary<string, bool>>();
     private string parentName;
+    private int level;
     public static bool update;
 
 
-    public static List<MapContainer> positonStack = new List<MapContainer>();
-    public static List<MapContainer> countyStack = new List<MapContainer>();
+
 
     private bool moved;
 
@@ -42,8 +42,19 @@ public class MapContainer : MonoBehaviour
 
     public void OnDestroy()
     {
-        if (positonStack.Contains(this)) positonStack.Remove(this);
-       if (countyStack.Contains(this)) countyStack.Remove(this);
+        
+        if (this.level == (int)(int)mapRenderer.LEVEL.STATE_LEVEL)
+        {
+            this.transform.root.GetComponent<MapController>().StateStack.destroy(this);
+
+        }
+        else
+        {
+            this.transform.root.GetComponent<MapController>().StateStack.destroy(this);
+
+
+        }
+ 
     }
 
 
@@ -95,7 +106,7 @@ public class MapContainer : MonoBehaviour
             {
                 this.transform.localScale = new Vector3(1F, 1F, 1F);
 
-                this.stack_remove(this);
+                this.stack_remove(this, 0);
                 this.moved = true;
             }
         };
@@ -106,6 +117,7 @@ public class MapContainer : MonoBehaviour
             Debug.Log(this.transform.root);
             string file = this.transform.root.GetComponent<MapController>().mainMap;
             this.parentName = "America";
+            this.level = 0;
 
             mapRenderer map = new mapRenderer();
             map.drawMultiple(this.gameObject, reportGrabbed, file,0, this.transform.root.GetComponent<MapController>().haveTooltip, this.transform.root.GetComponent<MapController>().mapScale, parentName);
@@ -152,10 +164,7 @@ public class MapContainer : MonoBehaviour
         update = true;
     }
 
-    internal static float GetYPosition(int i)
-    {
-        return i * 0.05F;
-    }
+
     internal static float GetCountyPosition(int i)
     {
         return i * 0.1F;
@@ -222,8 +231,9 @@ public class MapContainer : MonoBehaviour
 
                 float seperation = (this.transform.position - item.transform.position).magnitude;
                 Debug.Log(seperation);
-                if (seperation > 3) {
+                if (seperation > 5) {
                     SetLinkStatus(this.parentName, item.parentName, false);
+                
                 }
                 else if (seperation < 0.5 || IsLinked(this.parentName, item.parentName))
 
@@ -268,43 +278,7 @@ public class MapContainer : MonoBehaviour
         }
     }
 
-    private void stack_remove(MapContainer drawObject)
-    {
-        
-        if (positonStack.Contains(drawObject))
-        {
-            var index = positonStack.IndexOf(drawObject);
-            
-            for (int i = index+1; i<positonStack.Count; i++)
-            {
-                if (positonStack.Count < 10)
-                {
-                    positonStack[i].animationStarted = true;
-                    positonStack[i].startPos = positonStack[i].transform.localPosition;
-                    positonStack[i].anim.Play("ZMovement");
-                }
-                else
-                {
-                    positonStack[i].transform.position -= new Vector3(0, 0, 0.05F);
-                }
-            }
-
-            positonStack.Remove(drawObject);
-        }
-        else if (countyStack.Contains(drawObject))
-        {
-
-            var index = countyStack.IndexOf(drawObject);
-
-            for (int i = index + 1; i < countyStack.Count; i++)
-            {
-                    countyStack[i].transform.position -= new Vector3(0, 0.1F, 0);
-            }
-
-            countyStack.Remove(drawObject);
-
-        }
-    } 
+  
 
     private bool animWasPlaying = false;
     private int resetCount = 0;
@@ -333,6 +307,20 @@ public class MapContainer : MonoBehaviour
         }
     }
 
+    internal void stack_remove(MapContainer container, int level)
+    {
+        if (level == (int)(int)mapRenderer.LEVEL.STATE_LEVEL)
+        {
+            this.transform.root.GetComponent<MapController>().StateStack.stack_remove(this);
+
+        }
+        else
+        {
+            this.transform.root.GetComponent<MapController>().CountyStack.stack_remove(this);
+
+        }
+    }
+
 
     internal void Draw(PointableObject pointableObject, int level)
     {
@@ -343,7 +331,7 @@ public class MapContainer : MonoBehaviour
             {
                 this.transform.localScale = new Vector3(1F, 1F, 1F);
 
-                this.stack_remove(this);
+                this.stack_remove(this, level);
                 this.moved = true;
             }
         };
@@ -351,6 +339,7 @@ public class MapContainer : MonoBehaviour
         string file;
         mapRenderer map = new mapRenderer();
         this.parentName = pointableObject.name;
+        this.level = level;
 
         if (level == (int)mapRenderer.LEVEL.STATE_LEVEL)
         {
@@ -358,8 +347,7 @@ public class MapContainer : MonoBehaviour
 
 
             map.drawMultiple(this.gameObject, reportGrabbed, file, level, true, this.transform.root.GetComponent<MapController>().mapScale, "", pointableObject);
-            this.gameObject.transform.position += new Vector3(0, 0, GetYPosition(positonStack.Count + 1));
-            positonStack.Add(this);
+            this.transform.root.GetComponent<MapController>().StateStack.addMap(this.gameObject, this);
 
         }
         
@@ -378,12 +366,14 @@ public class MapContainer : MonoBehaviour
                     }
                 }
             }
-            
-            this.gameObject.transform.position += new Vector3(0, GetCountyPosition(countyStack.Count + 1), 0);
-            countyStack.Add(this);
+            this.transform.root.GetComponent<MapController>().CountyStack.addMap(this.gameObject, this);
+
+            //this.gameObject.transform.position += new Vector3(0, GetCountyPosition(countyStack.Count + 1), 0);
+            //countyStack.Add(this);
         }
 
         this.transform.localScale = new Vector3(0.25F, 0.25F, 0.25F);
+        
 
 
 

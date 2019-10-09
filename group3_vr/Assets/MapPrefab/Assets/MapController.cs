@@ -14,6 +14,11 @@ public class MapController : MonoBehaviour
     public Legend CountyLegend;
     public Legend FlowLegend;
 
+    public Stack StateStack;
+
+    public Stack CountyStack;
+
+
     public static Color empty_colour = new Color(0,0,0,0.2F);
 
 
@@ -340,67 +345,68 @@ public class MapController : MonoBehaviour
         }
         else if (data > 0 && data < CountyLegend.ClassSeperator1)
         {
-            return CountyLegend.Colour1;
+            return CountyLegend.scheme[0];
         }
         else if (data > CountyLegend.ClassSeperator1 && data < CountyLegend.ClassSeperator2)
         {
-            return CountyLegend.Colour2;
+            return CountyLegend.scheme[1];
         }
         else if (data > CountyLegend.ClassSeperator2 && data < CountyLegend.ClassSeperator3)
         {
-            return CountyLegend.Colour3;
+            return CountyLegend.scheme[2];
         }
 
         else if (data > CountyLegend.ClassSeperator3 && data < CountyLegend.ClassSeperator4)
         {
-            return CountyLegend.Colour4;
+            return CountyLegend.scheme[3];
         }
         else if (data > CountyLegend.ClassSeperator4 && data < CountyLegend.ClassSeperator5)
         {
-            return CountyLegend.Colour5;
+            return CountyLegend.scheme[4];
         }
         else if (data > CountyLegend.ClassSeperator5 && data < CountyLegend.ClassSeperator6)
         {
-            return CountyLegend.Colour6;
+            return CountyLegend.scheme[5];
         }
         else
         {
-            return CountyLegend.Colour7;
+            return CountyLegend.scheme[6];
         }
     }
 
     internal Material getFlowColour(float data)
     {
-
+        var material = Resources.Load("Materials/GlowingBlue1", typeof(Material)) as Material;
         if (data > 0 && data < FlowLegend.ClassSeperator1)
         {
-            return Resources.Load("Materials/GlowingBlue1", typeof(Material)) as Material;
+            material.SetColor("_EmissionColor", FlowLegend.scheme[0]);
         }
         else if (data > FlowLegend.ClassSeperator1 && data < FlowLegend.ClassSeperator2)
         {
-            return Resources.Load("Materials/GlowingBlue2", typeof(Material)) as Material;
+            material.SetColor("_EmissionColor", FlowLegend.scheme[1]);
         }
         else if (data > FlowLegend.ClassSeperator2 && data < FlowLegend.ClassSeperator3)
         {
-            return Resources.Load("Materials/GlowingBlue3", typeof(Material)) as Material;
+            material.SetColor("_EmissionColor", FlowLegend.scheme[2]);
         }
 
         else if (data > FlowLegend.ClassSeperator3 && data < FlowLegend.ClassSeperator4)
         {
-            return Resources.Load("Materials/GlowingBlue4", typeof(Material)) as Material;
+            material.SetColor("_EmissionColor", FlowLegend.scheme[3]);
         }
         else if (data > FlowLegend.ClassSeperator4 && data < FlowLegend.ClassSeperator5)
         {
-            return Resources.Load("Materials/GlowingBlue5", typeof(Material)) as Material;
+            material.SetColor("_EmissionColor", FlowLegend.scheme[4]);
         }
         else if (data > FlowLegend.ClassSeperator5 && data < FlowLegend.ClassSeperator6)
         {
-            return Resources.Load("Materials/GlowingBlue6", typeof(Material)) as Material;
+            material.SetColor("_EmissionColor", FlowLegend.scheme[5]);
         }
         else
         {
-            return Resources.Load("Materials/GlowingBlue7", typeof(Material)) as Material;
+            material.SetColor("_EmissionColor", FlowLegend.scheme[6]);
         }
+        return material;
     }
 
 
