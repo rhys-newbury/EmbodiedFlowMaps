@@ -1,7 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-
+/// <summary>
+/// Generic class which is used to triangulate points in to a mesh
+/// Code based on: http://wiki.unity3d.com/index.php/Triangulator
+/// </summary>
 public class Triangulator
 {
     protected List<Vector2> mPoints = new List<Vector2>();

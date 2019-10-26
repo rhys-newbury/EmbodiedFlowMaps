@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-
-public class Stack : Pointable
+/// <summary>
+/// A stack class which creates an animated stack of maps
+/// </summary>
+public class Stack : InteractableObject
 {
 
     public enum Sepration { HorizontalSeperation, VerticalSeperation};
@@ -16,12 +16,20 @@ public class Stack : Pointable
 
     internal Vector3 prevPos;
     private Quaternion prevRot;
-
+    /// <summary>
+    /// Find position of which the object should be placed
+    /// </summary>
+    /// <returns>float, position along the stack.</returns>
+    /// 
     internal float GetYPosition(int i)
     {
         return i * seperationDistance;
     }
-    // Start is called before the first frame update
+    /// <summary>
+    /// Save the starting position of the map. 
+    /// </summary>
+    /// <returns></returns>
+    /// 
     void Start()
     {
 
@@ -29,7 +37,11 @@ public class Stack : Pointable
 
     }
 
-    // Update is called once per frame
+
+    /// <summary>
+    /// On update, move the stack objects along with the handle.
+    /// </summary>
+    /// 
     void LateUpdate()
     {
         if (seperationMethod == Sepration.VerticalSeperation) {
@@ -43,6 +55,7 @@ public class Stack : Pointable
         var diff = this.gameObject.transform.position - prevPos;
 
         prevPos = this.gameObject.transform.position;
+
         if (diff.magnitude == 0) return;
 
         foreach (var item in positonStack)
@@ -53,7 +66,11 @@ public class Stack : Pointable
         
 
     }
-
+    /// <summary>
+    /// On removal on an object from the stack.
+    /// </summary>
+    /// <returns></returns>
+    /// 
     internal void stack_remove(MapContainer drawObject)
     {
 
@@ -76,17 +93,13 @@ public class Stack : Pointable
                     if (seperationMethod == Sepration.VerticalSeperation)
                     {
                         positonStack[i].transform.position -= new Vector3(0, seperationDistance, 0);
-                        //gameObject.transform.localScale -= new Vector3(0, 0, 0.05F);
-
                     }
                     else
                     {
                         var translation = this.transform.TransformDirection(new Vector3(0, seperationDistance, 0));
 
                         positonStack[i].transform.position -= translation;
-                        //gameObject.transform.localScale -= new Vector3(0, 0.05F, 0);
-
-
+               
                     }
                 }
             }
@@ -95,12 +108,20 @@ public class Stack : Pointable
         }
         
     }
-
+    /// <summary>
+    /// Remove the destoyed object from the stack.
+    /// </summary>
+    /// <returns></returns>
+    /// 
     internal void destroy(MapContainer mapContainer)
     {
         stack_remove(mapContainer);
     }
-
+    /// <summary>
+    /// Add a map object to the stack.
+    /// </summary>
+    /// <returns></returns>
+    /// 
     internal void addMap(GameObject gameObject, MapContainer container)
     {
         gameObject.transform.position = this.gameObject.transform.position;
@@ -108,25 +129,15 @@ public class Stack : Pointable
         if (seperationMethod == Sepration.VerticalSeperation)
         {
             gameObject.transform.position += new Vector3(0, GetYPosition(positonStack.Count + 1), 0);
-            //gameObject.transform.localScale += new Vector3(0/*,*/ 0.05F, 0);
-
         }
         else
         {
             var translation = this.transform.TransformDirection(new Vector3(0, GetYPosition(positonStack.Count + 1), 0));
 
             gameObject.transform.position += translation;
-            //gameObject.transform.localScale += new Vector3(0, 0, 0.05F);
-
 
         }
         positonStack.Add(container);
-
-        //container.transform.parent = this.transform;
-
-
-
-
 
     }
 }

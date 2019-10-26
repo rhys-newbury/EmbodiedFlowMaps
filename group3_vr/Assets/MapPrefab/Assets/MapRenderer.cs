@@ -1,15 +1,15 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using System.IO;
 using System.Text.RegularExpressions;
-using UnityEngine.EventSystems;
 using VRTK;
 using System;
 using UnityEngine.UI;
-
-public class mapRenderer
+/// <summary>
+/// A script used to parse geoJSON and convert in to a series of x,y points for the triangulator.
+/// </summary>
+public class MapRenderer
 {
 
     //Set up some Regex to strip data from the GeoJSON
@@ -37,15 +37,15 @@ public class mapRenderer
     }
 
 
-    public void drawSingular(GameObject gameObject, Action<bool> report_grabbed, string inp_ln, string parentName, int level, PointableObject parent, float centerX = 0, float centerY = 0, int number = 0)
+    public void drawSingular(GameObject gameObject, Action<bool> report_grabbed, string inp_ln, string parentName, int level, InteractableMap parent, float centerX = 0, float centerY = 0, int number = 0)
     {
 
-        drawMultipleThing(gameObject, report_grabbed, inp_ln,level, parentName, new Vector3(1,1,1), parent, true, centerX, centerY, number);
+        drawMultipleMaps(gameObject, report_grabbed, inp_ln,level, parentName, new Vector3(1,1,1), parent, true, centerX, centerY, number);
 
     }
 
     public void drawMultiple(GameObject gameObject, Action<bool> report_grabbed, string dataFile, int level, bool haveTooltip, Vector3 scale, string parentName="",
-        PointableObject parent = null, float centerX = 0, float centerY = 0, int number = 0)
+        InteractableMap parent = null, float centerX = 0, float centerY = 0, int number = 0)
     {
         string data = File.ReadAllText(dataFile);
 
@@ -56,12 +56,12 @@ public class mapRenderer
         }
 
 
-        drawMultipleThing(gameObject, report_grabbed, data,level, parentName,scale, parent, haveTooltip, centerX, centerY, number);
+        drawMultipleMaps(gameObject, report_grabbed, data,level, parentName,scale, parent, haveTooltip, centerX, centerY, number);
     }
 
 
 
-    public void drawMultipleThing(GameObject gameObject, Action<bool> report_grabbed, string dataFile, int level, string parentName, Vector3 scale,PointableObject parent=null, bool haveTooltip=true
+    public void drawMultipleMaps(GameObject gameObject, Action<bool> report_grabbed, string dataFile, int level, string parentName, Vector3 scale,InteractableMap parent=null, bool haveTooltip=true
         ,float centerX=0, float centerY=0, int number=0)
     {
 
@@ -146,7 +146,7 @@ public class mapRenderer
 
         area = (totalMaxX - totalMinX) * (totalMaxY - totalMinY);
 
-        var children = new List<PointableObject>();
+        var children = new List<InteractableMap>();
 
         foreach (var data in drawingData)
         {
@@ -154,7 +154,7 @@ public class mapRenderer
             GameObject temp = new GameObject();
             temp.transform.parent = gameObject.transform;
 
-            PointableObject pointableObject = temp.AddComponent(getType(level)) as PointableObject;
+            InteractableMap pointableObject = temp.AddComponent(getType(level)) as InteractableMap;
 
             string currentName = data.Item3;
             pointableObject.SetParent(gameObject.transform);
@@ -166,7 +166,7 @@ public class mapRenderer
                 parent.AddChild(pointableObject);
                 pointableObject.parent = parent;
             }
-            var _buildingData = pointableObject.getMapContainer().getBuildingData();
+            var _buildingData = pointableObject.getMapController().getBuildingData();
             
 
             if (level == (int) LEVEL.COUNTY_LEVEL &&

@@ -1,22 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+/// <summary>
+/// A Legend class which uses class seperators to return colours based on chosen scheme
+/// </summary>
 public class Legend : MonoBehaviour
 {
-    //public Color Colour1;
-    //public Color Colour2;
-    //public Color Colour3;
-    //public Color Colour4;
-    //public Color Colour5;
-    //public Color Colour6;
-    //public Color Colour7;
-
-    //Based on D3 colour scheme
-    public enum ColourScheme { schemeBlues, schemeGreens, schemeGreys, schemeOranges, schemePurples, schemeReds, schemeBuGn, schemeBuPu, schemeGnBu, schemeOrRd, schemePuBuGn };
-    public ColourScheme LegendColour;
-
 
 
     public int ClassSeperator1;
@@ -28,41 +18,38 @@ public class Legend : MonoBehaviour
 
     internal List<Color> scheme;
 
-    // Start is called before the first frame update
-    void Start()
+    public enum ColourScheme { schemeBlues, schemeGreens, schemeGreys, schemeOranges, schemePurples, schemeReds, schemeBuGn, schemeBuPu, schemeGnBu, schemeOrRd, schemePuBuGn };
+    public ColourScheme LegendColour;
+
+
+    /// <summary>
+    /// Update tooltips of maps and set colour of legend boxes.
+    /// </summary>
+    /// <returns></returns>
+    /// 
+    private void Start()
     {
+        //Convert chosen colour scheme enumerable, to colour scheme.
         scheme = getColourScheme(LegendColour).Select(stringToColor).ToList();
 
+
         var data = Enumerable.Range(0, this.transform.childCount)
-            .Select(this.transform.GetChild)
-            .Select(x => x.gameObject)
-            .OrderBy(o => o.name)
-            .Where(x => x.name != "SwitchModes");
+                .Select(this.transform.GetChild)
+                .Select(x => x.gameObject)
+                .OrderBy(o => o.name)
+                .Where(x => x.name != "SwitchModes");
 
-        if (this.name == "Legend")
-        {
-            data
-                .Zip(scheme, (x, y) => (x, y))
-                .ToList()
-                .ForEach(v =>
-                {
-                    var meshRenderer = v.x.GetComponent<MeshRenderer>();
-                    meshRenderer.material = new Material(Shader.Find("Sprites/Default"));
-                    meshRenderer.material.color = v.y;
-                });
-        }
-        else
-        {
-            data
-                .Zip(scheme, (x, y) => (x, y))
-                .ToList()
-                .ForEach(v =>
-                {
-                    var meshRenderer = v.x.GetComponent<MeshRenderer>();
-                    meshRenderer.material.SetColor("_EmissionColor", v.y);
-                });
+        data
+            .Zip(scheme, (x, y) => (x, y))
+            .ToList()
+            .ForEach(v =>
+            {
+                var meshRenderer = v.x.GetComponent<MeshRenderer>();
+                meshRenderer.material = new Material(Shader.Find("Sprites/Default"));
+                meshRenderer.material.color = v.y;
+            });
 
-        }
+
 
         var class_data = new int[] { ClassSeperator1, ClassSeperator2, ClassSeperator3, ClassSeperator4, ClassSeperator5, ClassSeperator6 };
 
@@ -78,17 +65,18 @@ public class Legend : MonoBehaviour
             .Zip(ranges, (x, y) => (x, y))
             .ToList()
             .ForEach(x =>
-           {
-               var tootip = x.x.GetComponentInChildren<VRTK.VRTK_ObjectTooltip>();
-               tootip.displayText = format(x.y.x, x.y.y);
-           });
-                     
-
-
-
+            {
+                var tootip = x.x.GetComponentInChildren<VRTK.VRTK_ObjectTooltip>();
+                tootip.displayText = format(x.y.x, x.y.y);
+            });
     }
 
-    string format(int num1, int num2)
+    /// <summary>
+    /// Format the two numbers to be shown on the legend.
+    /// </summary>
+    /// <returns></returns>
+    /// 
+    private string format(int num1, int num2)
     {
         if (num1 == -1)
         {
@@ -100,7 +88,12 @@ public class Legend : MonoBehaviour
         }
     }
 
-    public string[] getColourScheme(ColourScheme ColourSchemeNum)
+    /// <summary>
+    /// Convert colour scheme enumarable in to actual colour scheme.
+    /// </summary>
+    /// <returns>Array of Colour String Hex Codes</returns>
+    /// 
+    private string[] getColourScheme(ColourScheme ColourSchemeNum)
     {
         switch (ColourSchemeNum)
         {
@@ -126,17 +119,16 @@ public class Legend : MonoBehaviour
                 return new string[] { "#f6eff7", "#d0d1e6", "#a6bddb", "#67a9cf", "#3690c0", "#02818a", "#016450" };
         }
     }
-
-    public Color stringToColor(string hexCode)
+    /// <summary>
+    /// Convert colour hex code string in to Color
+    /// </summary>
+    /// <returns>Color represented by hex code.</returns>
+    /// 
+    private Color stringToColor(string hexCode)
     {
         Color colour;
         ColorUtility.TryParseHtmlString(hexCode, out colour);
         return colour;
     }
 
-// Update is called once per frame
-void Update()
-    {
-        
-    }
 }

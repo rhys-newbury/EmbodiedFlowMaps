@@ -6,7 +6,9 @@ using VRTK;
 using System;
 
 
-
+/// <summary>
+/// A Collection of InteractableMaps, wrapped in to a map container. For example 'America' would be a collecton of InteractableMaps(eg States).
+/// </summary>
 public class MapContainer : MonoBehaviour
 {
 
@@ -41,24 +43,29 @@ public class MapContainer : MonoBehaviour
 
     public Vector3 startPos;
 
+    /// <summary>
+    /// Remove from objects on stack, when object is destoryed
+    /// </summary>
     public void OnDestroy()
     {
-        
-        if (this.level == (int)(int)mapRenderer.LEVEL.STATE_LEVEL)
+        if (!this.moved)
         {
-            this.transform.root.GetComponent<MapController>().StateStack.destroy(this);
+            if (this.level == (int)(int)MapRenderer.LEVEL.STATE_LEVEL)
+            {
+                this.mapController.StateStack.destroy(this);
+            }
+            else
+            {
+                this.mapController.CountyStack.destroy(this);
 
-        }
-        else
-        {
-            this.transform.root.GetComponent<MapController>().StateStack.destroy(this);
-
-
+            }
         }
  
     }
 
-
+    /// <summary>
+    /// When object is created, set up Animations and VRTK Interactions
+    /// </summary>
     private void Start()
     {      
 
@@ -103,7 +110,7 @@ public class MapContainer : MonoBehaviour
 
         this.reportGrabbed = delegate (bool x)
         {
-            if (!(this.moved))
+            if (!(this.moved) && (this.level > 0))
             {
                 this.transform.localScale = new Vector3(1F, 1F, 1F);
                 this.transform.parent = this.transform.root.GetComponent<MapController>().transform;
@@ -113,15 +120,15 @@ public class MapContainer : MonoBehaviour
             }
         };
 
-
-        if (this.transform.root.GetComponent<MapController>() == null || this.transform.root.GetComponent<MapController>().startUp)
+        var mc = this.transform.root.GetComponent<MapController>();
+        if (mc != null && this.transform.root.GetComponent<MapController>().startUp)
         {
-            Debug.Log(this.transform.root);
-            string file = this.transform.root.GetComponent<MapController>().mainMap;
+            //Debug.Log(this.transform.root);
+            string file = mc.mainMap;
             this.parentName = "America";
             this.level = 0;
 
-            mapRenderer map = new mapRenderer();
+            MapRenderer map = new MapRenderer();
             map.drawMultiple(this.gameObject, reportGrabbed, file,0, this.transform.root.GetComponent<MapController>().haveTooltip, this.transform.root.GetComponent<MapController>().mapScale, parentName);
 
             this.transform.root.GetComponent<MapController>().startUp = false;
@@ -131,13 +138,18 @@ public class MapContainer : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Delete object and children on throw
+    /// </summary>
+    /// <returns></returns>
+    /// 
     public void OnThrow()
     {
 
         int level = -1;
         //On Throw Delete each item in children
         //Deselect the parent
-        foreach (var item in this.GetComponentsInChildren<PointableObject>())
+        foreach (var item in this.GetComponentsInChildren<InteractableMap>())
         {
             item.Delete();
             item.parent.Deselect();
@@ -149,30 +161,46 @@ public class MapContainer : MonoBehaviour
 
 
     }
-
+    /// <summary>
+    /// Add item to lines list
+    /// </summary>
+    /// <returns></returns>
+    /// 
     void AddLines(LineRenderer l)
     {
         this.lines.Add(l);
     }
+
+
+    /// <summary>
+    /// Set the link status between two objects, set link both ways.
+    /// </summary>
+    /// <param name="i1">Object One</param>
+    /// <param name="i2">Object Two</param>
+    /// <param name="val">The value which to update the link too</param>
+    /// <returns></returns>
+    /// 
     static void SetLinkStatus(string i1, string i2, bool val)
     {
         IsLinked(i1, i2);
         currently_joined[i1][i2] = val;
         currently_joined[i2][i1] = val;
     }
-
+    /// <summary>
+    /// Set update flag.
+    /// </summary>
+    /// <returns></returns>
+    ///
     internal static void DeselectState()
     {
         update = true;
     }
 
-
-    internal static float GetCountyPosition(int i)
-    {
-        return i * 0.1F;
-    }
-
-
+    /// <summary>
+    /// Check if two objects are linked
+    /// </summary>
+    /// <returns></returns>
+    ///
     static bool IsLinked(string i1, string i2) 
     {
         string access1 = i1;
@@ -201,14 +229,17 @@ public class MapContainer : MonoBehaviour
             currently_joined[access2][access1] = false;
         }
 
-        bool output = currently_joined[access1][access2] && currently_joined[access2][access1];
-        currently_joined[access1][access2] = output;
-        currently_joined[access2][access1] = output;
+        bool output = currently_joined[access1][access2] || currently_joined[access2][access1];
+        
         return output;
 
     }
 
-    // Update is called once per frame
+    /// <summary>
+    /// Check if objects are linked and draw flow if nessecary.
+    /// </summary>
+    /// <returns></returns>
+    ///
     void Update()
     {
         if (prevPos == this.transform.position && !update)
@@ -232,7 +263,7 @@ public class MapContainer : MonoBehaviour
             {
 
                 float seperation = (this.transform.position - item.transform.position).magnitude;
-                Debug.Log(seperation);
+                //Debug.Log(seperation);
                 if (seperation > 5) {
                     SetLinkStatus(this.parentName, item.parentName, false);
                 
@@ -242,8 +273,8 @@ public class MapContainer : MonoBehaviour
                 {
                     SetLinkStatus(this.parentName, item.parentName, true);
 
-                    var selected1 = this.GetComponentsInChildren<PointableObject>().Where(x => x.IsSelected()).ToArray();
-                    var selected2 = item.GetComponentsInChildren<PointableObject>().Where(x => x.IsSelected()).ToArray();
+                    var selected1 = this.GetComponentsInChildren<InteractableMap>().Where(x => x.IsSelected()).ToArray();
+                    var selected2 = item.GetComponentsInChildren<InteractableMap>().Where(x => x.IsSelected()).ToArray();
 
                     if (selected1.Any() && selected2.Any())
                     {
@@ -251,22 +282,26 @@ public class MapContainer : MonoBehaviour
                         {
                             foreach (var destination in selected2)
                             {
-                                Bezier b = new Bezier(this.transform, origin, destination);
-                                lines.Add(b.line);
-                                item.AddLines(b.line);
-                                try
+
+                                
+                                if (origin.getMapController().getFlowData(origin.name, origin.parentName, destination.name, destination.parentName) != -1)
                                 {
-                                    b.line.material = origin.getMapContainer().getFlowColour(origin.getMapContainer().getFlowData(origin.name, origin.parentName, destination.name, destination.parentName));
+                                
+                                    Bezier b = new Bezier(this.transform, origin, destination);
+                                    lines.Add(b.line);
+                                    item.AddLines(b.line);
+
+                                    b.line.material = new Material(Shader.Find("Sprites/Default"));
+
+                                    b.line.startColor = Color.green; //new Color(253, 187, 45, 255);
+                                    b.line.endColor = Color.red; // new Color(34, 193,195, 255);
+                                    b.line.startWidth = (1 / 1000000) * origin.getMapController().getFlowData(origin.name, origin.parentName, destination.name, destination.parentName) + 0.02F;
+
+                                    b.line.endWidth = b.line.startWidth; //origin.getMapContainer().getFlowColour(origin.getMapContainer().getFlowData(origin.name, origin.parentName, destination.name, destination.parentName));
+
 
                                 }
-                                catch
-                                {
-                                    b.line.material = Resources.Load("Materials/GlowingBlue1", typeof(Material)) as Material;
-
-                                }
-
-
-
+    
 
                             }
                         }
@@ -284,6 +319,12 @@ public class MapContainer : MonoBehaviour
 
     private bool animWasPlaying = false;
     private int resetCount = 0;
+
+    /// <summary>
+    /// On LateUpdate while object is animating, shift the object back to original position.
+    /// </summary>
+    /// <returns></returns>
+    ///
     private void LateUpdate()
     {
 
@@ -311,7 +352,7 @@ public class MapContainer : MonoBehaviour
 
     internal void stack_remove(MapContainer container, int level)
     {
-        if (level == (int)(int)mapRenderer.LEVEL.STATE_LEVEL)
+        if (level == (int)MapRenderer.LEVEL.STATE_LEVEL)
         {
             this.mapController.StateStack.stack_remove(this);
 
@@ -323,15 +364,21 @@ public class MapContainer : MonoBehaviour
         }
     }
 
-
-    internal void Draw(PointableObject pointableObject, int level)
+    /// <summary>
+    /// Draw the objects inside the MapContainer
+    /// </summary>
+    /// <param name="interactableMap">The empty interactable map to fill with data</param>
+    /// <param name="level">The current level if the object</param>
+    /// <returns></returns>
+    /// 
+    internal void Draw(InteractableMap interactableMap, int level)
     {
 
         this.mapController = this.transform.root.GetComponent<MapController>();
 
         this.reportGrabbed = delegate (bool x)
         {
-            if (!(this.moved))
+            if (!(this.moved) && this.level > 0)
             {
                 this.transform.localScale = new Vector3(1F, 1F, 1F);
                 this.transform.parent = this.mapController.transform;
@@ -342,32 +389,32 @@ public class MapContainer : MonoBehaviour
         };
 
         string file;
-        mapRenderer map = new mapRenderer();
-        this.parentName = pointableObject.name;
+        MapRenderer map = new MapRenderer();
+        this.parentName = interactableMap.name;
 
         this.level = level;
 
-        if (level == (int)mapRenderer.LEVEL.STATE_LEVEL)
+        if (level == (int)MapRenderer.LEVEL.STATE_LEVEL)
         {
-             file = this.transform.root.GetComponent<MapController>().pathToStates + pointableObject.name + ".json";
+             file = this.transform.root.GetComponent<MapController>().pathToStates + interactableMap.name + ".json";
 
 
-            map.drawMultiple(this.gameObject, reportGrabbed, file, level, true, this.transform.root.GetComponent<MapController>().mapScale, "", pointableObject);
+            map.drawMultiple(this.gameObject, reportGrabbed, file, level, true, this.transform.root.GetComponent<MapController>().mapScale, "", interactableMap);
             this.transform.root.GetComponent<MapController>().StateStack.addMap(this.gameObject, this);
 
         }
         
         else
         {
-            file = this.transform.root.GetComponent<MapController>().pathToStates + pointableObject.parentName + ".json";
-            if (this.transform.root.GetComponent<MapController>().checkForBuildings(pointableObject.name, pointableObject.parentName))
+            file = this.transform.root.GetComponent<MapController>().pathToStates + interactableMap.parentName + ".json";
+            if (this.transform.root.GetComponent<MapController>().checkForBuildings(interactableMap.name, interactableMap.parentName))
             {
 
                 foreach (var line in File.ReadAllLines(file))
                 {
-                    if (line.Contains(pointableObject.name))
+                    if (line.Contains(interactableMap.name))
                     {
-                        map.drawSingular(this.gameObject, reportGrabbed, line, pointableObject.parentName, level, pointableObject);
+                        map.drawSingular(this.gameObject, reportGrabbed, line, interactableMap.parentName, level, interactableMap);
                         break;
                     }
                 }

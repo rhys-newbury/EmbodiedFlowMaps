@@ -2,22 +2,35 @@
 using VRTK;
 using System;
 
+/// <summary>
+/// Class containing a building. A building consists of two cubes, one for volume and one for capacity
+/// </summary>
 public class Buildings : MonoBehaviour
 {
+
     public float Volume { get; set; }
+    
     public float Data { get; set; }
-    public GameObject GameObj { get; } 
+    
+    public GameObject GameObj { get; }
 
     public GameObject CapacityCube { get; set; }
-
+   
     public GameObject VolumeCube { get; set; }
-
+    /// <summary>
+    /// Store for the GameObject for the tooltip
+    /// </summary>
     public GameObject go;
-
+    /// <summary>
+    /// Store for the VRTK Tooltip
+    /// </summary>
     public VRTK_ObjectTooltip tooltip;
 
-   
 
+    /// <summary>
+    /// Constrctor for the class, which creats two builidings, with tooltips.
+    /// </summary>
+    /// <returns></returns>
     public Buildings()
     {
         GameObj = new GameObject();

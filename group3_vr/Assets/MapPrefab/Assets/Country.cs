@@ -1,68 +1,24 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using System.Linq;
-using System.IO;
-using System.Text.RegularExpressions;
-using UnityEngine.EventSystems;
-using VRTK;
-using System;
-using UnityEngine.UI;
-public class Country : PointableObject
+﻿/// <summary>
+/// An InteractableMap, specifically an instance of a Country.
+/// </summary>
+public class Country : InteractableMap
 {
 
+    /// <summary>
+    /// Specify the level of the Map.
+    /// </summary>
+    /// <returns>The level of the map</returns>
+    /// 
     public override int GetLevel()
     {
         return 0;
     }
-    private readonly List<GameObject> lines = new List<GameObject>();
-    public override void AddLine(GameObject line)
-    {
-        lines.Add(line);
-    }
-    public override void RemoveLines()
-    {
-        lines.ToList().ForEach(Destroy);
-        lines.Clear();
-    }
-
-    internal override void AddToList(string parentName, string name)
-    {
-
-        this.getMapContainer().addToList(parentName, name);
-
-    }
 
 
-    public override void GetInternalFlows(PointableObject origin)
-    {
-        foreach (var state in origin.siblings)
-        {
-            try {
-                if (state.Key != origin.name)
-                {
-                    var destination = state.Value;
-
-                    if (destination.IsSelected())
-                    {
-
-
-                        Bezier b = new Bezier(this.transform, origin, destination);
-
-                        this.lines.Add(b.obj);
-                        destination.AddLine(b.obj);
-                        b.line.material = origin.getMapContainer().getFlowColour(origin.getMapContainer().getFlowData(origin.name, origin.parentName, destination.name, destination.parentName));
-
-
-                    }
-
-                }
-            }
-            catch { }
-        }
-
-    }
-
+    /// <summary>
+    /// Override delete, such that the no Country Map can be deleted. However, the children can be.
+    /// </summary>
+    /// 
     internal override void Delete()
     {
         var p = children.Count > 0 ? this.children[0].transform.parent.transform.parent.gameObject : null;

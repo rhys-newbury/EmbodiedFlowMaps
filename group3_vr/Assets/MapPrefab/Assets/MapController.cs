@@ -1,18 +1,20 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
 
+/// <summary>
+/// A controlling instance for a series of MapContainers.
+/// </summary>
 public class MapController : MonoBehaviour
 { 
     public string mainMap;
     public string pathToStates;
     public string pathToData;
 
-    public Legend CountyLegend;
-    public Legend FlowLegend;
+    public Legend CountryLegend;
+    //public ThicknessLegend FlowLegend;
 
     public Stack StateStack;
 
@@ -43,7 +45,13 @@ public class MapController : MonoBehaviour
     public static bool isIncoming = true;
 
 
-
+    /// <summary>
+    /// Check for buildings in County
+    /// </summary>
+    /// <param name="County">The name of the County</param>
+    /// <param name="State">The name of the State</param>
+    /// <returns>Boolean which shows if there are buildings in County</returns>
+    /// 
     public bool checkForBuildings(string County, string State)
     {
         return _buildingData.ContainsKey(State) && _buildingData[State].ContainsKey(County);
@@ -56,7 +64,11 @@ public class MapController : MonoBehaviour
     public Vector3 mapScale;
 
 
-
+    /// <summary>
+    /// Load dataset on startup
+    /// </summary>
+    /// <returns></returns>
+    /// 
     void Start()
     {
 
@@ -263,21 +275,20 @@ public class MapController : MonoBehaviour
 
 }
 
-    internal void addToList(string parentName, string name)
-    {
-        if (!list_of_counties.ContainsKey(parentName))
-        {
-            list_of_counties[parentName] = new HashSet<string>();
-        }
-
-        list_of_counties[parentName].Add(name);
-    }
-
+    /// <summary>
+    /// Get list of building data
+    /// </summary>
+    /// <returns></returns>
+    /// 
     internal Dictionary<String, Dictionary<String, List<List<String>>>> getBuildingData()
     {
         return _buildingData;
     }
-
+    /// <summary>
+    /// Get the data from dataset.
+    /// </summary>
+    /// <returns>return amount of data, -1 for no data</returns>
+    /// 
     public float getData(string current, string parent)
     {
         if (isIncoming)
@@ -304,38 +315,29 @@ public class MapController : MonoBehaviour
 
         }
     }
-
+    /// <summary>
+    /// Get flow between two current objects with parents.
+    /// </summary>
+    /// <returns>float representing amount of flow</returns>
+    /// 
     public float getFlowData(string current1, string parent1, string current2, string parent2)
     {
         try
         {
-            return Mathf.Max(county_flow[parent1][current1][parent2][current2], county_flow[parent2][current2][parent1][current1]);
+            return county_flow[parent1][current1][parent2][current2];
+
         }
         catch
         {
-            try
-            {
-                return county_flow[parent2][current2][parent1][current1];
-            }
-
-            catch
-            {
-                try
-                {
-                    return county_flow[parent1][current1][parent2][current2];
-
-                }
-                catch
-                {
-                    return -1;
-                }
-            }
-
-            }
-  
+            return -1;
         }
-    
+    }
 
+    /// <summary>
+    /// Get colour based on legend seperators.
+    /// </summary>
+    /// <returns>Color representing the data</returns>
+    /// 
     internal Color getCountryColour(float data)
     {
 
@@ -343,76 +345,85 @@ public class MapController : MonoBehaviour
         {
             return empty_colour;
         }
-        else if (data > 0 && data < CountyLegend.ClassSeperator1)
+        else if (data > 0 && data < CountryLegend.ClassSeperator1)
         {
-            return CountyLegend.scheme[0];
+            return CountryLegend.scheme[0];
         }
-        else if (data > CountyLegend.ClassSeperator1 && data < CountyLegend.ClassSeperator2)
+        else if (data > CountryLegend.ClassSeperator1 && data < CountryLegend.ClassSeperator2)
         {
-            return CountyLegend.scheme[1];
+            return CountryLegend.scheme[1];
         }
-        else if (data > CountyLegend.ClassSeperator2 && data < CountyLegend.ClassSeperator3)
+        else if (data > CountryLegend.ClassSeperator2 && data < CountryLegend.ClassSeperator3)
         {
-            return CountyLegend.scheme[2];
+            return CountryLegend.scheme[2];
         }
 
-        else if (data > CountyLegend.ClassSeperator3 && data < CountyLegend.ClassSeperator4)
+        else if (data > CountryLegend.ClassSeperator3 && data < CountryLegend.ClassSeperator4)
         {
-            return CountyLegend.scheme[3];
+            return CountryLegend.scheme[3];
         }
-        else if (data > CountyLegend.ClassSeperator4 && data < CountyLegend.ClassSeperator5)
+        else if (data > CountryLegend.ClassSeperator4 && data < CountryLegend.ClassSeperator5)
         {
-            return CountyLegend.scheme[4];
+            return CountryLegend.scheme[4];
         }
-        else if (data > CountyLegend.ClassSeperator5 && data < CountyLegend.ClassSeperator6)
+        else if (data > CountryLegend.ClassSeperator5 && data < CountryLegend.ClassSeperator6)
         {
-            return CountyLegend.scheme[5];
+            return CountryLegend.scheme[5];
         }
         else
         {
-            return CountyLegend.scheme[6];
+            return CountryLegend.scheme[6];
         }
     }
 
-    internal Material getFlowColour(float data)
-    {
-        var material = Resources.Load("Materials/GlowingBlue1", typeof(Material)) as Material;
-        if (data > 0 && data < FlowLegend.ClassSeperator1)
-        {
-            material.SetColor("_EmissionColor", FlowLegend.scheme[0]);
-        }
-        else if (data > FlowLegend.ClassSeperator1 && data < FlowLegend.ClassSeperator2)
-        {
-            material.SetColor("_EmissionColor", FlowLegend.scheme[1]);
-        }
-        else if (data > FlowLegend.ClassSeperator2 && data < FlowLegend.ClassSeperator3)
-        {
-            material.SetColor("_EmissionColor", FlowLegend.scheme[2]);
-        }
+    //internal float getFlowColour(float data)
+    //{
+    //    var material = Resources.Load("Materials/GlowingBlue1", typeof(Material)) as Material;
+    //    if (data == -1)
+    //    {
+    //        return 0;
+    //    }
+    //    if (data > 0 && data < FlowLegend.ClassSeperator1)
+    //    {
+    //        return 0.02F;
+    //    }
+    //    else if (data > FlowLegend.ClassSeperator1 && data < FlowLegend.ClassSeperator2)
+    //    {
+    //        return 0.03F;
+    //    }
+    //    else if (data > FlowLegend.ClassSeperator2 && data < FlowLegend.ClassSeperator3)
+    //    {
+    //        return 0.04F;
+    //    }
 
-        else if (data > FlowLegend.ClassSeperator3 && data < FlowLegend.ClassSeperator4)
-        {
-            material.SetColor("_EmissionColor", FlowLegend.scheme[3]);
-        }
-        else if (data > FlowLegend.ClassSeperator4 && data < FlowLegend.ClassSeperator5)
-        {
-            material.SetColor("_EmissionColor", FlowLegend.scheme[4]);
-        }
-        else if (data > FlowLegend.ClassSeperator5 && data < FlowLegend.ClassSeperator6)
-        {
-            material.SetColor("_EmissionColor", FlowLegend.scheme[5]);
-        }
-        else
-        {
-            material.SetColor("_EmissionColor", FlowLegend.scheme[6]);
-        }
-        return material;
-    }
+    //    else if (data > FlowLegend.ClassSeperator3 && data < FlowLegend.ClassSeperator4)
+    //    {
+    //        return 0.05F;
+
+    //    }
+    //    else if (data > FlowLegend.ClassSeperator4 && data < FlowLegend.ClassSeperator5)
+    //    {
+    //        return 0.06F;
+    //    }
+    //    else if (data > FlowLegend.ClassSeperator5 && data < FlowLegend.ClassSeperator6)
+    //    {
+    //        return 0.07F;
+    //    }
+    //    else
+    //    {
+    //        return 0.08F;
+
+    //    }
+    //}
 
 
-    public Dictionary<string, HashSet<string>> list_of_counties = new Dictionary<string, HashSet<string>>();
+    // public Dictionary<string, HashSet<string>> list_of_counties = new Dictionary<string, HashSet<string>>();
 
-
+    /// <summary>
+    /// Convert county code to State Name
+    /// </summary>
+    /// <returns>State name as a string</returns>
+    /// 
     private static string codeToState(string code)
     {
         switch (code)
@@ -522,14 +533,5 @@ public class MapController : MonoBehaviour
             default:
                 return "Texas";
         }
-    }
-
-
-   
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }

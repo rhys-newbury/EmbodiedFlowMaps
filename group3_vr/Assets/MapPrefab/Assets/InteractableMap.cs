@@ -4,7 +4,10 @@ using System.Linq;
 using VRTK;
 using System;
 
-public class PointableObject : Pointable
+/// <summary>
+/// An Interactable Object, specifically an InteractableMap. This class provides a general interface for differnet map instances and lev
+/// </summary>
+public abstract class InteractableMap : InteractableObject
 {
 
     private string name;
@@ -19,47 +22,85 @@ public class PointableObject : Pointable
     private float alpha;
     private MeshRenderer meshRenderer;
     private float centerX, centerY;
-
-    protected List<PointableObject> children = new List<PointableObject>();
-
-
+    protected List<InteractableMap> children = new List<InteractableMap>();
     private float centroidX;
-
     private float centroidY;
     private float zShift;
-
     private bool selected;
+    private readonly List<GameObject> lines = new List<GameObject>();
+
 
     public Mesh mesh;
-    internal PointableObject parent;
-    public Dictionary<string, PointableObject> siblings = new Dictionary<string, PointableObject>();
+    internal InteractableMap parent;
+    public Dictionary<string, InteractableMap> siblings = new Dictionary<string, InteractableMap>();
+    private MapController mapController;
 
-    public void Start()
+    /// <summary>
+    /// Draws a flow between given origin and the siblings, which are currently selected.
+    /// </summary>
+    /// <param name="origin">Origin of the flows</param>
+    /// <returns></returns>
+    /// 
+    public virtual void GetInternalFlows(InteractableMap origin)
     {
+        foreach (var state in origin.siblings)
+        {
+            try
+            {
+                if (state.Key != origin.name && state.Value.IsSelected())
+                {
+                    var destination = state.Value;
+
+                    float flowData = origin.getMapController().getFlowData(origin.name, origin.parentName, state.Value.name, state.Value.parentName);
+                    if (flowData == -1) continue;
+
+                    Bezier b = new Bezier(this.transform, origin, destination);
+
+                    this.lines.Add(b.obj);
+                    destination.AddLine(b.obj);
+
+                    b.line.startWidth = (1 / 1000000.0F) * flowData;
+                    b.line.endWidth = b.line.startWidth;
+
+                    b.line.material = new Material(Shader.Find("Sprites/Default"));
+
+                    b.line.startColor = Color.green; //new Color(253, 187, 45, 255);
+                    b.line.endColor = Color.red; // new Color(34, 193,195, 255);
+
+                }
+            }
+            catch {
+                continue;
+            }
+        }
 
     }
 
-    public virtual void GetInternalFlows(PointableObject origin)
+    /// <summary>
+    /// Return the MapController, which controlles the map instance
+    /// <returns></returns>
+    ///
+    public MapController getMapController()
     {
-
+        this.mapController = this.transform.root.GetComponent<MapController>() ?? this.mapController;
+        return this.mapController;
     }
 
-    public MapController getMapContainer()
-    {
-        return this.transform.root.GetComponent<MapController>();
-              
-    }
-
-    
-
-
- 
-
+    /// <summary>
+    /// When the user grips the map, remove from stack.
+    /// <returns></returns>
+    ///
     public override void OnGripPressed()
     {
         this.reportGrabbed(true);
     }
 
+    /// <summary>
+    /// Behaviour, when the trigger button is pressed.
+    /// If the map is currently selected, consider this a delete
+    /// If the map is not selected, draw a new map
+    /// <returns></returns>
+    ///
     public override void OnTriggerPressed()
     {
 
@@ -88,44 +129,60 @@ public class PointableObject : Pointable
 
     }
 
-
-    public virtual void RemoveLines()
-    {
-
-    }
-
+    /// <summary>
+    /// Add a line to the current list.
+    /// </summary>
+    /// <param name="line">The line to add</param>
+    /// <returns></returns>
+    /// 
     public virtual void AddLine(GameObject line)
     {
-
+        lines.Add(line);
+    }
+    /// <summary>
+    /// Destory the game object for each line, then clear the list
+    /// </summary>
+    /// <returns></returns>
+    /// 
+    public virtual void RemoveLines()
+    {
+        lines.ToList().ForEach(Destroy);
+        lines.Clear();
     }
 
+    /// <summary>
+    /// Return the name of the current state.
+    /// </summary>
+    /// <returns></returns>
+    /// 
     public string GetName()
     {
         return this.name;
     }
 
-    public virtual int GetLevel() {
-        return 0;
-    }
+    public abstract int GetLevel();
 
-
+    /// <summary>
+    /// Enable the tooltip OnPointerEnter.
+    /// </summary>
+    /// <param name="changeText">Delegate function to updae the tooltip text</param>
+    /// <returns></returns>
+    /// 
     public override void OnPointerEnter(Action<string> changeText)
     {
         this.color.a = 0.3F;
         this.meshRenderer.material.color = this.color;
         VRTK_ObjectTooltip tooltip = go.GetComponent<VRTK_ObjectTooltip>();
 
-        if (this.getMapContainer().getData(this.name, this.parentName) == -1)
+        if (this.getMapController().getData(this.name, this.parentName) == -1)
         {
             changeText(this.GetName() + " has no " + (MapController.isIncoming ? " Incoming " : " Outgoing ") + "Flow");
             tooltip.displayText = this.GetName() + " has no " + (MapController.isIncoming ? " Incoming " : " Outgoing ") + "Flow";
-
-
         }
         else
         {
-            changeText(this.GetName() + (MapController.isIncoming ? " Incoming " : " Outgoing ") + "Flow of:" + this.getMapContainer().getData(this.name, this.parentName).ToString());
-            tooltip.displayText = this.GetName() + (MapController.isIncoming ? " Incoming " : " Outgoing ") + "Flow of:" + this.getMapContainer().getData(this.name, this.parentName).ToString();
+            changeText(this.GetName() + (MapController.isIncoming ? " Incoming " : " Outgoing ") + "Flow of:" + this.getMapController().getData(this.name, this.parentName).ToString());
+            tooltip.displayText = this.GetName() + (MapController.isIncoming ? " Incoming " : " Outgoing ") + "Flow of:" + this.getMapController().getData(this.name, this.parentName).ToString();
 
         }
         this.go.SetActive(true);
@@ -133,7 +190,11 @@ public class PointableObject : Pointable
 
     }
 
-
+    /// <summary>
+    /// Disable the tooltip OnPointerLeave.
+    /// </summary>
+    /// <returns></returns>
+    /// 
     public override void OnPointerLeave()
     {
         this.color.a = this.alpha;
@@ -141,11 +202,21 @@ public class PointableObject : Pointable
         this.go.SetActive(false);
     }
 
+    /// <summary>
+    /// Return a boolean, depicting whether the object is selected
+    /// </summary>
+    /// <returns></returns>
+    /// 
     public bool IsSelected()
     {
         return this.selected;
     }
 
+    /// <summary>
+    /// Create the unity mesh from the triangualation result.
+    /// </summary>
+    /// <returns></returns>
+    /// 
     private void DrawObject()
     {
 
@@ -197,7 +268,7 @@ public class PointableObject : Pointable
         this.mesh.RecalculateBounds();
 
         //Color meshColor = UnityEngine.Random.ColorHSV();
-        Color meshColor = this.getMapContainer().getCountryColour(this.getMapContainer().getData(this.name, this.parentName));
+        Color meshColor = this.getMapController().getCountryColour(this.getMapController().getData(this.name, this.parentName));
         this.alpha = meshColor.a;
         this.color = meshColor;
 
@@ -214,21 +285,38 @@ public class PointableObject : Pointable
 
     }
 
+    /// <summary>
+    /// Update the colour of Objects, based on the toggling data.
+    /// </summary>
+    /// <returns></returns>
+    /// 
     public void updateColour()
     {
-        Color meshColor = this.getMapContainer().getCountryColour(this.getMapContainer().getData(this.name, this.parentName));
+        Color meshColor = this.getMapController().getCountryColour(this.getMapController().getData(this.name, this.parentName));
         this.alpha = meshColor.a;
         this.color = meshColor;
         meshRenderer.material.color = this.color;
 
     }
 
+    /// <summary>
+    /// On deselect, destory the line.
+    /// </summary>
+    /// <returns></returns>
+    /// 
     internal void Deselect()
     {
         this.selected = false;
         DestoryLine();
     }
 
+    /// <summary>
+    /// Set the position and rotation of the shape and wrapper.
+    /// </summary>
+    /// <param name="pos">The new position the shape</param>
+    /// <param name="angle">The new angle of the shape</param>
+    /// <returns></returns>
+    /// 
     public void SetPositionAndRotation(Vector3 pos, Quaternion angle)    
     {
         this.transform.SetPositionAndRotation(pos, angle);
@@ -241,6 +329,17 @@ public class PointableObject : Pointable
 
     }
 
+    /// <summary>
+    /// Construct the Interactable Map
+    /// </summary>
+    /// <param name="points">The results of the triangulator</param>
+    /// <param name="name">The name of the map</param>
+    /// <param name="objToSpawn">GameObject which is going to contain the map instance</param>
+    /// <param name="bounds">Bounds of the shape</param>
+    /// <param name="parentName">Name of the parent map</param>
+    /// <param name="reportGrabbed">Delegate function, which the map instance uses to report grabbed</param>
+    /// <returns></returns>
+    /// 
     internal void Constructor(Vector2[] points, string name, GameObject objToSpawn, float[] bounds, string parentName, Action<bool> reportGrabbed)
     {
         T = new Triangulator(points);
@@ -267,15 +366,29 @@ public class PointableObject : Pointable
         
         this.DrawObject();
 
-        this.AddToList(parentName, name);
-    }
-
-   internal virtual void AddToList(string parentName, string name)
-    {
-
+        //this.AddToList(parentName, name);
     }
 
 
+    /// <summary>
+    /// Add the map instance to the list
+    /// </summary>
+    /// <param name="parentName">The name of the map parent</param>
+    /// <param name="name">The name of the map</param>
+    /// <returns></returns>
+    /// 
+    //internal virtual void AddToList(string parentName, string name)
+    //{
+    //    this.getMapController().addToList(parentName, name);
+    //}
+
+
+    /// <summary>
+    /// Set the parent of wrapper GameObject to be the speicfied parent.
+    /// </summary>
+    /// <param name="parent">The parent of the wrapper</param>
+    /// <returns></returns>
+    /// 
     public void SetParent(Transform parent)
     {
 
@@ -283,6 +396,11 @@ public class PointableObject : Pointable
         this.wrapper.transform.SetParent(parent);
     }
 
+    /// <summary>
+    /// Delete children of the map instance
+    /// </summary>
+    /// <returns></returns>
+    /// 
     internal void DeleteChildren()
     {
         if (this.children.Count > 0)
@@ -295,6 +413,11 @@ public class PointableObject : Pointable
         }
     }
 
+    /// <summary>
+    /// Draw a line around the map
+    /// </summary>
+    /// <returns></returns>
+    /// 
     public void CreateLine()
     {
         var line = objToSpawn.AddComponent<LineRenderer>();
@@ -313,19 +436,44 @@ public class PointableObject : Pointable
         line.startWidth = 0.01F;
         line.endWidth = 0.01F;
         line.alignment = LineAlignment.TransformZ;
-
     }
-
+    /// <summary>
+    /// Destroy the line around the map.
+    /// </summary>
+    /// <returns></returns>
+    /// 
+    public void DestoryLine()
+    {
+        this.selected = false;
+        MapContainer.update = true;
+        this.RemoveLines();
+        var line = objToSpawn.GetComponent<LineRenderer>();
+        MapContainer.DeselectState();
+        Destroy(line);
+    }
+    /// <summary>
+    /// Default angle of map
+    /// </summary>
+    /// <returns></returns>
+    /// 
     public virtual Quaternion GetAngle()
     {
         return new Quaternion(0, 1, 0, 0);
     }
-
+    /// <summary>
+    /// Convert Translation in to correct coordinate system
+    /// </summary>
+    /// <returns></returns>
+    /// 
     public virtual Vector3 GetTranslation(float x, float y)
     {
         return new Vector3(x, -y, 0);
     }
-
+    /// <summary>
+    /// Get Final angle of map.
+    /// </summary>
+    /// <returns></returns>
+    /// 
     public virtual Quaternion GetFinalAngle()
     {
         return new Quaternion(0,0,0,1);
@@ -333,25 +481,21 @@ public class PointableObject : Pointable
 
 
 
-    public void DestoryLine()
-    {
-       
-        this.selected = false;
-        MapContainer.update = true;
-        this.RemoveLines();
-        var line = objToSpawn.GetComponent<LineRenderer>();
-        MapContainer.DeselectState();
-        Destroy(line);
 
-
-    }
-
-    internal void AddChild(PointableObject gameObject)
+    /// <summary>
+    /// Add a 'child' to the map instance
+    /// </summary>
+    /// <returns></returns>
+    /// 
+    internal void AddChild(InteractableMap gameObject)
     {
         this.children.Add(gameObject);
-            
     }
-
+    /// <summary>
+    /// Recursively delete the children and destroy the current object.
+    /// </summary>
+    /// <returns></returns>
+    /// 
     internal virtual void Delete()
     {
             this.children.ForEach(x => x.Delete());
@@ -364,8 +508,12 @@ public class PointableObject : Pointable
         }
         catch { }
     }
-
-    internal void SetSiblings(List<PointableObject> children)
+    /// <summary>
+    /// Recursively delete the children and destroy the current object.
+    /// </summary>
+    /// <returns></returns>
+    /// 
+    internal void SetSiblings(List<InteractableMap> children)
     {
 
         foreach (var sibling in children)

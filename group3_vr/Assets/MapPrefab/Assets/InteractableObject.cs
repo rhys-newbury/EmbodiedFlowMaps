@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-
-public class Pointable : MonoBehaviour
+/// <summary>
+/// Defined events for InteractableObjects.
+/// </summary>
+public abstract class InteractableObject : MonoBehaviour
 {
     public virtual void OnUpdateTouchPadPressed(float touchPadAngle, Transform transformDirection) { }
     public virtual void OnPointerEnter(Action<string> changeText) { }

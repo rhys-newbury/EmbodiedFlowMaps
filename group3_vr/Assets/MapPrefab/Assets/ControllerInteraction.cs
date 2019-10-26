@@ -1,36 +1,38 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using VRTK;
-using static MapContainer;
 using System;
 
-//This class is in charge of the laser pointers and interacting with them
-
+/// <summary>
+/// Main class which deals with inteactions between pointer and InteractableObject. InteractableObject supports 5 events which are delegated by this class.
+/// </summary>
 public class ControllerInteraction : MonoBehaviour
 {
     private bool selectingObject;
-    private Pointable currentObject;
-        
-
+    private InteractableObject currentObject;
     
-    //The box currently being drawn
-    private LineRenderer line;
     private VRTK_ControllerTooltips helpTooltip;
     private bool helpTooltipState = false;
+
     private VRTK_ControllerTooltips dataToolTip;
+
     private Action<string> changeText;
+
     private VRTK_ControllerEvents controller;
-    private long oldTime = 0;
-    private Vector3 oldPos = new Vector3(0,0,0);
     private VRTK_Pointer pointer;
 
+    private long oldTime = 0;
+    private Vector3 oldPos = new Vector3(0,0,0);
 
     private List<float> velocityBuffer = (new float[] { 0, 0, 0, 0, 0 }).ToList();
     private bool touchpadPressed = false;
     private float touchpadAngle;
 
+    /// <summary>
+    /// Calculations to be performed on every frame.
+    /// </summary>
+    /// <returns></returns>
     private void Update()
     {
         try
@@ -38,7 +40,7 @@ public class ControllerInteraction : MonoBehaviour
 
             var obj = GetComponent<VRTK_InteractGrab>().GetGrabbedObject();
 
-            if (touchpadPressed) TouchPadMove(obj);
+            if (touchpadPressed) OnUpdateTouchPadPressed(touchpadAngle, pointer.transform.parent.transform, obj);
 
             long time = DateTime.Now.Ticks;
            
@@ -49,13 +51,16 @@ public class ControllerInteraction : MonoBehaviour
                 Vector3 delta = newPos - oldPos;
                 float speed = delta.magnitude / time * (Mathf.Pow(10,20));
 
-                //Add to the velocity buffee
+                //Add to the velocity buffer
                 if (oldPos.magnitude != 0)
                 {
                     velocityBuffer.RemoveAt(0);
                     velocityBuffer.Add(speed);
                 }
                 oldPos = newPos;
+
+                Debug.Log(velocityBuffer);
+                
                 //Condition for a throw to occur.
                 if (velocityBuffer.Sum() > 150 && velocityBuffer.Count((x) => x > 20) > 3) {
                     obj.GetComponentInChildren<MapContainer>()?.OnThrow();
@@ -74,22 +79,33 @@ public class ControllerInteraction : MonoBehaviour
 
     }
 
-    public void OnUpdateTouchPadPressed(float touchpadAngle, Transform transformDirection, GameObject obj)
+
+    /// <summary>
+    /// If the touchpad is being pressed, perform the nessecary action based on the angle.
+    /// </summary>
+    /// <param name="touchpadAngle">Current angle of the touchpad</param>
+    /// <param name="transformDirection">Diretion in which to move the object</param>
+    /// <param name="obj">The object to move</param>
+    /// <returns></returns>
+    /// 
+    private void OnUpdateTouchPadPressed(float touchpadAngle, Transform transformDirection, GameObject obj)
     {
-        //Left/Right -> Rotate
-        //Up/Down -> Back and forth in direction of pointer.
+        //If the first or last section, move towards the user
         if (touchpadAngle < 72 || touchpadAngle > 288)
         {
             obj.transform.position = obj.transform.position + transformDirection.TransformDirection(new Vector3(0, 0, 0.01F));
         }
+        //Rotate about vertical axis, in the negative direction
         else if (touchpadAngle < 144)
         {
             obj.transform.Rotate(new Vector3(0, -1, 0), Space.Self);
         }
+        //If the bottom section, move away from user.
         else if (touchpadAngle < 216)
         {
             obj.transform.position = obj.transform.position + transformDirection.TransformDirection(new Vector3(0, 0, -0.01F));
         }
+        //Rotate about vertical axis, in the positive direction
         else if (touchpadAngle < 288)
         {
             obj.transform.Rotate(new Vector3(0, 1, 0), Space.Self);
@@ -98,12 +114,11 @@ public class ControllerInteraction : MonoBehaviour
     }
 
 
-    void TouchPadMove(GameObject obj)
-    {
-        OnUpdateTouchPadPressed(touchpadAngle, pointer.transform.parent.transform, obj);
-    }
- 
 
+    /// <summary>
+    /// Set up event listeners from Controller and Pointer
+    /// <returns></returns>
+    /// 
     void Awake()
     {
         //VRTK_ControllerEvents controller;
@@ -138,6 +153,10 @@ public class ControllerInteraction : MonoBehaviour
 
 
 
+    /// <summary>
+    /// When Grip is clicked, notify InteractableObject of OnGripPressed and OnPointerLeave
+    /// <returns></returns>
+    /// 
     private void Controller_GripClicked(object sender, ControllerInteractionEventArgs e) {
         // Report that the current object is being grabbed. This can tell the stack it is being removed
         currentObject?.OnGripPressed();
@@ -148,20 +167,32 @@ public class ControllerInteraction : MonoBehaviour
     }
 
 
-
+    /// <summary>
+    /// When Grip is clicked, enable touchpad pressed flag.
+    /// <returns></returns>
+    /// 
     private void Controller_TouchpadPressed(object sender, ControllerInteractionEventArgs e) {
         this.touchpadPressed = true;
     }
-
+    /// <summary>
+    /// When Grip is clicked, disable touchpad pressed flag.
+    /// <returns></returns>
+    /// 
     private void Controller_TouchpadReleased(object sender, ControllerInteractionEventArgs e) {
         this.touchpadPressed = false;
     }
-
+    /// <summary>
+    /// When Grip is clicked, disable update current touchpad angle.
+    /// <returns></returns>
+    /// 
     private void Controller_TouchpadAxisChanged(object sender, ControllerInteractionEventArgs e) {
         //Set the touchpad angle to the current angle
         this.touchpadAngle = e.touchpadAngle;
     }
-
+    /// <summary>
+    /// When TriggerPressed, two options for behaviour. If user is currently pointing at object, notify object on event. Otherwise, show tooltip.
+    /// <returns></returns>
+    /// 
     private void Controller_TriggerPressed(object sender, ControllerInteractionEventArgs e) {
 
         //If still on an object
@@ -178,7 +209,10 @@ public class ControllerInteraction : MonoBehaviour
 
         }
     }
-
+    /// <summary>
+    /// On PointerExit, notify current object, if not null. Disable the tooltip
+    /// <returns></returns>
+    /// 
     private void Pointer_DestinationMarkerExit(object sender, DestinationMarkerEventArgs e) {
 
         try {
@@ -189,7 +223,7 @@ public class ControllerInteraction : MonoBehaviour
             selectingObject = false;
 
             //Tell the objet that the pointer has left
-            currentObject = e.raycastHit.collider.gameObject.GetComponent<Pointable>();
+            currentObject = e.raycastHit.collider.gameObject.GetComponent<InteractableObject>();
             currentObject?.OnPointerLeave();
 
             //Reset tooltips
@@ -205,9 +239,9 @@ public class ControllerInteraction : MonoBehaviour
 
 
     private void Pointer_DestinationMarkerEnter(object sender, DestinationMarkerEventArgs e) {
-        //If the object being his is a PointableObject -> Activate the tooltips, and tell the object that the pointer has entered
+        //If the object being his is a InteractableMap -> Activate the tooltips, and tell the object that the pointer has entered
         try {
-            currentObject = e.raycastHit.collider.gameObject.GetComponent<Pointable>();
+            currentObject = e.raycastHit.collider.gameObject.GetComponent<InteractableObject>();
             selectingObject = true;
             currentObject?.OnPointerEnter(changeText);
             dataToolTip.ToggleTips(true);
