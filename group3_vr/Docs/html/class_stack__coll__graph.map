@@ -1,0 +1,10 @@
+<map id="Stack" name="Stack">
+<area shape="rect" id="node1" title="A stack class which creates an animated stack of maps" alt="" coords="438,331,561,481"/>
+<area shape="rect" id="node2" href="$class_interactable_object.html" title="Defined events for InteractableObjects." alt="" coords="5,132,212,268"/>
+<area shape="rect" id="node3" href="$class_mono_behaviour.html" title=" " alt="" coords="53,5,164,83"/>
+<area shape="rect" id="node4" title=" " alt="" coords="237,161,314,239"/>
+<area shape="rect" id="node5" title=" " alt="" coords="399,161,445,239"/>
+<area shape="rect" id="node6" title=" " alt="" coords="525,161,610,239"/>
+<area shape="rect" id="node7" title=" " alt="" coords="634,161,701,239"/>
+<area shape="rect" id="node8" title=" " alt="" coords="725,161,871,239"/>
+</map>

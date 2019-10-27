@@ -1,0 +1,5 @@
+<map id="DataToggle" name="DataToggle">
+<area shape="rect" id="node1" title="An Interactable Object, specifically a toggle button." alt="" coords="35,315,182,392"/>
+<area shape="rect" id="node2" href="$class_interactable_object.html" title="Defined events for InteractableObjects." alt="" coords="5,131,212,267"/>
+<area shape="rect" id="node3" href="$class_mono_behaviour.html" title=" " alt="" coords="53,5,164,83"/>
+</map>

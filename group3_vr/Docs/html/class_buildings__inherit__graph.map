@@ -1,0 +1,4 @@
+<map id="Buildings" name="Buildings">
+<area shape="rect" id="node1" title="Class containing a building." alt="" coords="5,131,120,296"/>
+<area shape="rect" id="node2" href="$class_mono_behaviour.html" title=" " alt="" coords="7,5,118,83"/>
+</map>
