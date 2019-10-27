@@ -1,22 +1,22 @@
 import urllib3
 import re
 
-list = []
+l = []
 succ = 0
 fail =  0
 dup = 0
+def add_correct_counties(lat_file):
 
-data = []
-with open('UPS network data v2 2019-4-23/lat2.csv') as f:
+    data = []
+    with open(lat_file) as f:
 
-    for index,line in enumerate(f):
-        if index == 0:
-            continue
-        data.append(list(map(lambda x : x.strip(), line.split(","))))
+        for index,line in enumerate(f):
+            if index == 0:
+                continue
+            line_data = line.split(",")
+            data.append(list(map(lambda x : x.strip(), line.split(","))))
+        data = sorted(data, key=lambda x: (float(x[10]),float(x[11])))
     
-    data = sorted(data, key=lambda x: float(x[10]),float(x[11])
-    print(data)
-
         try:
             data = line.split(",")
             lat = data[10]
@@ -44,22 +44,18 @@ with open('UPS network data v2 2019-4-23/lat2.csv') as f:
                 line += "," + county_name
                 succ += 1
 
-            list.append(line)
+            l.append(line)
 
 
             if (succ+fail) % 10 == 0:
                 print(succ,fail)
 
-
-
-
-
         except:
             pass
 
-f = '\n'.join(list)
-x = open("data_with_counties.csv", "w")
-x.write(f)
+    f = '\n'.join(l)
+    x = open("data_with_counties.csv", "w")
+    x.write(f)
 
 
 
