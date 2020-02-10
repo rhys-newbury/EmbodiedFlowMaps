@@ -1,7 +1,7 @@
 ﻿/// <summary>
 /// An InteractableMap, specifically an instance of a State.
 /// </summary>
-public class State : InteractableMap
+public class CountyInState : InteractableMap
 {
     /// <summary>
     /// Specify the level of the Map.

@@ -199,8 +199,12 @@ public class ControllerInteraction : MonoBehaviour
 
         if (currentObject != null)
         {
-           //Do something on click
-            currentObject.OnTriggerPressed();
+            //Do something on click
+            GameObject go = currentObject.OnTriggerPressed(pointer.transform.parent.transform);
+            if (go !=null) {
+                
+                GetComponent<VRTK_InteractGrab>().AttemptGrabObject(go);
+            }
          }
         else
         {

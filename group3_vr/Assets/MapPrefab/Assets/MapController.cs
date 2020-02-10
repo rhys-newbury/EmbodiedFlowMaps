@@ -29,35 +29,19 @@ public class MapController : MonoBehaviour
     private Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, float>>>> county_flow = new Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, float>>>>();
 
 
-
+    private Dictionary<string, Dictionary<string, float>> populationDenisty = new Dictionary<string, Dictionary<string, float>>();
+    
     private Dictionary<string, Dictionary<string, float>> countyIncoming = new Dictionary<string, Dictionary<string, float>>();
 
     private Dictionary<string, Dictionary<string, float>> countyOutcoming = new Dictionary<string, Dictionary<string, float>>();
 
 
 
-    //List of string data for the buildings. This can be converted in to actual buildings on county creation
-    private Dictionary<String, Dictionary<String, List<List<String>>>> _buildingData = null;
-
-    //List of buildings
-    public Dictionary<String, Dictionary<String, List<Buildings>>> buildingData = new Dictionary<String, Dictionary<String, List<Buildings>>>();
+  
 
     public static bool isIncoming = true;
 
-
-    /// <summary>
-    /// Check for buildings in County
-    /// </summary>
-    /// <param name="County">The name of the County</param>
-    /// <param name="State">The name of the State</param>
-    /// <returns>Boolean which shows if there are buildings in County</returns>
-    /// 
-    public bool checkForBuildings(string County, string State)
-    {
-        return _buildingData.ContainsKey(State) && _buildingData[State].ContainsKey(County);
-    }
-
-    public bool startUp = true;
+    internal bool startUp = true;
 
     public bool haveTooltip;
 
@@ -72,6 +56,45 @@ public class MapController : MonoBehaviour
     void Start()
     {
 
+        populationDenisty.Add("America", new Dictionary<string, float>());
+
+        StreamReader pop_dens_stream = new StreamReader(pathToData + "state_population_denisty.csv");
+
+        while (!pop_dens_stream.EndOfStream)
+        {
+            string inp_ln = pop_dens_stream.ReadLine();
+
+            string[] data = inp_ln.Split(',');
+            string state = data[0];
+            float inc_data = float.Parse(data[1]);
+
+            populationDenisty["America"].Add(state, inc_data);
+
+
+        }
+
+        StreamReader cpop_dens_stream = new StreamReader(pathToData + "county_population_density.csv", System.Text.Encoding.GetEncoding("iso-8859-1"));
+
+        while (!cpop_dens_stream.EndOfStream)
+        {
+            string inp_ln = cpop_dens_stream.ReadLine();
+
+            string[] data = inp_ln.Split(',');
+            string state = data[1].Trim();
+            string county = data[0].Trim();
+
+
+            float inc_data = float.Parse(data[2]);
+
+            if (!populationDenisty.ContainsKey(state))
+            {
+                populationDenisty.Add(state, new Dictionary<string, float>());
+            }
+            populationDenisty[state].Add(county, inc_data);
+        }
+
+
+
 
 
         StreamReader inp_stm = new StreamReader(pathToData+"inc.csv");
@@ -85,22 +108,22 @@ public class MapController : MonoBehaviour
             string inp_ln = inp_stm.ReadLine();
 
             string[] data = inp_ln.Split(',');
-            string state = codeToState(data[0]);
+            string state = data[0];
             float inc_data = float.Parse(data[1]);
 
             countyIncoming["America"].Add(state, inc_data);
 
 
         }
-        StreamReader cinp_stm = new StreamReader(pathToData + "county_in.csv");
+        StreamReader cinp_stm = new StreamReader(pathToData + "county_inc.txt", System.Text.Encoding.GetEncoding("iso-8859-1"));
 
         while (!cinp_stm.EndOfStream)
         {
             string inp_ln = cinp_stm.ReadLine();
 
             string[] data = inp_ln.Split(',');
-            string state = data[1];
-            string county = data[0];
+            string state = data[0].Trim();
+            string county = data[1].Trim();
 
 
             float inc_data = float.Parse(data[2]);
@@ -123,22 +146,22 @@ public class MapController : MonoBehaviour
             string out_ln = out_stm.ReadLine();
 
             string[] data = out_ln.Split(',');
-            string state = codeToState(data[0]);
+            string state = data[0];
             float out_data = float.Parse(data[1]);
 
             countyOutcoming["America"].Add(state, out_data);
 
 
         }
-        StreamReader cout_stm = new StreamReader(pathToData + "county_out.csv");
+        StreamReader cout_stm = new StreamReader(pathToData + "county_out.txt", System.Text.Encoding.GetEncoding("iso-8859-1"));
 
         while (!cout_stm.EndOfStream)
         {
             string cout_ln = cout_stm.ReadLine();
 
             string[] data = cout_ln.Split(',');
-            string state = data[1];
-            string county = data[0];
+            string state = data[0].Trim();
+            string county = data[1].Trim();
 
 
             float cout_data = float.Parse(data[2]);
@@ -155,7 +178,7 @@ public class MapController : MonoBehaviour
 
 
 
-        StreamReader inp_stm2 = new StreamReader(pathToData + "flow.csv");
+        StreamReader inp_stm2 = new StreamReader(pathToData + "flow.csv", System.Text.Encoding.GetEncoding("iso-8859-1"));
 
         county_flow["America"] = new Dictionary<string, Dictionary<string, Dictionary<string, float>>>();
 
@@ -166,8 +189,8 @@ public class MapController : MonoBehaviour
 
 
             string[] data = inp_ln.Split(',');
-            string state1 = codeToState(data[0]);
-            string state2 = codeToState(data[1]);
+            string state1 = data[0].Trim();
+            string state2 = data[1].Trim();
             float inc_data = float.Parse(data[2]);
 
             
@@ -187,7 +210,7 @@ public class MapController : MonoBehaviour
 
         }
 
-        StreamReader inp_stm3 = new StreamReader(pathToData + "county_flow.csv");
+        StreamReader inp_stm3 = new StreamReader(pathToData + "county_flow.txt", System.Text.Encoding.GetEncoding("iso-8859-1"));
         
         while (!inp_stm3.EndOfStream)
         {
@@ -196,10 +219,10 @@ public class MapController : MonoBehaviour
 
 
             string[] data = inp_ln.Split(',');
-            string county1 = data[0];
-            string state1 = data[1];
-            string county2 = data[2];
-            string state2 = data[3];
+            string county1 = data[1].Trim();
+            string state1 = data[0].Trim();
+            string county2 = data[3].Trim();
+            string state2 = data[2].Trim();
 
             float inc_data = float.Parse(data[4]);
 
@@ -225,6 +248,31 @@ public class MapController : MonoBehaviour
             current_county[state2][county2] = inc_data;
 
 
+            if (!county_flow.ContainsKey("America"))
+            {
+                county_flow["America"] = new Dictionary<string, Dictionary<string, Dictionary<string, float>>>();
+            }
+
+            if (!county_flow["America"].ContainsKey(state2))
+            {
+                county_flow["America"][state2] = new Dictionary<string, Dictionary<string, float>>();
+            }
+
+            if (!county_flow["America"][state2].ContainsKey(state1))
+            {
+                county_flow["America"][state2][state1] = new Dictionary<string, float>();
+            }
+
+            if (!county_flow["America"][state2][state1].ContainsKey(county1))
+            {
+                county_flow["America"][state2][state1][county1] = 0;
+            }
+                                          
+
+
+            county_flow["America"][state2][state1][county1] += inc_data;
+
+
             if (!current_county.ContainsKey("America"))
             {
                 current_county["America"] = new Dictionary<string, float>();
@@ -240,58 +288,42 @@ public class MapController : MonoBehaviour
         }
 
 
-        //Create a dictionary.
-        _buildingData = new Dictionary<String, Dictionary<String, List<List<String>>>>();
-        StreamReader inp_stm5 = new StreamReader(pathToData + "building_data.csv");
-
-
-
-        while (!inp_stm5.EndOfStream)
-        {
-
-            string inp_ln = inp_stm5.ReadLine();
-
-            List<String> data = inp_ln.Split(',').ToList();
-
-            //Check for existance otherwise add a new dictionary
-            if (!_buildingData.ContainsKey(data[4]))
-            {
-                _buildingData.Add(data[4], new Dictionary<string, List<List<string>>>());
-            }
-            Dictionary<String, List<List<String>>> stateData = _buildingData[data[4]];
-
-
-            if (!stateData.ContainsKey(data[3]))
-            {
-                stateData.Add(data[3], new List<List<string>>());
-            }
-
-            //Add the data to the state
-            stateData[data[3]].Add(data);
-
-        }
     
 
 
 }
 
-    /// <summary>
-    /// Get list of building data
-    /// </summary>
-    /// <returns></returns>
-    /// 
-    internal Dictionary<String, Dictionary<String, List<List<String>>>> getBuildingData()
+
+    public float getPopulationDensity(string current, string parent)
     {
-        return _buildingData;
+        if (populationDenisty.ContainsKey(parent))
+        {
+            if (populationDenisty[parent].ContainsKey(current))
+            {
+                return populationDenisty[parent][current];
+            }
+            else
+            {
+                return -1;
+
+            }
+        }
+
+        else
+        {
+            return -1;
+        }
     }
+
+
     /// <summary>
     /// Get the data from dataset.
     /// </summary>
     /// <returns>return amount of data, -1 for no data</returns>
     /// 
-    public float getData(string current, string parent)
+    public float getData(string current, string parent, bool incoming)
     {
-        if (isIncoming)
+        if (incoming)
         {
             if (countyIncoming.ContainsKey(parent) && countyIncoming[parent].ContainsKey(current))
             {
@@ -333,6 +365,8 @@ public class MapController : MonoBehaviour
         }
     }
 
+       
+
     /// <summary>
     /// Get colour based on legend seperators.
     /// </summary>
@@ -349,24 +383,24 @@ public class MapController : MonoBehaviour
         {
             return CountryLegend.scheme[0];
         }
-        else if (data > CountryLegend.ClassSeperator1 && data < CountryLegend.ClassSeperator2)
+        else if (data >= CountryLegend.ClassSeperator1 && data < CountryLegend.ClassSeperator2)
         {
             return CountryLegend.scheme[1];
         }
-        else if (data > CountryLegend.ClassSeperator2 && data < CountryLegend.ClassSeperator3)
+        else if (data >= CountryLegend.ClassSeperator2 && data < CountryLegend.ClassSeperator3)
         {
             return CountryLegend.scheme[2];
         }
 
-        else if (data > CountryLegend.ClassSeperator3 && data < CountryLegend.ClassSeperator4)
+        else if (data >= CountryLegend.ClassSeperator3 && data < CountryLegend.ClassSeperator4)
         {
             return CountryLegend.scheme[3];
         }
-        else if (data > CountryLegend.ClassSeperator4 && data < CountryLegend.ClassSeperator5)
+        else if (data >= CountryLegend.ClassSeperator4 && data < CountryLegend.ClassSeperator5)
         {
             return CountryLegend.scheme[4];
         }
-        else if (data > CountryLegend.ClassSeperator5 && data < CountryLegend.ClassSeperator6)
+        else if (data >= CountryLegend.ClassSeperator5 && data < CountryLegend.ClassSeperator6)
         {
             return CountryLegend.scheme[5];
         }

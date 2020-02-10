@@ -31,6 +31,8 @@ public class MapContainer : MonoBehaviour
 
     private Action<bool> reportGrabbed;
 
+    public VRTK_InteractableObject interactObject;
+
     public Animation anim;
     AnimationClip animationClip;
 
@@ -46,30 +48,30 @@ public class MapContainer : MonoBehaviour
     /// <summary>
     /// Remove from objects on stack, when object is destoryed
     /// </summary>
-    public void OnDestroy()
-    {
-        if (!this.moved)
-        {
-            if (this.level == (int)(int)MapRenderer.LEVEL.STATE_LEVEL)
-            {
-                this.mapController.StateStack.destroy(this);
-            }
-            else
-            {
-                this.mapController.CountyStack.destroy(this);
+    //public void OnDestroy()
+    //{
+    //    if (!this.moved)
+    //    {
+    //        if (this.level == (int)(int)MapRenderer.LEVEL.STATE_LEVEL)
+    //        {
+    //            this.mapController.StateStack.destroy(this);
+    //        }
+    //        else
+    //        {
+    //            this.mapController.CountyStack.destroy(this);
 
-            }
-        }
- 
-    }
+    //        }
+    //    }
+
+    //}
 
     /// <summary>
     /// When object is created, set up Animations and VRTK Interactions
     /// </summary>
-    private void Start()
-    {      
-
-        VRTK_InteractableObject interactObject = gameObject.AddComponent(typeof(VRTK_InteractableObject)) as VRTK_InteractableObject;
+    /// 
+    private void Awake()
+    {
+        interactObject = gameObject.AddComponent(typeof(VRTK_InteractableObject)) as VRTK_InteractableObject;
         VRTK_InteractHaptics interactHaptics = gameObject.AddComponent(typeof(VRTK_InteractHaptics)) as VRTK_InteractHaptics;
         VRTK.GrabAttachMechanics.VRTK_ChildOfControllerGrabAttach grabAttach = gameObject.AddComponent(typeof(VRTK.GrabAttachMechanics.VRTK_ChildOfControllerGrabAttach)) as VRTK.GrabAttachMechanics.VRTK_ChildOfControllerGrabAttach;
         VRTK.SecondaryControllerGrabActions.VRTK_SwapControllerGrabAction grabAction = gameObject.AddComponent(typeof(VRTK.SecondaryControllerGrabActions.VRTK_SwapControllerGrabAction)) as VRTK.SecondaryControllerGrabActions.VRTK_SwapControllerGrabAction;
@@ -90,6 +92,12 @@ public class MapContainer : MonoBehaviour
 
         scaleAction.lockAxis = new Vector3State(false, false, true);
         scaleAction.uniformScaling = true;
+    }
+
+    private void Start()
+    {      
+
+
 
         anim = gameObject.AddComponent<Animation>();
         AnimationCurve translateX = AnimationCurve.EaseInOut(0.0f, 0.0f, 0.5f, -0.05f);
@@ -112,10 +120,10 @@ public class MapContainer : MonoBehaviour
         {
             if (!(this.moved) && (this.level > 0))
             {
-                this.transform.localScale = new Vector3(1F, 1F, 1F);
+                //this.transform.localScale = new Vector3(1F, 1F, 1F);
                 this.transform.parent = this.transform.root.GetComponent<MapController>().transform;
 
-                this.stack_remove(this, 0);
+                //this.stack_remove(this, 0);
                 this.moved = true;
             }
         };
@@ -152,7 +160,7 @@ public class MapContainer : MonoBehaviour
         foreach (var item in this.GetComponentsInChildren<InteractableMap>())
         {
             item.Delete();
-            item.parent.Deselect();
+            item.parent?.Deselect();
             level = level == -1 ? item.GetLevel() : level;
         }
         //Do not destroy country
@@ -294,12 +302,14 @@ public class MapContainer : MonoBehaviour
                                     b.line.material = new Material(Shader.Find("Sprites/Default"));
 
                                     b.line.startColor = Color.green; //new Color(253, 187, 45, 255);
-                                    b.line.endColor = Color.red; // new Color(34, 193,195, 255);
-                                    b.line.startWidth = (1 / 1000000) * origin.getMapController().getFlowData(origin.name, origin.parentName, destination.name, destination.parentName) + 0.02F;
+                                    b.line.endColor = Color.blue; // new Color(34, 193,195, 255);
+
+
+                                    b.line.startWidth = 0.1F * (0.00000699192F * origin.getMapController().getFlowData(origin.name, origin.parentName, destination.name, destination.parentName) + 0.05F);
 
                                     b.line.endWidth = b.line.startWidth; //origin.getMapContainer().getFlowColour(origin.getMapContainer().getFlowData(origin.name, origin.parentName, destination.name, destination.parentName));
 
-
+                                    //b.createCollider();
                                 }
     
 
@@ -350,19 +360,19 @@ public class MapContainer : MonoBehaviour
         }
     }
 
-    internal void stack_remove(MapContainer container, int level)
-    {
-        if (level == (int)MapRenderer.LEVEL.STATE_LEVEL)
-        {
-            this.mapController.StateStack.stack_remove(this);
+    //internal void stack_remove(MapContainer container, int level)
+    //{
+    //    if (level == (int)MapRenderer.LEVEL.STATE_LEVEL)
+    //    {
+    //        this.mapController.StateStack.stack_remove(this);
 
-        }
-        else
-        {
-            this.mapController.CountyStack.stack_remove(this);
+    //    }
+    //    else
+    //    {
+    //        this.mapController.CountyStack.stack_remove(this);
 
-        }
-    }
+    //    }
+    //}
 
     /// <summary>
     /// Draw the objects inside the MapContainer
@@ -371,7 +381,7 @@ public class MapContainer : MonoBehaviour
     /// <param name="level">The current level if the object</param>
     /// <returns></returns>
     /// 
-    internal void Draw(InteractableMap interactableMap, int level)
+    internal void Draw(InteractableMap interactableMap, int level, Transform start_pos, Transform direction)
     {
 
         this.mapController = this.transform.root.GetComponent<MapController>();
@@ -380,10 +390,10 @@ public class MapContainer : MonoBehaviour
         {
             if (!(this.moved) && this.level > 0)
             {
-                this.transform.localScale = new Vector3(1F, 1F, 1F);
+                //this.transform.localScale = new Vector3(1F, 1F, 1F);
                 this.transform.parent = this.mapController.transform;
 
-                this.stack_remove(this, level);
+                //this.stack_remove(this, level);
                 this.moved = true;
             }
         };
@@ -400,34 +410,36 @@ public class MapContainer : MonoBehaviour
 
 
             map.drawMultiple(this.gameObject, reportGrabbed, file, level, true, this.transform.root.GetComponent<MapController>().mapScale, "", interactableMap);
-            this.transform.root.GetComponent<MapController>().StateStack.addMap(this.gameObject, this);
+            this.transform.position = start_pos.position;
+            this.transform.eulerAngles = start_pos.eulerAngles;
+            this.transform.position = this.transform.position + direction.TransformDirection(new Vector3(0, 0, -0.1F));
+            //this.transform.root.GetComponent<MapController>().StateStack.addMap(this.gameObject, this);
 
         }
         
         else
         {
             file = this.transform.root.GetComponent<MapController>().pathToStates + interactableMap.parentName + ".json";
-            if (this.transform.root.GetComponent<MapController>().checkForBuildings(interactableMap.name, interactableMap.parentName))
+            foreach (var line in File.ReadAllLines(file))
             {
-
-                foreach (var line in File.ReadAllLines(file))
+                if (line.Contains(interactableMap.name))
                 {
-                    if (line.Contains(interactableMap.name))
-                    {
-                        map.drawSingular(this.gameObject, reportGrabbed, line, interactableMap.parentName, level, interactableMap);
-                        break;
-                    }
+                    map.drawSingular(this.gameObject, reportGrabbed, line, interactableMap.parentName, level, interactableMap);
+                    break;
                 }
             }
-            this.transform.root.GetComponent<MapController>().CountyStack.addMap(this.gameObject, this);
+
+            this.transform.position = start_pos.position;
+            this.transform.eulerAngles = start_pos.eulerAngles;
+            this.transform.position = this.transform.position + direction.TransformDirection(new Vector3(0, 0, -0.1F));
 
             //this.gameObject.transform.position += new Vector3(0, GetCountyPosition(countyStack.Count + 1), 0);
             //countyStack.Add(this);
         }
 
-        this.transform.localScale = new Vector3(0.25F, 0.25F, 0.25F);
+        //this.transform.localScale = new Vector3(0.25F, 0.25F, 0.25F);
         
-
+            
 
 
 

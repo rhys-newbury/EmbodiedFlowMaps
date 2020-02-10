@@ -1,7 +1,8 @@
-﻿/// <summary>
+﻿using System.Linq;
+/// <summary>
 /// An InteractableMap, specifically an instance of a Country.
 /// </summary>
-public class Country : InteractableMap
+public class StateInCountry : InteractableMap
 {
 
     /// <summary>
@@ -21,6 +22,7 @@ public class Country : InteractableMap
     /// 
     internal override void Delete()
     {
+        this.children = this.children.Where(x => x != null).ToList();
         var p = children.Count > 0 ? this.children[0].transform.parent.transform.parent.gameObject : null;
         foreach (var child in this.children)
         {
@@ -29,6 +31,7 @@ public class Country : InteractableMap
                     child.Delete();
             }
         }
+        this.Deselect();
         this.children.Clear();
         Destroy(p);
     }

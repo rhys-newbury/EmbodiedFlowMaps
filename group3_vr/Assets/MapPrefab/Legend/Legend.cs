@@ -9,16 +9,16 @@ public class Legend : MonoBehaviour
 {
 
 
-    public int ClassSeperator1;
-    public int ClassSeperator2;
-    public int ClassSeperator3;
-    public int ClassSeperator4;
-    public int ClassSeperator5;
-    public int ClassSeperator6;
+    public float ClassSeperator1;
+    public float ClassSeperator2;
+    public float ClassSeperator3;
+    public float ClassSeperator4;
+    public float ClassSeperator5;
+    public float ClassSeperator6;
 
     internal List<Color> scheme;
 
-    public enum ColourScheme { schemeBlues, schemeGreens, schemeGreys, schemeOranges, schemePurples, schemeReds, schemeBuGn, schemeBuPu, schemeGnBu, schemeOrRd, schemePuBuGn };
+    public enum ColourScheme { schemeBlues, schemeGreens, schemeGreys, schemeOranges, schemePurples, schemeReds, schemeBuGn, schemeBuPu, schemeGnBu, schemeOrRd, schemePuBuGn, schemeBlYu };
     public ColourScheme LegendColour;
 
 
@@ -51,7 +51,7 @@ public class Legend : MonoBehaviour
 
 
 
-        var class_data = new int[] { ClassSeperator1, ClassSeperator2, ClassSeperator3, ClassSeperator4, ClassSeperator5, ClassSeperator6 };
+        var class_data = new float[] { ClassSeperator1, ClassSeperator2, ClassSeperator3, ClassSeperator4, ClassSeperator5, ClassSeperator6 };
 
         var data1 = class_data.ToList();
         data1.Add(-1);
@@ -76,7 +76,7 @@ public class Legend : MonoBehaviour
     /// </summary>
     /// <returns></returns>
     /// 
-    private string format(int num1, int num2)
+    private string format(float num1, float num2)
     {
         if (num1 == -1)
         {
@@ -115,6 +115,8 @@ public class Legend : MonoBehaviour
                 return new string[] { "#f0f9e8", "#ccebc5", "#a8ddb5", "#7bccc4", "#4eb3d3", "#2b8cbe", "#08589e" };
             case (ColourScheme.schemeOrRd):
                 return new string[] { "#fef0d9", "#fdd49e", "#fdbb84", "#fc8d59", "#ef6548", "#d7301f", "#990000" };
+            case (ColourScheme.schemeBlYu):
+                return new string[] { "#BDE5BB", "#ABD9BB", "#99CCBB", "#87C0BC", "#75B3BC", "#63A7BC", "#51A4BC" };
             default:
                 return new string[] { "#f6eff7", "#d0d1e6", "#a6bddb", "#67a9cf", "#3690c0", "#02818a", "#016450" };
         }

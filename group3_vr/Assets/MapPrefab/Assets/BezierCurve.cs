@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using VRTK;
 
 [System.Serializable]
 
@@ -35,12 +36,13 @@ public class Bezier : System.Object
     /// <summary>
     /// GameObject which holds the line
     /// </summary>
-    internal GameObject obj;
+    internal GameObject gameObject;
     /// <summary>
     /// The line renderer instance
     /// </summary>
     internal LineRenderer line;
-     
+    private VRTK_InteractableObject interactObject;
+
     /// <summary>
     /// Constrctor for the class, which enables drawing between two points, with a specfied parent
     /// </summary>
@@ -50,13 +52,32 @@ public class Bezier : System.Object
     /// <returns></returns>
     public Bezier(Transform parent, InteractableMap origin, InteractableMap destination)
     {
-        obj = new GameObject();
+        gameObject = new GameObject();
 
-        line = obj.AddComponent(typeof(LineRenderer)) as LineRenderer;
+        line = gameObject.AddComponent(typeof(LineRenderer)) as LineRenderer;
         line.transform.SetParent(parent);
         line.useWorldSpace = true;
         line.startWidth = 0.005F;
         line.endWidth = 0.005F;
+
+        interactObject = gameObject.AddComponent(typeof(VRTK_InteractableObject)) as VRTK_InteractableObject;
+        VRTK_InteractHaptics interactHaptics = gameObject.AddComponent(typeof(VRTK_InteractHaptics)) as VRTK_InteractHaptics;
+        VRTK.GrabAttachMechanics.VRTK_ChildOfControllerGrabAttach grabAttach = gameObject.AddComponent(typeof(VRTK.GrabAttachMechanics.VRTK_ChildOfControllerGrabAttach)) as VRTK.GrabAttachMechanics.VRTK_ChildOfControllerGrabAttach;
+        VRTK.SecondaryControllerGrabActions.VRTK_SwapControllerGrabAction grabAction = gameObject.AddComponent(typeof(VRTK.SecondaryControllerGrabActions.VRTK_SwapControllerGrabAction)) as VRTK.SecondaryControllerGrabActions.VRTK_SwapControllerGrabAction;
+        Rigidbody rigidBody = gameObject.AddComponent(typeof(Rigidbody)) as Rigidbody;
+
+        interactObject.isGrabbable = true;
+        interactObject.holdButtonToGrab = false;
+        interactObject.grabAttachMechanicScript = grabAttach;
+
+
+
+        //interactObject.secondaryGrabActionScript = scaleAction;
+
+        //grabAttach.precisionGrab = true;
+
+        rigidBody.useGravity = false;
+        rigidBody.isKinematic = true;
 
         Vector3 p0 = origin.transform.parent.transform.position; //- origin.transform.parent.transform.TransformVector(new Vector3(0, 0, 0.07F));
         Vector3 p3 = destination.transform.parent.transform.position; //- destination.transform.parent.transform.TransformVector(new Vector3(0, 0, 0.07F));
@@ -74,6 +95,17 @@ public class Bezier : System.Object
         line.useWorldSpace = false;
 
     }
+
+    //public void createCollider()
+    //{
+    //    MeshCollider meshCollider = gameObject.AddComponent<MeshCollider>();
+
+    //    Mesh mesh = new Mesh();
+    //    line.BakeMesh(mesh, true);
+    //    meshCollider.sharedMesh = mesh;
+    //}
+
+
     /// <summary>
     /// Create bezier based on given control points.
     /// </summary>
@@ -128,3 +160,4 @@ public class Bezier : System.Object
     }
 
 }
+

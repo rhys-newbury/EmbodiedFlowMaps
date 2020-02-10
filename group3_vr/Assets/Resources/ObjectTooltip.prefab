@@ -391,13 +391,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   displayText: TooltipText
-  fontSize: 60
-  containerSize: {x: 400, y: 60}
+  fontSize: 45
+  containerSize: {x: 500, y: 60}
   drawLineFrom: {fileID: 0}
   drawLineTo: {fileID: 0}
   lineWidth: 0.001
   fontColor: {r: 0, g: 0, b: 0, a: 1}
-  containerColor: {r: 1, g: 0.5588235, b: 0.5588235, a: 1}
+  containerColor: {r: 1, g: 1, b: 1, a: 1}
   lineColor: {r: 0, g: 0, b: 0, a: 1}
   alwaysFaceHeadset: 0
 --- !u!1 &198614

@@ -11,7 +11,7 @@ public class DataToggle : InteractableObject
     /// Handle the button, by listening to trigger pressed.
     /// </summary>
     /// <returns></returns>
-    public override void OnTriggerPressed()
+    public override GameObject OnTriggerPressed(Transform direction)
     {
 
         //change bool in mapController
@@ -47,6 +47,8 @@ public class DataToggle : InteractableObject
             backend.ToList().ForEach(x => x.text = "Outgoing Flow");
 
         }
+
+        return null;
 
 
     }

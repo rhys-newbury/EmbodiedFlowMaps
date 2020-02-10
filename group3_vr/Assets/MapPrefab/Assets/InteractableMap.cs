@@ -56,16 +56,19 @@ public abstract class InteractableMap : InteractableObject
 
                     Bezier b = new Bezier(this.transform, origin, destination);
 
-                    this.lines.Add(b.obj);
-                    destination.AddLine(b.obj);
+                    this.lines.Add(b.gameObject);
+                    destination.AddLine(b.gameObject);
 
-                    b.line.startWidth = (1 / 1000000.0F) * flowData;
+                    b.line.startWidth = 0.1F * (0.00000699192F * flowData + 0.05F);
+                    Debug.Log("line width = " + b.line.startWidth.ToString());
                     b.line.endWidth = b.line.startWidth;
 
                     b.line.material = new Material(Shader.Find("Sprites/Default"));
 
                     b.line.startColor = Color.green; //new Color(253, 187, 45, 255);
-                    b.line.endColor = Color.red; // new Color(34, 193,195, 255);
+                    b.line.endColor = Color.blue; // new Color(34, 193,195, 255);
+
+                    //b.createCollider();
 
                 }
             }
@@ -101,7 +104,7 @@ public abstract class InteractableMap : InteractableObject
     /// If the map is not selected, draw a new map
     /// <returns></returns>
     ///
-    public override void OnTriggerPressed()
+    public override GameObject OnTriggerPressed(Transform direction)
     {
 
         if (!this.IsSelected())
@@ -111,11 +114,12 @@ public abstract class InteractableMap : InteractableObject
             GameObject mapGameObject = new GameObject();
             mapGameObject.transform.parent = this.transform.root;
             MapContainer main = mapGameObject.AddComponent(typeof(MapContainer)) as MapContainer;
-            main?.Draw(this, this.GetLevel() + 1);
+            main?.Draw(this, this.GetLevel() + 1, this.transform.parent.transform, direction);
 
             this.selected = true;
             CreateLine();
             this.GetInternalFlows(this);
+            return main.gameObject;
         }
         else
         {
@@ -125,6 +129,7 @@ public abstract class InteractableMap : InteractableObject
 
 
             this.DeleteChildren();
+            return null;
         }
 
     }
@@ -174,17 +179,16 @@ public abstract class InteractableMap : InteractableObject
         this.meshRenderer.material.color = this.color;
         VRTK_ObjectTooltip tooltip = go.GetComponent<VRTK_ObjectTooltip>();
 
-        if (this.getMapController().getData(this.name, this.parentName) == -1)
-        {
-            changeText(this.GetName() + " has no " + (MapController.isIncoming ? " Incoming " : " Outgoing ") + "Flow");
-            tooltip.displayText = this.GetName() + " has no " + (MapController.isIncoming ? " Incoming " : " Outgoing ") + "Flow";
-        }
-        else
-        {
-            changeText(this.GetName() + (MapController.isIncoming ? " Incoming " : " Outgoing ") + "Flow of:" + this.getMapController().getData(this.name, this.parentName).ToString());
-            tooltip.displayText = this.GetName() + (MapController.isIncoming ? " Incoming " : " Outgoing ") + "Flow of:" + this.getMapController().getData(this.name, this.parentName).ToString();
+        var inc_flow = Mathf.Max(0,this.getMapController().getData(this.name, this.parentName, true));
+        
+        var out_flow = Mathf.Max(0,this.getMapController().getData(this.name, this.parentName, false));
 
-        }
+        var text = this.name + ": \n" + inc_flow.ToString("N0") +  "Moved In \n" + out_flow.ToString("N0") + " Moved Out";
+
+
+        changeText(text);
+        tooltip.displayText = text;
+        
         this.go.SetActive(true);
 
 
@@ -268,7 +272,7 @@ public abstract class InteractableMap : InteractableObject
         this.mesh.RecalculateBounds();
 
         //Color meshColor = UnityEngine.Random.ColorHSV();
-        Color meshColor = this.getMapController().getCountryColour(this.getMapController().getData(this.name, this.parentName));
+        Color meshColor = this.getMapController().getCountryColour(this.getMapController().getPopulationDensity(this.name, this.parentName));
         this.alpha = meshColor.a;
         this.color = meshColor;
 
@@ -281,7 +285,9 @@ public abstract class InteractableMap : InteractableObject
         filter.mesh = this.mesh;
 
         var mapcollider = objToSpawn.AddComponent<MeshCollider>();
+        //mapcollider.convex = true;
         mapcollider.sharedMesh = this.mesh;
+        
 
     }
 
@@ -292,7 +298,7 @@ public abstract class InteractableMap : InteractableObject
     /// 
     public void updateColour()
     {
-        Color meshColor = this.getMapController().getCountryColour(this.getMapController().getData(this.name, this.parentName));
+        Color meshColor = this.getMapController().getCountryColour(this.getMapController().getPopulationDensity(this.name, this.parentName));
         this.alpha = meshColor.a;
         this.color = meshColor;
         meshRenderer.material.color = this.color;
@@ -352,7 +358,7 @@ public abstract class InteractableMap : InteractableObject
         this.centerY = (bounds[1] + bounds[3]) / 2F;
 
 
-        this.go = Instantiate(Resources.Load("ObjectTooltip")) as GameObject;
+        this.go = Instantiate(Resources.Load("MapToolTip")) as GameObject;
         go.transform.parent = this.wrapper.transform;
         VRTK_ObjectTooltip tooltip = go.GetComponent<VRTK_ObjectTooltip>();
         tooltip.alwaysFaceHeadset = true;
@@ -365,6 +371,9 @@ public abstract class InteractableMap : InteractableObject
         this.objToSpawn.name = name;
         
         this.DrawObject();
+
+
+        CreateLineAroundState();
 
         //this.AddToList(parentName, name);
     }
@@ -413,6 +422,33 @@ public abstract class InteractableMap : InteractableObject
         }
     }
 
+    public void CreateLineAroundState()
+    {
+        if (vertices3D.Length == 0)
+        {
+            Debug.Log("Empty: " + this.name);
+            return;
+        }
+
+        var line = objToSpawn.AddComponent<LineRenderer>();
+        line.useWorldSpace = false;
+        var tempVertices3D = vertices3D.ToList();
+        tempVertices3D.Add(vertices3D[0]);
+        //Chuck her in front of the country so its visible
+        tempVertices3D = tempVertices3D.Select(x => new Vector3(x.x, x.y, -0.005F)).ToList();
+        var finaltempVertices3D = tempVertices3D.ToArray();
+        line.positionCount = finaltempVertices3D.Length;
+        line.SetPositions(finaltempVertices3D);
+
+        line.material = new Material(Shader.Find("Sprites/Default"));
+        line.startColor = new Color(0.3F, 0.3F, 0.3F);//Color.grey;
+        line.endColor = new Color(0.3F, 0.3F, 0.3F); ;
+        line.startWidth = 0.004F;
+        line.endWidth = 0.0004F;
+        line.alignment = LineAlignment.TransformZ;
+    }
+    /// <
+
     /// <summary>
     /// Draw a line around the map
     /// </summary>
@@ -420,19 +456,19 @@ public abstract class InteractableMap : InteractableObject
     /// 
     public void CreateLine()
     {
-        var line = objToSpawn.AddComponent<LineRenderer>();
-        line.useWorldSpace = false;
-        var tempVertices3D = vertices3D.ToList();
-        tempVertices3D.Add(vertices3D[0]);
-        //Chuck her in front of the country so its visible
-        tempVertices3D = tempVertices3D.Select(x => new Vector3(x.x, x.y, -0.01F)).ToList();
-        var finaltempVertices3D = tempVertices3D.ToArray();
-        line.positionCount = finaltempVertices3D.Length;
-        line.SetPositions(finaltempVertices3D);
+        var line = objToSpawn.GetComponent<LineRenderer>();
+        //line.useWorldSpace = false;
+        //var tempVertices3D = vertices3D.ToList();
+        //tempVertices3D.Add(vertices3D[0]);
+        ////Chuck her in front of the country so its visible
+        //tempVertices3D = tempVertices3D.Select(x => new Vector3(x.x, x.y, -0.01F)).ToList();
+        //var finaltempVertices3D = tempVertices3D.ToArray();
+        //line.positionCount = finaltempVertices3D.Length;
+        //line.SetPositions(finaltempVertices3D);
 
-        line.material = new Material(Shader.Find("Sprites/Default"));
-        line.startColor = Color.red;
-        line.endColor = Color.yellow;
+        //line.material = new Material(Shader.Find("Sprites/Default"));
+        line.startColor = new Color(224,80,70);
+        line.endColor = new Color(224, 80, 70);
         line.startWidth = 0.01F;
         line.endWidth = 0.01F;
         line.alignment = LineAlignment.TransformZ;
@@ -447,10 +483,16 @@ public abstract class InteractableMap : InteractableObject
         this.selected = false;
         MapContainer.update = true;
         this.RemoveLines();
+
         var line = objToSpawn.GetComponent<LineRenderer>();
+        line.startColor = Color.grey;
+        line.endColor = Color.gray;
+        line.startWidth = 0.004F;
+        line.endWidth = 0.0004F;
+        line.alignment = LineAlignment.TransformZ;
+
         MapContainer.DeselectState();
-        Destroy(line);
-    }
+      }
     /// <summary>
     /// Default angle of map
     /// </summary>
@@ -500,6 +542,7 @@ public abstract class InteractableMap : InteractableObject
     {
             this.children.ForEach(x => x.Delete());
             this.children.Clear();
+        
 
         try
         {
