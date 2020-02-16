@@ -201,7 +201,8 @@ public class VRTK_ObiInteractableSolver : MonoBehaviour
             if (leftControllerInfo.isTouchingParticle)
             {
                 // Get actor and apply constraint
-                leftControllerInfo.currentInteraction.GrabActor(leftControllerInfo);
+                StartCoroutine(leftControllerInfo.currentInteraction.GrabActor(leftControllerInfo));
+
             }
         }
         else if (ReferenceEquals(sender, rightControllerInfo.interactGrab) && rightControllerInfo.grabbingEnabled)
@@ -209,7 +210,9 @@ public class VRTK_ObiInteractableSolver : MonoBehaviour
             if (rightControllerInfo.isTouchingParticle)
             {
                 // Get actor and apply constraint
-                rightControllerInfo.currentInteraction.GrabActor(rightControllerInfo);
+                StartCoroutine(rightControllerInfo.currentInteraction.GrabActor(rightControllerInfo));
+
+                
             }
         }
     }
@@ -251,6 +254,8 @@ public class VRTK_ObiInteractableSolver : MonoBehaviour
         // Reset every frame
         leftControllerInfo.Clear();
         rightControllerInfo.Clear();
+        bool left = false;
+        bool right = false;
 
         for (int i = 0; i < e.contacts.Count; ++i)
         {
@@ -262,22 +267,33 @@ public class VRTK_ObiInteractableSolver : MonoBehaviour
             // make sure this is an actual contact
             if (contact.distance < 1F)
             {
-                Collider collider = ObiColliderBase.idToCollider[contact.other] as Collider;
+                Collider collider;
+                try
+                {
+                    collider = ObiColliderBase.idToCollider[contact.other] as Collider;
+                }
+                catch { continue; }
 
                 if (collider.ToString().Contains("Left"))
                 {
                     leftControllerInfo.isTouchingParticle = true;
                     leftControllerInfo.touchingParticle = particleIndex;
                     leftControllerInfo.currentInteraction = actor.gameObject.GetComponent<VRTK_ObiInteractableActor>();
+                    left = true;
                 }
                 else if (collider.ToString().Contains("Right"))
                 {
                     rightControllerInfo.isTouchingParticle = true;
                     rightControllerInfo.touchingParticle = particleIndex;
                     rightControllerInfo.currentInteraction = actor.gameObject.GetComponent<VRTK_ObiInteractableActor>();
+                    right = true;
                 }
             }
+
         }
+ 
+        leftController.GetComponent<VRTK_StraightPointerRenderer>().ChangePointerColour(left);
+        rightController.GetComponent<VRTK_StraightPointerRenderer>().ChangePointerColour(right);
     }
 
     #endregion

@@ -1,58 +1,51 @@
-﻿using UnityEngine;
+﻿using Obi;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class GenerateRope : MonoBehaviour
 {
-
-    public Material RopeMaterial;  //set in Editor
-    public Obi.ObiSolver RopeSolver;  //set in Editor
-    public Obi.ObiRopeSection RopeSection;  //set in Editor
-
-    private Vector3? _startPoint;
-    static int _genCounter = 0;
-
     private void Start()
     {
         MakeRope();
     }
-
-    //void Update()
-    //{
-    //    if (Input.GetMouseButtonDown(0))
-    //    {
-    //        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-    //        var point = ray.GetPoint(2);
-
-    //        if (_startPoint.HasValue)
-    //        {
-    //            Vector3 startPoint = _startPoint.Value;
-    //            Vector3 endPoint = point;
-    //            _startPoint = null;
-
-    //            MakeRope(startPoint, endPoint);
-    //        }
-    //        else
-    //        {
-    //            _startPoint = point;
-    //        }
-    //    }
-    //}
-
-    private void MakeRope()//Vector3 startPoint, Vector3 endPoint)
+    // Start is called before the first frame update
+    void MakeRope()
     {
-        var gon = new GameObject("New Rope (" + (++_genCounter).ToString() + ")");
-        var go = GameObject.Find("Cube (4)");
-        //go.transform.position = startPoint;
-        var goEnd = GameObject.Find("Cube (2)");
-        //goEnd.transform.parent = go.transform;
-        //goEnd.transform.position = endPoint;
-        gon.transform.position = (go.transform.position + go.transform.position) / 2.0F;
-        var ropeHelper = gon.AddComponent<MyRopeHelper>();
-        //ropeHelper.section = RopeSection;
-        //ropeHelper.material = RopeMaterial;
-        //ropeHelper.solver = RopeSolver;
-        //ropeHelper.start = go.transform;
-        //ropeHelper.end = goEnd.transform;
-        float thickness = 0.03F;
-        ropeHelper.GenerateRope(go, goEnd, thickness);
+
+        // create an object containing both the solver and the updater:
+        GameObject solverObject = GameObject.Find("Obi Solver");
+        ObiSolver solver = solverObject.GetComponent<ObiSolver>();
+        ObiFixedUpdater updater = solverObject.GetComponent<ObiFixedUpdater>();
+
+        // add the solver to the updater:
+        updater.solvers.Add(solver);
+        // create the blueprint: (ltObiRopeBlueprint, ObiRodBlueprint)
+        var blueprint = (Obi.ObiRopeBlueprint)Resources.Load("rope blueprint 1");
+
+        // create a rope:
+        GameObject ropeObject = new GameObject("rope", typeof(ObiRope), typeof(ObiRopeExtrudedRenderer));
+
+        // get component references:
+        ObiRope rope = ropeObject.GetComponent<ObiRope>();
+        ObiRopeExtrudedRenderer ropeRenderer = ropeObject.GetComponent<ObiRopeExtrudedRenderer>();
+
+        // load the default rope section:
+        ropeRenderer.section = Resources.Load<ObiRopeSection>("DefaultRopeSection");
+
+        // instantiate and set the blueprint:
+        rope.ropeBlueprint = blueprint;
+
+        //ropeObject.GetComponent<MeshRenderer>().material = Resources.Load<Material>("Materials/RedRope");
+
+        // parent the cloth under a solver to start simulation:
+        rope.transform.parent = solver.transform;
+
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        
     }
 }

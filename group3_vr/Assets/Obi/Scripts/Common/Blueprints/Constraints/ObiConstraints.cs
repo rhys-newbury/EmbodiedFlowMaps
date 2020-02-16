@@ -29,8 +29,8 @@ namespace Obi
     [Serializable]
     public class ObiConstraints<T> : IObiConstraints where T : class, IObiConstraintsBatch
     {
-        protected ObiActor actor;
-        protected ObiConstraints<T> source;
+        public ObiActor actor;
+        public ObiConstraints<T> source;
 
         protected bool inSolver;
         [HideInInspector] public List<T> batches = new List<T>();
@@ -177,6 +177,11 @@ namespace Obi
         {
             foreach (T batch in batches)
                 batch.SetEnabled(enabled);
+        }
+
+        public static implicit operator ObiConstraints<T>(ObiPinConstraintsBatch v)
+        {
+            throw new NotImplementedException();
         }
     }
 }

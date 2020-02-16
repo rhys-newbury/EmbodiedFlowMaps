@@ -134,7 +134,7 @@ public class MapRenderer
             }
             catch
             {
-                Debug.Log("Failed to parse line!");
+    
             }
         }
 

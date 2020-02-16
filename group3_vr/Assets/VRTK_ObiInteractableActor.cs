@@ -1,28 +1,27 @@
 ﻿using UnityEngine;
 using Obi;
+using VRTK;
 
-//[RequireComponent(typeof(ObiPinConstraints))]
+//[RequireComponent(typeof(ObiPinConstraintsBatch))]
 public class VRTK_ObiInteractableActor : MonoBehaviour
 {
     #region Fields
 
     public bool isGrabbable = true;
 
-    //private ObiPinConstraints pinConstraints;
+    private GameObject sphere;
+
+    private ObiPinConstraintsBatch pinConstraints;
 
     #endregion
 
 
     #region Mono Events
 
-    private void Awake()
-    {
-        //pinConstraints = GetComponent<ObiPinConstraints>();
-    }
 
     private void Reset()
     {
-        //isGrabbable = true;
+        isGrabbable = true;
     }
 
     #endregion
@@ -30,38 +29,59 @@ public class VRTK_ObiInteractableActor : MonoBehaviour
 
     #region Actor Interaction
 
-    public void GrabActor(InteractingInfo interactingInfo)
+    public System.Collections.IEnumerator GrabActor(InteractingInfo interactingInfo)
     {
-        //if (!isGrabbable) return;
+        if (!isGrabbable) yield return -1;
 
-        //ObiPinConstraintBatch batch = pinConstraints.GetBatches()[0] as ObiPinConstraintBatch;
+        var controller = interactingInfo.collider.attachedRigidbody.gameObject;
+        var cube = GameObject.Find(controller.name.Split(new char[] { ' ' })[0] + "Cube");
+
+        sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+
+        ObiRope rope = this.GetComponent<ObiRope>();
+
+
+        sphere.transform.position = rope.GetParticlePosition(interactingInfo.touchingParticle);
+        sphere.transform.rotation = rope.GetParticleOrientation(interactingInfo.touchingParticle);
         
+        var interactObject = sphere.AddComponent(typeof(VRTK_InteractableObject)) as VRTK_InteractableObject;
+        VRTK_InteractHaptics interactHaptics = sphere.AddComponent(typeof(VRTK_InteractHaptics)) as VRTK_InteractHaptics;
+        VRTK.GrabAttachMechanics.VRTK_ChildOfControllerGrabAttach grabAttach = sphere.AddComponent(typeof(VRTK.GrabAttachMechanics.VRTK_ChildOfControllerGrabAttach)) as VRTK.GrabAttachMechanics.VRTK_ChildOfControllerGrabAttach;
+        VRTK.SecondaryControllerGrabActions.VRTK_SwapControllerGrabAction grabAction = sphere.AddComponent(typeof(VRTK.SecondaryControllerGrabActions.VRTK_SwapControllerGrabAction)) as VRTK.SecondaryControllerGrabActions.VRTK_SwapControllerGrabAction;
+        VRTK.SecondaryControllerGrabActions.VRTK_AxisScaleGrabAction scaleAction = sphere.AddComponent(typeof(VRTK.SecondaryControllerGrabActions.VRTK_AxisScaleGrabAction)) as VRTK.SecondaryControllerGrabActions.VRTK_AxisScaleGrabAction;
+        Rigidbody rigidBody = sphere.AddComponent(typeof(Rigidbody)) as Rigidbody;
 
-        //pinConstraints.RemoveFromSolver(null);
+        interactObject.isGrabbable = true;
+        interactObject.holdButtonToGrab = false;
+        interactObject.grabAttachMechanicScript = grabAttach;
+        interactObject.secondaryGrabActionScript = scaleAction;
 
-        //interactingInfo.pinIndex = batch.ConstraintCount;
-        //interactingInfo.grabbedParticle = interactingInfo.touchingParticle;
-        //batch.AddConstraint(interactingInfo.grabbedParticle.Value, interactingInfo.obiCollider, interactingInfo.pinOffset, interactingInfo.stiffness);
+        grabAttach.precisionGrab = true;
 
-        //pinConstraints.AddToSolver(null);
+        rigidBody.useGravity = false;
+        rigidBody.isKinematic = true;
 
-        //pinConstraints.PushDataToSolver();
+        sphere.transform.localScale = new Vector3(0.1F, 0.1F, 0.1F);
+
+        interactingInfo.interactGrab.AttemptGrabObject(sphere);
+        foreach (var att in GetComponents<ObiParticleAttachment>())
+        {
+         
+       att.target.transform.parent = sphere.transform;
+         
+        }
+
+
+        interactingInfo.grabbedParticle = interactingInfo.touchingParticle;
+
     }
 
     public void ReleaseActor(InteractingInfo interactingInfo)
     {
-        //if (!isGrabbable) return;
+        sphere.transform.DetachChildren();
+        GameObject.Destroy(sphere);
 
-        //ObiPinConstraintBatch batch = pinConstraints.GetBatches()[0] as ObiPinConstraintBatch;
 
-        //pinConstraints.RemoveFromSolver(null);
-
-        //if (interactingInfo.pinIndex.HasValue)
-        //    batch.RemoveConstraint(interactingInfo.pinIndex.Value);
-
-        //pinConstraints.AddToSolver(null);
-
-        //pinConstraints.PushDataToSolver();
     }
 
     #endregion

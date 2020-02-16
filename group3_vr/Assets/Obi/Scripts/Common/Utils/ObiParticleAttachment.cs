@@ -260,7 +260,7 @@ namespace Obi
 
                         var pins = m_Actor.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
                         ObiColliderBase attachedCollider = m_Target.GetComponent<ObiColliderBase>();
-
+                        //Bind();
                         if (pins != null && attachedCollider != null)
                         {
                             // create a new data batch with all our pin constraints:
@@ -291,7 +291,7 @@ namespace Obi
                         break;
 
                     case AttachmentType.Static:
-
+                        //Bind();
                         for (int i = 0; i < m_SolverIndices.Length; ++i)
                             solver.invMasses[m_SolverIndices[i]] = 0;
 

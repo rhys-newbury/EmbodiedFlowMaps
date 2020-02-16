@@ -816,10 +816,13 @@ MonoBehaviour:
   - {r: 1, g: 1, b: 1, a: 1}
   - {r: 1, g: 1, b: 1, a: 1}
   distanceConstraintsData:
+    actor: {fileID: 0}
     batches: []
   bendConstraintsData:
+    actor: {fileID: 0}
     batches: []
   pinConstraintsData:
+    actor: {fileID: 0}
     batches:
     - m_IDs: 
       m_IDToIndex: 
@@ -838,10 +841,13 @@ MonoBehaviour:
         serializedContents: []
       constraintForces: []
   skinConstraintsData:
+    actor: {fileID: 0}
     batches: []
   tetherConstraintsData:
+    actor: {fileID: 0}
     batches: []
   stretchShearConstraintsData:
+    actor: {fileID: 0}
     batches:
     - m_IDs: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000100000001100000012000000130000001400000015000000160000001700000018000000190000001a0000001b0000001c000000
       m_IDToIndex: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000100000001100000012000000130000001400000015000000160000001700000018000000190000001a0000001b0000001c000000
@@ -1048,6 +1054,7 @@ MonoBehaviour:
         - {x: 0, y: 0, z: 0}
         - {x: 0, y: 0, z: 0}
   bendTwistConstraintsData:
+    actor: {fileID: 0}
     batches:
     - m_IDs: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000100000001100000012000000130000001400000015000000160000001700000018000000190000001a0000001b0000001c000000
       m_IDToIndex: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000100000001100000012000000130000001400000015000000160000001700000018000000190000001a0000001b0000001c000000
@@ -1188,10 +1195,13 @@ MonoBehaviour:
         - {x: 0, y: 0, z: 0}
         - {x: 0, y: 0, z: 0}
   shapeMatchingConstraintsData:
+    actor: {fileID: 0}
     batches: []
   aerodynamicConstraintsData:
+    actor: {fileID: 0}
     batches: []
   chainConstraintsData:
+    actor: {fileID: 0}
     batches:
     - m_IDs: 00000000
       m_IDToIndex: 00000000
@@ -1208,6 +1218,7 @@ MonoBehaviour:
         serializedContents:
         - {x: 0.28434873, y: 0.28434873}
   volumeConstraintsData:
+    actor: {fileID: 0}
     batches: []
   groups:
   - {fileID: -4518859148014644581}
