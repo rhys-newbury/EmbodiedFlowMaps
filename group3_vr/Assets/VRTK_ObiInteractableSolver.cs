@@ -265,7 +265,7 @@ public class VRTK_ObiInteractableSolver : MonoBehaviour
             var particleIndex = pia.indexInActor;
 
             // make sure this is an actual contact
-            if (contact.distance < 1F)
+            if (contact.distance < 0.2F)
             {
                 Collider collider;
                 try

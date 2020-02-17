@@ -37,6 +37,7 @@ public class VRTK_ObiInteractableActor : MonoBehaviour
         var cube = GameObject.Find(controller.name.Split(new char[] { ' ' })[0] + "Cube");
 
         sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        sphere.GetComponent<MeshRenderer>().material = Resources.Load<Material>("invisible");
 
         ObiRope rope = this.GetComponent<ObiRope>();
 
