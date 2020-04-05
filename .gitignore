@@ -45,3 +45,4 @@ group3_vr/Thumbs.db
 .idea
 .vs
 venv/
+*.meta
