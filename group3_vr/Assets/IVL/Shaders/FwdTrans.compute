@@ -318,7 +318,7 @@ void executeFDEUB(uint3 id : SV_DispatchThreadID, uint3 groupId : SV_GroupThread
 	}
 	// Add displacement to the displacement matrix
 	dispVec[id.x] = fs + fa + fr + fo + fp;
-	dispVec[id.x] = dispVec[id.x] > 0 ? dispVec[id.x] : 0;
+	//dispVec[id.x] = dispVec[id.x] > 0 ? dispVec[id.x] : 0;
 	//dispVec[id.x].z = dispVec[id.x].z);
 }
 

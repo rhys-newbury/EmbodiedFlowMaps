@@ -944,8 +944,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 221687377}
   m_LocalRotation: {x: 0.00010473081, y: -0.008727145, z: 2.4385119e-11, w: 0.9999619}
-  m_LocalPosition: {x: -7.34, y: 2.09, z: -0.31}
-  m_LocalScale: {x: 0.45000008, y: 0.46138513, z: 0.45000005}
+  m_LocalPosition: {x: 0.03, y: 2.15, z: -0.31}
+  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 11
@@ -5357,6 +5357,7 @@ MonoBehaviour:
   - {fileID: 1601499206}
   - {fileID: 146395200}
   - {fileID: 1893529181}
+  - {fileID: 221687377}
   attractivePlane: []
   mainCam: {fileID: 1148182085}
   otherClients: []
@@ -5370,7 +5371,7 @@ MonoBehaviour:
   springConstant: 3044
   repulsionConstant: -0.001
   attractionConstant: 0.0005
-  obstacleRepulsionConstant: 1
+  obstacleRepulsionConstant: -0.005
   obstacleDMin: 0.3
   distanceMaxNormal: 0.5
   forceMaxNormal: 0.2
@@ -5557,13 +5558,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1893529181}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.298, y: 1.246, z: 0}
+  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 0.298, y: 1.246, z: 0.0000000022387863}
   m_LocalScale: {x: 1, y: 1, z: 0.01}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 18
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!114 &1893529186
 MonoBehaviour:
   m_ObjectHideFlags: 0
