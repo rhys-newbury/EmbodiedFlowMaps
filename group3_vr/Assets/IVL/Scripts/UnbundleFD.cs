@@ -42,6 +42,7 @@ public class UnbundleFD : MonoBehaviour {
     Vector3[] pointsToAvoid;
     // Bundle Id list    
     int[] bundleId;
+    public bool drawSphere = false;
     Dictionary<int, int> bundleDict = new Dictionary<int, int>();
 
     //Position of attractive plane
@@ -526,6 +527,19 @@ public class UnbundleFD : MonoBehaviour {
         }
     }
 
+    Matrix4x4 rotation_between_two_vectora(Vector3 v1, Vector3 v2)
+    {
+        var angle = Vector3.Angle(v1, v2);
+        var axis = Vector3.Cross(v1, v2);
+
+        var q = Quaternion.AngleAxis(angle, axis);
+
+
+        return Matrix4x4.TRS(Vector3.zero, q, Vector3.one);
+
+
+    }
+
     private Vector3[] ComputeDisplacementFromViewport(Matrix4x4 trans)
     {
         //Updating points to link positions
@@ -551,6 +565,69 @@ public class UnbundleFD : MonoBehaviour {
             count++;
 
         }
+        var mf = GameObject.Find("Screen2");
+        //Top Left
+        var vl = mf.GetComponent<MeshFilter>().sharedMesh.vertices;
+
+        var s = mf.transform.TransformPoint(vl[0]);
+        var r = mf.transform.TransformPoint(vl[1]);
+        var b = mf.transform.TransformPoint(vl[4]);
+
+        var QR = r - b;
+        var QS = s - b;
+
+        var perp = -Vector3.Cross(QR, QS);
+        Debug.Log(perp);
+
+        //var lol = 0;
+        //if (drawSphere)
+        //{
+        //    drawSphere = false;
+        //    foreach (var p in vl)
+        //    {
+        //        var g = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        //        g.name = lol++.ToString();
+        //        g.transform.position = mf.transform.TransformPoint(p);
+        //        g.transform.localScale = new Vector3(0.05F, 0.05F, 0.05F);
+        //    }
+        //}
+
+
+        //var t = mf.transform.TransformDirection(Vector3.up);
+
+        var m = rotation_between_two_vectora(perp, Vector3.up);
+
+        Debug.Log(m);
+
+        shader.SetFloat("m00", m.m00);
+        shader.SetFloat("m01", m.m01);
+        shader.SetFloat("m02", m.m02);
+
+        shader.SetFloat("m10", m.m10);
+        shader.SetFloat("m11", m.m11);
+        shader.SetFloat("m12", m.m12);
+
+        shader.SetFloat("m20", m.m10);
+        shader.SetFloat("m21", m.m11);
+        shader.SetFloat("m22", m.m12);
+
+        var inv = m.inverse;
+
+        Vector3 test = new Vector3(0.5F, 0.4F, 0.6F);
+        Debug.Log(inv.MultiplyVector(m.MultiplyVector(test)));
+
+
+        shader.SetFloat("im00", inv.m00);
+        shader.SetFloat("im01", inv.m01);
+        shader.SetFloat("im02", inv.m02);
+
+        shader.SetFloat("im10", inv.m10);
+        shader.SetFloat("im11", inv.m11);
+        shader.SetFloat("im12", inv.m12);
+
+        shader.SetFloat("im20", inv.m10);
+        shader.SetFloat("im21", inv.m11);
+        shader.SetFloat("im22", inv.m12);
 
 
 
@@ -620,6 +697,10 @@ public class UnbundleFD : MonoBehaviour {
             shader.Dispatch(fwdTransfObsKern, pointsToAvoid.Length, 1, 1);
         }
         // Apply FDEUB
+
+
+
+        //shader.SetFloat()
         shader.SetInt("lineNb", lineNb);
         shader.SetInt("obsNb", pointsToAvoid.Length);
         shader.SetFloat("k", springConstant);

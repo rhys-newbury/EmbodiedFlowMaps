@@ -43,6 +43,33 @@ float fmaxP;
 uint nbPlane;
 
 
+float m00;
+float m01;
+float m02;
+
+float m10;
+float m11;
+float m12;
+
+float m20;
+float m21;
+float m22;
+
+
+float im00;
+float im01;
+float im02;
+
+float im10;
+float im11;
+float im12;
+
+float im20;
+float im21;
+float im22;
+
+
+
 // Create a RenderTexture with enableReadWrite flag and set it
 // with cs.SetTexture
 // Struct: [p00,p01,..,p0m,...,pn0,...pnm]
@@ -167,6 +194,22 @@ float3 getSphereDirtoLine(float3 pt, float3 linePt, float3 lineDir)
 	// First we get the vector orthogonal to the line Pt and the line direction = vecOrth.
 	// Then we find the vector that is orthogonal to Pt and vecOrht.
 	return cross(normPt, cross(normLinePt, normLineDir));
+}
+
+float3 multiplyByRotation(float3 v) {
+	float x = m00 * v.x + m01 * v.y + m02 * v.z;
+	float y = m10 * v.x + m11 * v.y + m12 * v.z;
+	float z = m20 * v.x + m21 * v.y + m22 * v.z;
+
+	return float3(x, y, z);
+}
+
+float3 multiplyByInverse(float3 v) {
+	float x = im00 * v.x + im01 * v.y + im02 * v.z;
+	float y = im10 * v.x + im11 * v.y + im12 * v.z;
+	float z = im20 * v.x + im21 * v.y + im22 * v.z;
+
+	return float3(x, y, z);
 }
 
 //Function to calculate the distance between plane and point
@@ -305,6 +348,7 @@ void executeFDEUB(uint3 id : SV_DispatchThreadID, uint3 groupId : SV_GroupThread
 	for (uint k = 0; k < obsNb; k++)
 	{
 		fo += abs(calculateLinkRepulsion(avoidPoints[k], pos[id.x], kor, dmin / length(avoidPoints[k])));
+		fo = fo * float3(1, 0, 0);
 	//	// NB: Here we divide the distance threshold by the lenght (i.e. distance to eye) of the opbstacle).
 	//	// Doing this counteract the change of angular resolution based on distance
 	//	// This means that we always repulse until a distance from obstacle that is independent from pov.
@@ -317,8 +361,19 @@ void executeFDEUB(uint3 id : SV_DispatchThreadID, uint3 groupId : SV_GroupThread
 		//fap += calculatePlaneEffect(pos[id.x], attracPlane[k+3], attracPlane[k+2], attracPlane[k+1], attracPlane[k]);
 	}
 	// Add displacement to the displacement matrix
-	dispVec[id.x] = fs + fa + fr + fo + fp;
-	//dispVec[id.x] = dispVec[id.x] > 0 ? dispVec[id.x] : 0;
+	float3 mfr = multiplyByRotation(fr);
+	
+	mfr = float3(mfr.x, abs(mfr.y), mfr.z);
+
+	float3 cfr = multiplyByInverse(mfr);
+
+
+
+	//fr = float3(fr.x, abs(fr.y), fr.z);
+	dispVec[id.x] = fs + fa + cfr + fo + fp;
+
+
+	//dispVec[id.x] = dispVec[id.x] > 0 ? dispVec[id.x] : float3(0,0,0);
 	//dispVec[id.x].z = dispVec[id.x].z);
 }
 

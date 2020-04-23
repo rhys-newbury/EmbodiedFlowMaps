@@ -5354,10 +5354,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sensorToTakeIntoAccount: []
   gameObjectToAvoid:
-  - {fileID: 1601499206}
-  - {fileID: 146395200}
   - {fileID: 1893529181}
-  - {fileID: 221687377}
   attractivePlane: []
   mainCam: {fileID: 1148182085}
   otherClients: []
@@ -5371,7 +5368,7 @@ MonoBehaviour:
   springConstant: 3044
   repulsionConstant: -0.001
   attractionConstant: 0.0005
-  obstacleRepulsionConstant: -0.005
+  obstacleRepulsionConstant: -0.1
   obstacleDMin: 0.3
   distanceMaxNormal: 0.5
   forceMaxNormal: 0.2
