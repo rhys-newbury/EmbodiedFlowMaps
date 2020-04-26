@@ -34,16 +34,16 @@ public class PointGeneratorScript : MonoBehaviour {
             Vector3 p2W = Screen2.transform.TransformPoint(p2S);
 
             GameObject p1 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            p1.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
             p1.transform.SetParent(Screen1.transform);
             p1.transform.position = p1W;
+            p1.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
             p1.transform.forward = Screen1.transform.forward;
             p1.name = "Point+"+i;
 
             GameObject p2 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             p2.transform.SetParent(Screen2.transform);
             p2.transform.position = p2W;
-            p2.transform.localScale = new Vector3(0.05f, 0.05f, 5f);
+            p2.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
             p2.transform.forward = Screen2.transform.forward;
             p2.name = "Point+"+i+"-V";
 

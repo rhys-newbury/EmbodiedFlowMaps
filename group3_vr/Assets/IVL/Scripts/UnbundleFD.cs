@@ -230,7 +230,7 @@ public class UnbundleFD : MonoBehaviour {
         //CreateTestBundles();
 
         previousPositions = new List<Vector3[]>();
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 2; i++)
         {
             Vector3[] tmp = new Vector3[lineTab.Length];
             lineTab.CopyTo(tmp, 0);
@@ -940,9 +940,9 @@ public class UnbundleFD : MonoBehaviour {
     private Vector3 getAvgPos(int i)
     {
         Vector3 avgPos = new Vector3();
-        avgPos.x = (previousPositions[0][i].x + previousPositions[1][i].x + previousPositions[2][i].x + previousPositions[3][i].x + previousPositions[4][i].x) / 5.0f;
-        avgPos.y = (previousPositions[0][i].y + previousPositions[1][i].y + previousPositions[2][i].y + previousPositions[3][i].y + previousPositions[4][i].y) / 5.0f;
-        avgPos.z = (previousPositions[0][i].z + previousPositions[1][i].z + previousPositions[2][i].z + previousPositions[3][i].z + previousPositions[4][i].z) / 5.0f;
+        avgPos.x = (previousPositions[0][i].x + previousPositions[1][i].x) / 2.0f;
+        avgPos.y = (previousPositions[0][i].y + previousPositions[1][i].y) / 2.0f;
+        avgPos.z = (previousPositions[0][i].z + previousPositions[1][i].z) / 2.0f;
         return avgPos;
     }
 

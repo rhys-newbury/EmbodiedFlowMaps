@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &339187469507219607
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 339187469507219605}
+  - component: {fileID: 339187469507219604}
+  m_Layer: 0
+  m_Name: UnbundleManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &339187469507219605
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 339187469507219607}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.5223479, y: 2.1006536, z: 0.71056193}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &339187469507219604
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 339187469507219607}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b428948adabb1af45b02ec1ce482314f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sensorToTakeIntoAccount: []
+  gameObjectToAvoid:
+  - {fileID: 0}
+  attractivePlane: []
+  mainCam: {fileID: 0}
+  otherClients: []
+  isMaster: 1
+  SyncOtherClient: 1
+  radiusTube: 0.001
+  drawSphere: 0
+  colorT: {r: 0, g: 0, b: 0, a: 0}
+  shader: {fileID: 7200000, guid: a3759dd24f605ce4d9f8d1f687100cd1, type: 3}
+  deltaSim: 0.001
+  maxDeltaSim: 0.005
+  springConstant: 3044
+  repulsionConstant: -0.001
+  attractionConstant: 0.0005
+  obstacleRepulsionConstant: -0.1
+  obstacleDMin: 0.3
+  distanceMaxNormal: 0.5
+  forceMaxNormal: 0.2
+  distancePlane: 0
+  forcePlane: 0
+  LineRendererDrawing: 1
+  linkMat: {fileID: 2100000, guid: 9fee465513cc9d44aa47302a7ef6f24e, type: 2}
