@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
@@ -114,6 +115,201 @@ public class UnbundleFD : MonoBehaviour {
         initUnbundling(listGO, true);
     }
 
+    public void removeLinesFromObject(GameObject go)
+    {
+        int id = 0;
+        List<KeyValuePair<GameObject, GameObject>> temp = new List<KeyValuePair<GameObject, GameObject>>(); 
+        foreach (var item in pointsList)
+        {
+
+            if (item.Key.Equals(go) || item.Value.Equals(go))
+            {
+                var l = lineTab.OfType<Vector3>().ToList();
+                l.RemoveRange(id * 32, 32);
+                lineTab = l.ToArray();
+
+                l = beginLineNormal.OfType<Vector3>().ToList();
+                l.RemoveAt(id);
+                beginLineNormal = l.ToArray();
+
+                l = endLineNormal.OfType<Vector3>().ToList();
+                l.Add(Vector3.zero);
+                endLineNormal = l.ToArray();
+
+                var line =  tubeList[id * 32];
+                tubeList.Remove(id * 32);
+                GameObject.Destroy(line);
+                lineNb--;
+
+            }
+            else {
+                temp.Add(item);
+            }
+            id++;
+        }
+        pointsList = temp;
+
+        previousPositions = new List<Vector3[]>();
+        for (int i = 0; i < 2; i++)
+        {
+            Vector3[] tmp = new Vector3[lineTab.Length];
+            lineTab.CopyTo(tmp, 0);
+            previousPositions.Add(tmp);
+        }
+
+
+        update_shader();
+
+    }
+
+    public void addLine(GameObject go, GameObject go2)
+    {
+        lineNb += 1;
+
+        Vector3 sum = Vector3.zero;
+        int count = 0;
+
+        int posPointer = lineTab.Count();
+        int lineCounter = beginLineNormal.Count();
+
+        var l = lineTab.OfType<Vector3>().ToList();
+        l.AddRange(new Vector3 [lineLenght]);
+        lineTab = l.ToArray();
+
+
+        l = beginLineNormal.OfType<Vector3>().ToList();
+        l.Add(Vector3.zero);
+        beginLineNormal = l.ToArray();
+
+        l = endLineNormal.OfType<Vector3>().ToList();
+        l.Add(Vector3.zero);
+        endLineNormal = l.ToArray();
+
+        pointsList.Add(new KeyValuePair<GameObject, GameObject>(go, go2));
+
+
+
+        GameObject sensorVisu = go2;
+
+        List<Vector3> line = new List<Vector3>();
+        Vector3 goP = go.transform.position;
+        Vector3 goVP = sensorVisu.transform.position;
+        Vector3 step = (goVP - goP) / (lineLenght - 1);
+
+        Vector3[] pointsTube = new Vector3[lineLenght];
+        int idBegining = posPointer;
+
+        for (int i = 0; i < lineLenght - 1; i++)
+        {
+            Vector3 interPoint = goP + i * step;
+            lineTab[posPointer] = interPoint;
+            pointsTube[i] = lineTab[posPointer];
+            posPointer++;
+        }
+
+        lineTab[posPointer] = goVP;
+        posPointer++;
+        sum += goP;
+        sum += goVP;
+        count += 2;
+
+        Vector3 normal1 = go.transform.forward;
+        Vector3 normal2 = sensorVisu.transform.forward;
+        //beginLineNormal[2 * lineCounter] = go.transform.position;
+        beginLineNormal[lineCounter] = normal1;
+        //endLineNormal[2 * lineCounter] = sensorVisu.transform.position;
+        endLineNormal[lineCounter] = normal2;
+
+
+        lineCounter++;
+
+
+        GameObject tubeGO = new GameObject("Tube-");
+        LineRenderer lr = tubeGO.AddComponent<LineRenderer>();
+        lr.positionCount = pointsTube.Length;
+        lr.SetPositions(pointsTube);
+        lr.startWidth = 0.015f;
+        lr.endWidth = 0.015f;
+        Material[] matArray = new Material[1];
+        linkMat.color = colorT;
+        matArray[0] = linkMat;
+        lr.materials = matArray;
+        tubeList.Add(idBegining, lr);
+
+        //tubeGO.tag = "Tube";
+        previousPositions = new List<Vector3[]>();
+        for (int i = 0; i < 2; i++)
+        {
+            Vector3[] tmp = new Vector3[lineTab.Length];
+            lineTab.CopyTo(tmp, 0);
+            previousPositions.Add(tmp);
+        }
+
+
+        update_shader();
+
+
+
+
+    }
+
+    public void update_shader()
+    {
+        // Link buffer with RWTextures in shader
+        myLineBuffer = new ComputeBuffer(lineTab.Length, 3 * sizeof(float));
+        myLineBuffer.SetData(lineTab);
+
+        myDisplacementBuffer = new ComputeBuffer(lineTab.Length, 3 * sizeof(float));
+
+        normSrcVecBuffer = new ComputeBuffer(beginLineNormal.Length, 3 * sizeof(float));
+        normSrcVecBuffer.SetData(beginLineNormal);
+
+        normDestVecBuffer = new ComputeBuffer(endLineNormal.Length, 3 * sizeof(float));
+        normDestVecBuffer.SetData(endLineNormal);
+
+        
+        myBundleIdBuffer = new ComputeBuffer(bundleId.Length, sizeof(int));
+        myBundleIdBuffer.SetData(bundleId);
+
+        // Coord Transform Buffers
+        shader.SetBuffer(fwdTransfKernel, "pos", myLineBuffer);
+        shader.SetBuffer(bckTransfKernel, "pos", myLineBuffer);
+        shader.SetBuffer(bckTransfKernel, "dispVec", myDisplacementBuffer);
+
+        //Normal coordinate change
+        shader.SetBuffer(fwdTransfNormalKern, "normSrcVec", normSrcVecBuffer);
+        shader.SetBuffer(fwdTransfNormalKern, "normDestVec", normDestVecBuffer);
+        shader.SetBuffer(bckTransfNormalKern, "normSrcVec", normSrcVecBuffer);
+        shader.SetBuffer(bckTransfNormalKern, "normDestVec", normDestVecBuffer);
+        
+        
+        // FD Kernel Buffers
+        shader.SetBuffer(FDEUKernel, "pos", myLineBuffer);
+        shader.SetBuffer(FDEUKernel, "dispVec", myDisplacementBuffer);
+        shader.SetBuffer(FDEUKernel, "normSrcVec", normSrcVecBuffer);
+        shader.SetBuffer(FDEUKernel, "normDestVec", normDestVecBuffer);
+
+        shader.SetBuffer(FDEUKernel, "avoidPoints", myAvoidPointBuffer);
+       
+        shader.SetBuffer(dispKernel, "pos", myLineBuffer);
+        shader.SetBuffer(dispKernel, "dispVec", myDisplacementBuffer);
+
+        // Link shader uniforms
+        shader.SetInt("lineNb", lineNb);
+        shader.SetInt("obsNb", pointsToAvoid.Length);
+        shader.SetFloat("k", springConstant);
+        shader.SetFloat("kr", repulsionConstant);
+        shader.SetFloat("ka", attractionConstant);
+        shader.SetFloat("kor", obstacleRepulsionConstant);
+        shader.SetFloat("dmin", obstacleDMin);
+        shader.SetFloat("dmax", distanceMaxNormal);
+        shader.SetFloat("fmax", forceMaxNormal);
+        shader.SetInt("nbPlane", planeCoord.Length);
+        shader.SetFloat("dmaxP", distancePlane);
+        shader.SetFloat("fmaxP", forcePlane);
+
+    }
+
     public void initUnbundling(List<KeyValuePair<GameObject, GameObject>> listGO, bool drawing)
     {
         LineRendererDrawing = drawing;
@@ -177,14 +373,6 @@ public class UnbundleFD : MonoBehaviour {
             //endLineNormal[2 * lineCounter] = sensorVisu.transform.position;
             endLineNormal[lineCounter] = normal2;
 
-            #region DEBUG - Create a cube to show the normal
-            //GameObject goReal = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            //goReal.transform.localScale = new Vector3(0.005f, 0.005f, 0.005f);
-            //goReal.transform.position = beginLineNormal[lineCounter];
-            //GameObject goReal2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            //goReal2.transform.localScale = new Vector3(0.0005f, 0.0005f, 0.0005f);
-            //goReal2.transform.position = endLineNormal[lineCounter];
-            #endregion
 
             lineCounter++;
         }
@@ -192,35 +380,6 @@ public class UnbundleFD : MonoBehaviour {
 
         #region Tube Creation
         drawTube();
-        /*int countTube = 0;
-        int idVec = 0;
-        foreach (KeyValuePair<GameObject, GameObject> kv in pointsList)
-        {
-            GameObject tubeGO = new GameObject("Tube-" + countTube);
-            tubeGO.transform.SetParent(this.transform);
-            //tubeGO.transform.localScale = new Vector3(0.005f, 0.005f, 0.005f);
-            TubeRenderer tube = tubeGO.AddComponent<TubeRenderer>();
-            Vector3[] pointsTube = new Vector3[lineLenght];
-            int idBegining = idVec;
-            for (int i = idVec; i < idBegining + lineLenght; i++)
-            {
-                //Debug.Log(i + ";" + idVec + ";" + idBegining);
-                pointsTube[i - idBegining] = lineTab[idVec];
-                colorTube[i - idBegining] = colorT;
-                idVec++;
-            }
-            tube.points = pointsTube;
-            tube.radius = radiusTube;
-            tube.colors = colorTube;
-            tubeList.Add(idBegining, tube);
-
-            tubeGO.GetComponent<Renderer>().material.color = colorT;
-
-            //tubeGO.AddComponent<MeshCollider>();
-
-            tubeGO.tag = "Tube";
-            countTube++;
-        }*/
 
         #endregion
 

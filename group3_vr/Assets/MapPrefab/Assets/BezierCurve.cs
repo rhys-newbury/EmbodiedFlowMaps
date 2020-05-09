@@ -52,47 +52,65 @@ public class Bezier : System.Object
     /// <returns></returns>
     public Bezier(Transform parent, InteractableMap origin, InteractableMap destination)
     {
-        gameObject = new GameObject();
+        //gameObject = new GameObject();
 
-        line = gameObject.AddComponent(typeof(LineRenderer)) as LineRenderer;
-        line.transform.SetParent(parent);
-        line.useWorldSpace = true;
-        line.startWidth = 0.005F;
-        line.endWidth = 0.005F;
+        //line = gameObject.AddComponent(typeof(LineRenderer)) as LineRenderer;
+        //line.transform.SetParent(parent);
+        //line.useWorldSpace = true;
+        //line.startWidth = 0.005F;
+        //line.endWidth = 0.005F;
 
-        interactObject = gameObject.AddComponent(typeof(VRTK_InteractableObject)) as VRTK_InteractableObject;
-        VRTK_InteractHaptics interactHaptics = gameObject.AddComponent(typeof(VRTK_InteractHaptics)) as VRTK_InteractHaptics;
-        VRTK.GrabAttachMechanics.VRTK_ChildOfControllerGrabAttach grabAttach = gameObject.AddComponent(typeof(VRTK.GrabAttachMechanics.VRTK_ChildOfControllerGrabAttach)) as VRTK.GrabAttachMechanics.VRTK_ChildOfControllerGrabAttach;
-        VRTK.SecondaryControllerGrabActions.VRTK_SwapControllerGrabAction grabAction = gameObject.AddComponent(typeof(VRTK.SecondaryControllerGrabActions.VRTK_SwapControllerGrabAction)) as VRTK.SecondaryControllerGrabActions.VRTK_SwapControllerGrabAction;
-        Rigidbody rigidBody = gameObject.AddComponent(typeof(Rigidbody)) as Rigidbody;
+        //interactObject = gameObject.AddComponent(typeof(VRTK_InteractableObject)) as VRTK_InteractableObject;
+        //VRTK_InteractHaptics interactHaptics = gameObject.AddComponent(typeof(VRTK_InteractHaptics)) as VRTK_InteractHaptics;
+        //VRTK.GrabAttachMechanics.VRTK_ChildOfControllerGrabAttach grabAttach = gameObject.AddComponent(typeof(VRTK.GrabAttachMechanics.VRTK_ChildOfControllerGrabAttach)) as VRTK.GrabAttachMechanics.VRTK_ChildOfControllerGrabAttach;
+        //VRTK.SecondaryControllerGrabActions.VRTK_SwapControllerGrabAction grabAction = gameObject.AddComponent(typeof(VRTK.SecondaryControllerGrabActions.VRTK_SwapControllerGrabAction)) as VRTK.SecondaryControllerGrabActions.VRTK_SwapControllerGrabAction;
+        //Rigidbody rigidBody = gameObject.AddComponent(typeof(Rigidbody)) as Rigidbody;
 
-        interactObject.isGrabbable = true;
-        interactObject.holdButtonToGrab = false;
-        interactObject.grabAttachMechanicScript = grabAttach;
+        //interactObject.isGrabbable = true;
+        //interactObject.holdButtonToGrab = false;
+        //interactObject.grabAttachMechanicScript = grabAttach;
 
 
 
-        //interactObject.secondaryGrabActionScript = scaleAction;
 
-        //grabAttach.precisionGrab = true;
+        UnbundleFD unbundle = GameObject.Find("UnbundleManager").GetComponent<UnbundleFD>();
 
-        rigidBody.useGravity = false;
-        rigidBody.isKinematic = true;
+        ////interactObject.secondaryGrabActionScript = scaleAction;
 
-        Vector3 p0 = origin.transform.parent.transform.position; //- origin.transform.parent.transform.TransformVector(new Vector3(0, 0, 0.07F));
-        Vector3 p3 = destination.transform.parent.transform.position; //- destination.transform.parent.transform.TransformVector(new Vector3(0, 0, 0.07F));
+        ////grabAttach.precisionGrab = true;
 
-        float dist = (p0 - p3).magnitude;
+        //rigidBody.useGravity = false;
+        //rigidBody.isKinematic = true;
 
-        Vector3 p1 = p0 + origin.transform.parent.transform.TransformVector(new Vector3(0, 0, dist));
+        Vector3 p1W = origin.transform.parent.transform.position; //- origin.transform.parent.transform.TransformVector(new Vector3(0, 0, 0.07F));
+        Vector3 p2W = destination.transform.parent.transform.position; //- destination.transform.parent.transform.TransformVector(new Vector3(0, 0, 0.07F));
 
-        Vector3 p2 = p3 + destination.transform.parent.transform.TransformVector(new Vector3(0, 0, dist));
+        GameObject p1 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        p1.transform.SetParent(parent.transform);
+        p1.transform.position = p1W;
+        p1.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
+        p1.transform.forward = origin.transform.parent.transform.forward;
+        p1.name = "Point+";
 
-        CreateBezier(p0, p1, p2, p3, 50);
+        GameObject p2 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        p2.transform.SetParent(parent.transform);
+        p2.transform.position = p2W;
+        p2.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
+        p2.transform.forward = destination.transform.parent.transform.forward;
+        p2.name = "Point+" + "-V";
+        unbundle.addLine(p1, p2);
 
-        line.positionCount = this.points.Length;
-        line.SetPositions(this.points);
-        line.useWorldSpace = false;
+        //float dist = (p0 - p3).magnitude;
+
+        //Vector3 p1 = p0 + origin.transform.parent.transform.TransformVector(new Vector3(0, 0, dist));
+
+        //Vector3 p2 = p3 + destination.transform.parent.transform.TransformVector(new Vector3(0, 0, dist));
+
+        //CreateBezier(p0, p1, p2, p3, 50);
+
+        //line.positionCount = this.points.Length;
+        //line.SetPositions(this.points);
+        //line.useWorldSpace = false;
 
     }
 
