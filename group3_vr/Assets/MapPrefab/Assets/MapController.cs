@@ -35,6 +35,7 @@ public class MapController : MonoBehaviour
 
     private Dictionary<string, Dictionary<string, float>> countyOutcoming = new Dictionary<string, Dictionary<string, float>>();
 
+    internal Dictionary<String, List<Tuple<String, String, float>>> flattenedList = new Dictionary<string, List<Tuple<string, string, float>>>();
 
 
   
@@ -114,6 +115,7 @@ public class MapController : MonoBehaviour
             countyIncoming["America"].Add(state, inc_data);
 
 
+
         }
         StreamReader cinp_stm = new StreamReader(pathToData + "county_inc.txt", System.Text.Encoding.GetEncoding("iso-8859-1"));
 
@@ -176,7 +178,7 @@ public class MapController : MonoBehaviour
 
 
 
-
+        flattenedList["America"] = new List<Tuple<string, string, float>>();
 
         StreamReader inp_stm2 = new StreamReader(pathToData + "flow.csv", System.Text.Encoding.GetEncoding("iso-8859-1"));
 
@@ -193,6 +195,8 @@ public class MapController : MonoBehaviour
             string state2 = data[1].Trim();
             float inc_data = float.Parse(data[2]);
 
+
+
             
 
             if (!county_flow["America"].ContainsKey(state1))
@@ -207,6 +211,12 @@ public class MapController : MonoBehaviour
             }
 
             county_flow["America"][state1]["America"][state2] = inc_data;
+            if (state1 != state2)
+            {
+                flattenedList["America"].Add(new Tuple<string, string, float>(state1, state2, inc_data));
+
+            }
+
 
         }
 
@@ -247,6 +257,15 @@ public class MapController : MonoBehaviour
 
             current_county[state2][county2] = inc_data;
 
+            if (!flattenedList.ContainsKey(state1))
+            {
+                flattenedList[state1] = new List<Tuple<string, string, float>>();
+            }
+            if (state1 == state2)
+            {
+                    flattenedList[state1].Add(new Tuple<string, string, float>(county1, county2, inc_data));
+            }
+
 
             if (!county_flow.ContainsKey("America"))
             {
@@ -286,6 +305,17 @@ public class MapController : MonoBehaviour
             current_county["America"][state2] += inc_data;
 
         }
+        //var a = county_flow["America"];
+        var keys = new List<string>(flattenedList.Keys);
+        foreach (string key in keys)
+        {
+            flattenedList[key] = flattenedList[key].OrderBy(x => x.Item3).Reverse().ToList();
+        }
+
+
+
+
+        //var c = b[0];
 
 
     

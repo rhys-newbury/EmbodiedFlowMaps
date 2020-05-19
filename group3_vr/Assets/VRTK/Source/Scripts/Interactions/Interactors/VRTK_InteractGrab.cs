@@ -410,9 +410,9 @@ namespace VRTK
             }
         }
 
-        protected virtual void InitGrabbedObject()
+        protected virtual void InitGrabbedObject(GameObject objToGrab = null)
         {
-            grabbedObject = (interactTouch != null ? interactTouch.GetTouchedObject() : null);
+            grabbedObject = objToGrab != null ? objToGrab : (interactTouch != null ? interactTouch.GetTouchedObject() : null);
             if (grabbedObject != null)
             {
                 OnControllerStartGrabInteractableObject(interactTouch.SetControllerInteractEvent(grabbedObject));
@@ -540,9 +540,9 @@ namespace VRTK
         {
             bool initialGrabAttempt = false;
             VRTK_InteractableObject objectToGrabScript = (objectToGrab != null ? objectToGrab.GetComponent<VRTK_InteractableObject>() : null);
-            if (grabbedObject == null && interactTouch != null && IsObjectGrabbable(interactTouch.GetTouchedObject()) && ScriptValidGrab(objectToGrabScript))
+            if (grabbedObject == null && interactTouch != null && IsObjectGrabbable(objectToGrab != null ? objectToGrab : interactTouch.GetTouchedObject()) && ScriptValidGrab(objectToGrabScript))
             {
-                InitGrabbedObject();
+                InitGrabbedObject(objectToGrab);
                 if (!influencingGrabbedObject)
                 {
                     initialGrabAttempt = objectToGrabScript.grabAttachMechanicScript.StartGrab(gameObject, grabbedObject, controllerAttachPoint);

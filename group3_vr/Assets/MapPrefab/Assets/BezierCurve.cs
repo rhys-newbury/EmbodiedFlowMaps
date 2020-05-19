@@ -50,7 +50,7 @@ public class Bezier : System.Object
     /// <param name="origin">Origin of the curve</param>
     /// <param name="destination">Destination of the curve</param>
     /// <returns></returns>
-    public Bezier(Transform parent, InteractableMap origin, InteractableMap destination)
+    public Bezier(Transform parent, InteractableMap origin, InteractableMap destination, float lineWidth)
     {
         //gameObject = new GameObject();
 
@@ -85,20 +85,21 @@ public class Bezier : System.Object
         Vector3 p1W = origin.transform.parent.transform.position; //- origin.transform.parent.transform.TransformVector(new Vector3(0, 0, 0.07F));
         Vector3 p2W = destination.transform.parent.transform.position; //- destination.transform.parent.transform.TransformVector(new Vector3(0, 0, 0.07F));
 
-        GameObject p1 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        //GameObject p1 = GameObject.CreaCreatePrimitive(PrimitiveType.Sphere);
+        GameObject p1 = new GameObject();
         p1.transform.SetParent(parent.transform);
         p1.transform.position = p1W;
         p1.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
         p1.transform.forward = origin.transform.parent.transform.forward;
         p1.name = "Point+";
 
-        GameObject p2 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        GameObject p2 = new GameObject();
         p2.transform.SetParent(parent.transform);
         p2.transform.position = p2W;
         p2.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
         p2.transform.forward = destination.transform.parent.transform.forward;
         p2.name = "Point+" + "-V";
-        unbundle.addLine(p1, p2);
+        unbundle.addLine(p1, p2, lineWidth);
 
         //float dist = (p0 - p3).magnitude;
 

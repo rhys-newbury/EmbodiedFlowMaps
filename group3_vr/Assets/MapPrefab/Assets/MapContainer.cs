@@ -19,7 +19,7 @@ public class MapContainer : MonoBehaviour
     private List<LineRenderer> lines = new List<LineRenderer>();
 
     private static Dictionary<String, Dictionary<string, bool>> currently_joined = new Dictionary<String, Dictionary<string, bool>>();
-    private string parentName;
+    internal string parentName;
     private MapController mapController;
     private int level;
     public static bool update;
@@ -45,25 +45,7 @@ public class MapContainer : MonoBehaviour
 
     public Vector3 startPos;
 
-    /// <summary>
-    /// Remove from objects on stack, when object is destoryed
-    /// </summary>
-    //public void OnDestroy()
-    //{
-    //    if (!this.moved)
-    //    {
-    //        if (this.level == (int)(int)MapRenderer.LEVEL.STATE_LEVEL)
-    //        {
-    //            this.mapController.StateStack.destroy(this);
-    //        }
-    //        else
-    //        {
-    //            this.mapController.CountyStack.destroy(this);
-
-    //        }
-    //    }
-
-    //}
+    
 
     /// <summary>
     /// When object is created, set up Animations and VRTK Interactions
@@ -98,24 +80,6 @@ public class MapContainer : MonoBehaviour
     {      
 
 
-
-        anim = gameObject.AddComponent<Animation>();
-        AnimationCurve translateX = AnimationCurve.EaseInOut(0.0f, 0.0f, 0.5f, -0.05f);
-        animationClip = new AnimationClip();
-        animationClip.legacy = true;
-        animationClip.SetCurve("", typeof(Transform), "localPosition.z", translateX);
-        anim.AddClip(animationClip, "ZMovement");
-        Debug.Log(anim.GetClipCount());
-
-        //animZ = gameObject.AddComponent<Animation>();
-        AnimationCurve translateY = AnimationCurve.EaseInOut(0.0f, 0.1f, 0.0f, -0.05f);
-        animationClipZ = new AnimationClip();
-        animationClipZ.legacy = true;
-        animationClipZ.SetCurve("", typeof(Transform), "localPosition.y", translateY);
-        anim.AddClip(animationClipZ, "YMovement");
-        Debug.Log(anim.GetClipCount());
-
-
         this.reportGrabbed = delegate (bool x)
         {
             if (!(this.moved) && (this.level > 0))
@@ -141,9 +105,46 @@ public class MapContainer : MonoBehaviour
 
             this.transform.root.GetComponent<MapController>().startUp = false;
 
+            Dictionary<String, InteractableMap> lchild = new Dictionary<string, InteractableMap>();
+            foreach (var ma2p in this.GetComponentsInChildren<InteractableMap>())
+            {
+                lchild[ma2p.name] = ma2p;
+            }
+
+
+            foreach (var pair in mc.flattenedList["America"].Take(100))
+            {
+
+                try
+                {
+                    var origin = lchild[pair.Item1];
+                    var destination = lchild[pair.Item2];
+                    var flowData = pair.Item3;
+
+                    Bezier b = new Bezier(this.transform, origin, destination, 0.1F * (0.00000699192F * flowData + 0.05F));
+                }
+                catch { }
+
+                //b.line.startWidth = 0.1F * (0.00000699192F * flowData + 0.05F);
+                //Debug.Log("line width = " + b.line.startWidth.ToString());
+                //b.line.endWidth = b.line.startWidth;
+
+                //b.line.material = new Material(Shader.Find("Sprites/Default"));
+
+                //b.line.startColor = Color.green; //new Color(253, 187, 45, 255);
+                //b.line.endColor = Color.blue; // new Color(34, 193,195, 255);
+
+            }
+
         }
 
 
+    }
+    private void OnDestroy()
+    {
+        var g = GameObject.Find("UnbundleManager").GetComponent<UnbundleFD>();
+        g.removeLinesFromObject(this.gameObject);
+        
     }
 
     /// <summary>
@@ -295,7 +296,7 @@ public class MapContainer : MonoBehaviour
                                 if (origin.getMapController().getFlowData(origin.name, origin.parentName, destination.name, destination.parentName) != -1)
                                 {
                                 
-                                    Bezier b = new Bezier(this.transform, origin, destination);
+                                    Bezier b = new Bezier(this.transform, origin, destination, 1);
                                     lines.Add(b.line);
                                     item.AddLines(b.line);
 
@@ -327,38 +328,38 @@ public class MapContainer : MonoBehaviour
 
   
 
-    private bool animWasPlaying = false;
-    private int resetCount = 0;
+    //private bool animWasPlaying = false;
+    //private int resetCount = 0;
 
     /// <summary>
     /// On LateUpdate while object is animating, shift the object back to original position.
     /// </summary>
     /// <returns></returns>
     ///
-    private void LateUpdate()
-    {
+    //private void LateUpdate()
+    //{
 
-        if (anim.isPlaying || animWasPlaying)
-        {
-            animWasPlaying = true;
-            transform.localPosition += startPos;
-            if (anim.isPlaying)
-            {
-                resetCount = 0;
-            }
-            else
-            {
-                resetCount += 1;
-            }
+    //    if (anim.isPlaying || animWasPlaying)
+    //    {
+    //        animWasPlaying = true;
+    //        transform.localPosition += startPos;
+    //        if (anim.isPlaying)
+    //        {
+    //            resetCount = 0;
+    //        }
+    //        else
+    //        {
+    //            resetCount += 1;
+    //        }
 
-        }
+    //    }
 
 
-        if (resetCount >= 1)
-        {
-            animWasPlaying = false;
-        }
-    }
+    //    if (resetCount >= 1)
+    //    {
+    //        animWasPlaying = false;
+    //    }
+    //}
 
     //internal void stack_remove(MapContainer container, int level)
     //{

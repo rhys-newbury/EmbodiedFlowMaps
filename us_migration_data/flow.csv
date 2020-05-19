@@ -50,7 +50,6 @@ Alabama,Minnesota,519
 Alabama,Rhode Island,79
 Alabama,Vermont,21
 Alabama,District of Columbia,176
-Alabama,Total Arriving,102052
 Alaska,Alabama,1421
 Alaska,Alaska,18940
 Alaska,Arizona,3436
@@ -103,7 +102,6 @@ Alaska,Minnesota,1085
 Alaska,Rhode Island,461
 Alaska,Vermont,203
 Alaska,District of Columbia,600
-Alaska,Total Arriving,85975
 Arizona,Alabama,1104
 Arizona,Alaska,1538
 Arizona,Arizona,121806
@@ -156,7 +154,6 @@ Arizona,Minnesota,3026
 Arizona,Rhode Island,228
 Arizona,Vermont,150
 Arizona,District of Columbia,333
-Arizona,Total Arriving,196200
 Arkansas,Alabama,951
 Arkansas,Alaska,258
 Arkansas,Arizona,1096
@@ -209,7 +206,6 @@ Arkansas,Minnesota,672
 Arkansas,Rhode Island,0
 Arkansas,Vermont,13
 Arkansas,District of Columbia,69
-Arkansas,Total Arriving,68498
 California,Alabama,3602
 California,Alaska,3478
 California,Arizona,46702
@@ -262,7 +258,6 @@ California,Minnesota,6182
 California,Rhode Island,2072
 California,Vermont,1000
 California,District of Columbia,3535
-California,Total Arriving,567557
 Colorado,Alabama,907
 Colorado,Alaska,1729
 Colorado,Arizona,9365
@@ -315,7 +310,6 @@ Colorado,Minnesota,2646
 Colorado,Rhode Island,150
 Colorado,Vermont,559
 Colorado,District of Columbia,481
-Colorado,Total Arriving,155876
 Connecticut,Alabama,830
 Connecticut,Alaska,96
 Connecticut,Arizona,1133
@@ -368,7 +362,6 @@ Connecticut,Minnesota,498
 Connecticut,Rhode Island,3297
 Connecticut,Vermont,1651
 Connecticut,District of Columbia,1042
-Connecticut,Total Arriving,91658
 Florida,Alabama,14339
 Florida,Alaska,1598
 Florida,Arizona,5761
@@ -421,7 +414,6 @@ Florida,Minnesota,2738
 Florida,Rhode Island,2039
 Florida,Vermont,1063
 Florida,District of Columbia,1603
-Florida,Total Arriving,435944
 Georgia,Alabama,19524
 Georgia,Alaska,1529
 Georgia,Arizona,3218
@@ -474,7 +466,6 @@ Georgia,Minnesota,2104
 Georgia,Rhode Island,390
 Georgia,Vermont,232
 Georgia,District of Columbia,1243
-Georgia,Total Arriving,252011
 Hawaii,Alabama,622
 Hawaii,Alaska,903
 Hawaii,Arizona,2379
@@ -527,7 +518,6 @@ Hawaii,Minnesota,788
 Hawaii,Rhode Island,179
 Hawaii,Vermont,143
 Hawaii,District of Columbia,177
-Hawaii,Total Arriving,59766
 Idaho,Alabama,444
 Idaho,Alaska,796
 Idaho,Arizona,2785
@@ -580,7 +570,6 @@ Idaho,Minnesota,347
 Idaho,Rhode Island,46
 Idaho,Vermont,41
 Idaho,District of Columbia,22
-Idaho,Total Arriving,58347
 Illinois,Alabama,3524
 Illinois,Alaska,739
 Illinois,Arizona,10849
@@ -633,7 +622,6 @@ Illinois,Minnesota,6741
 Illinois,Rhode Island,381
 Illinois,Vermont,337
 Illinois,District of Columbia,1001
-Illinois,Total Arriving,284436
 Indiana,Alabama,2241
 Indiana,Alaska,305
 Indiana,Arizona,3917
@@ -686,7 +674,6 @@ Indiana,Minnesota,1227
 Indiana,Rhode Island,49
 Indiana,Vermont,102
 Indiana,District of Columbia,351
-Indiana,Total Arriving,139534
 Iowa,Alabama,384
 Iowa,Alaska,191
 Iowa,Arizona,3331
@@ -739,7 +726,6 @@ Iowa,Minnesota,6280
 Iowa,Rhode Island,14
 Iowa,Vermont,83
 Iowa,District of Columbia,143
-Iowa,Total Arriving,72981
 Kansas,Alabama,744
 Kansas,Alaska,403
 Kansas,Arizona,2145
@@ -792,7 +778,6 @@ Kansas,Minnesota,915
 Kansas,Rhode Island,91
 Kansas,Vermont,3
 Kansas,District of Columbia,61
-Kansas,Total Arriving,91083
 Kentucky,Alabama,2399
 Kentucky,Alaska,373
 Kentucky,Arizona,1621
@@ -845,7 +830,6 @@ Kentucky,Minnesota,408
 Kentucky,Rhode Island,164
 Kentucky,Vermont,394
 Kentucky,District of Columbia,146
-Kentucky,Total Arriving,97279
 Louisiana,Alabama,2469
 Louisiana,Alaska,559
 Louisiana,Arizona,1367
@@ -898,7 +882,6 @@ Louisiana,Minnesota,414
 Louisiana,Rhode Island,175
 Louisiana,Vermont,102
 Louisiana,District of Columbia,233
-Louisiana,Total Arriving,92180
 Michigan,Alabama,2771
 Michigan,Alaska,649
 Michigan,Arizona,8609
@@ -951,7 +934,6 @@ Michigan,Minnesota,2711
 Michigan,Rhode Island,231
 Michigan,Vermont,200
 Michigan,District of Columbia,679
-Michigan,Total Arriving,181911
 Mississippi,Alabama,6336
 Mississippi,Alaska,179
 Mississippi,Arizona,536
@@ -1004,7 +986,6 @@ Mississippi,Minnesota,316
 Mississippi,Rhode Island,132
 Mississippi,Vermont,6
 Mississippi,District of Columbia,31
-Mississippi,Total Arriving,69061
 Missouri,Alabama,1287
 Missouri,Alaska,756
 Missouri,Arizona,3594
@@ -1057,7 +1038,6 @@ Missouri,Minnesota,1564
 Missouri,Rhode Island,87
 Missouri,Vermont,64
 Missouri,District of Columbia,221
-Missouri,Total Arriving,142175
 Nevada,Alabama,534
 Nevada,Alaska,484
 Nevada,Arizona,8728
@@ -1110,7 +1090,6 @@ Nevada,Minnesota,1182
 Nevada,Rhode Island,92
 Nevada,Vermont,56
 Nevada,District of Columbia,85
-Nevada,Total Arriving,106011
 New Hampshire,Alabama,67
 New Hampshire,Alaska,193
 New Hampshire,Arizona,470
@@ -1163,7 +1142,6 @@ New Hampshire,Minnesota,49
 New Hampshire,Rhode Island,769
 New Hampshire,Vermont,3085
 New Hampshire,District of Columbia,176
-New Hampshire,Total Arriving,43076
 New Mexico,Alabama,661
 New Mexico,Alaska,304
 New Mexico,Arizona,6185
@@ -1216,7 +1194,6 @@ New Mexico,Minnesota,482
 New Mexico,Rhode Island,25
 New Mexico,Vermont,71
 New Mexico,District of Columbia,125
-New Mexico,Total Arriving,62055
 New York,Alabama,2813
 New York,Alaska,625
 New York,Arizona,5942
@@ -1269,7 +1246,6 @@ New York,Minnesota,2234
 New York,Rhode Island,3404
 New York,Vermont,3804
 New York,District of Columbia,3592
-New York,Total Arriving,388081
 North Carolina,Alabama,4689
 North Carolina,Alaska,924
 North Carolina,Arizona,3930
@@ -1322,7 +1298,6 @@ North Carolina,Minnesota,1706
 North Carolina,Rhode Island,580
 North Carolina,Vermont,418
 North Carolina,District of Columbia,1672
-North Carolina,Total Arriving,230990
 Ohio,Alabama,2672
 Ohio,Alaska,758
 Ohio,Arizona,5047
@@ -1375,7 +1350,6 @@ Ohio,Minnesota,1812
 Ohio,Rhode Island,201
 Ohio,Vermont,344
 Ohio,District of Columbia,468
-Ohio,Total Arriving,198039
 Pennsylvania,Alabama,1345
 Pennsylvania,Alaska,443
 Pennsylvania,Arizona,4305
@@ -1428,7 +1402,6 @@ Pennsylvania,Minnesota,994
 Pennsylvania,Rhode Island,1117
 Pennsylvania,Vermont,648
 Pennsylvania,District of Columbia,1866
-Pennsylvania,Total Arriving,225871
 South Carolina,Alabama,2351
 South Carolina,Alaska,337
 South Carolina,Arizona,1532
@@ -1481,7 +1454,6 @@ South Carolina,Minnesota,945
 South Carolina,Rhode Island,348
 South Carolina,Vermont,99
 South Carolina,District of Columbia,358
-South Carolina,Total Arriving,122016
 South Dakota,Alabama,141
 South Dakota,Alaska,429
 South Dakota,Arizona,1480
@@ -1534,7 +1506,6 @@ South Dakota,Minnesota,3729
 South Dakota,Rhode Island,39
 South Dakota,Vermont,76
 South Dakota,District of Columbia,78
-South Dakota,Total Arriving,26785
 Tennessee,Alabama,8550
 Tennessee,Alaska,538
 Tennessee,Arizona,2782
@@ -1587,7 +1558,6 @@ Tennessee,Minnesota,1252
 Tennessee,Rhode Island,232
 Tennessee,Vermont,191
 Tennessee,District of Columbia,417
-Tennessee,Total Arriving,154616
 Texas,Alabama,7351
 Texas,Alaska,2489
 Texas,Arizona,14258
@@ -1640,7 +1610,6 @@ Texas,Minnesota,4487
 Texas,Rhode Island,546
 Texas,Vermont,440
 Texas,District of Columbia,1288
-Texas,Total Arriving,403793
 Utah,Alabama,994
 Utah,Alaska,990
 Utah,Arizona,7976
@@ -1693,7 +1662,6 @@ Utah,Minnesota,901
 Utah,Rhode Island,40
 Utah,Vermont,150
 Utah,District of Columbia,67
-Utah,Total Arriving,80700
 Virginia,Alabama,3744
 Virginia,Alaska,857
 Virginia,Arizona,3257
@@ -1746,7 +1714,6 @@ Virginia,Minnesota,1457
 Virginia,Rhode Island,1260
 Virginia,Vermont,454
 Virginia,District of Columbia,7847
-Virginia,Total Arriving,239106
 Washington,Alabama,1253
 Washington,Alaska,3173
 Washington,Arizona,12576
@@ -1799,7 +1766,6 @@ Washington,Minnesota,1796
 Washington,Rhode Island,260
 Washington,Vermont,171
 Washington,District of Columbia,333
-Washington,Total Arriving,181480
 Wisconsin,Alabama,703
 Wisconsin,Alaska,370
 Wisconsin,Arizona,4971
@@ -1852,7 +1818,6 @@ Wisconsin,Minnesota,17722
 Wisconsin,Rhode Island,42
 Wisconsin,Vermont,131
 Wisconsin,District of Columbia,509
-Wisconsin,Total Arriving,105025
 Wyoming,Alabama,150
 Wyoming,Alaska,134
 Wyoming,Arizona,1914
@@ -1905,7 +1870,6 @@ Wyoming,Minnesota,318
 Wyoming,Rhode Island,13
 Wyoming,Vermont,106
 Wyoming,District of Columbia,41
-Wyoming,Total Arriving,29881
 Delaware,Alabama,252
 Delaware,Alaska,21
 Delaware,Arizona,315
@@ -1958,7 +1922,6 @@ Delaware,Minnesota,78
 Delaware,Rhode Island,71
 Delaware,Vermont,42
 Delaware,District of Columbia,234
-Delaware,Total Arriving,27269
 Maine,Alabama,364
 Maine,Alaska,193
 Maine,Arizona,481
@@ -2011,7 +1974,6 @@ Maine,Minnesota,163
 Maine,Rhode Island,355
 Maine,Vermont,753
 Maine,District of Columbia,116
-Maine,Total Arriving,32432
 Maryland,Alabama,1480
 Maryland,Alaska,517
 Maryland,Arizona,1888
@@ -2064,7 +2026,6 @@ Maryland,Minnesota,1071
 Maryland,Rhode Island,925
 Maryland,Vermont,381
 Maryland,District of Columbia,12263
-Maryland,Total Arriving,162809
 Massachusetts,Alabama,355
 Massachusetts,Alaska,148
 Massachusetts,Arizona,1464
@@ -2117,7 +2078,6 @@ Massachusetts,Minnesota,729
 Massachusetts,Rhode Island,8848
 Massachusetts,Vermont,2962
 Massachusetts,District of Columbia,1643
-Massachusetts,Total Arriving,151004
 Montana,Alabama,297
 Montana,Alaska,527
 Montana,Arizona,1581
@@ -2170,7 +2130,6 @@ Montana,Minnesota,928
 Montana,Rhode Island,10
 Montana,Vermont,169
 Montana,District of Columbia,48
-Montana,Total Arriving,32438
 Nebraska,Alabama,218
 Nebraska,Alaska,272
 Nebraska,Arizona,2059
@@ -2223,7 +2182,6 @@ Nebraska,Minnesota,1241
 Nebraska,Rhode Island,141
 Nebraska,Vermont,54
 Nebraska,District of Columbia,85
-Nebraska,Total Arriving,46842
 New Jersey,Alabama,1251
 New Jersey,Alaska,207
 New Jersey,Arizona,2905
@@ -2276,7 +2234,6 @@ New Jersey,Minnesota,809
 New Jersey,Rhode Island,1508
 New Jersey,Vermont,833
 New Jersey,District of Columbia,1645
-New Jersey,Total Arriving,207007
 North Dakota,Alabama,146
 North Dakota,Alaska,109
 North Dakota,Arizona,960
@@ -2329,7 +2286,6 @@ North Dakota,Minnesota,8026
 North Dakota,Rhode Island,13
 North Dakota,Vermont,10
 North Dakota,District of Columbia,69
-North Dakota,Total Arriving,25376
 Oklahoma,Alabama,735
 Oklahoma,Alaska,634
 Oklahoma,Arizona,2320
@@ -2382,7 +2338,6 @@ Oklahoma,Minnesota,800
 Oklahoma,Rhode Island,47
 Oklahoma,Vermont,10
 Oklahoma,District of Columbia,26
-Oklahoma,Total Arriving,93825
 Oregon,Alabama,225
 Oregon,Alaska,2000
 Oregon,Arizona,6544
@@ -2435,7 +2390,6 @@ Oregon,Minnesota,1206
 Oregon,Rhode Island,45
 Oregon,Vermont,89
 Oregon,District of Columbia,279
-Oregon,Total Arriving,105208
 West Virginia,Alabama,124
 West Virginia,Alaska,87
 West Virginia,Arizona,517
@@ -2488,7 +2442,6 @@ West Virginia,Minnesota,236
 West Virginia,Rhode Island,115
 West Virginia,Vermont,6
 West Virginia,District of Columbia,334
-West Virginia,Total Arriving,47351
 Puerto Rico,Alabama,624
 Puerto Rico,Alaska,234
 Puerto Rico,Arizona,815
@@ -2541,7 +2494,6 @@ Puerto Rico,Minnesota,306
 Puerto Rico,Rhode Island,384
 Puerto Rico,Vermont,4
 Puerto Rico,District of Columbia,34
-Puerto Rico,Total Arriving,70191
 Minnesota,Alabama,470
 Minnesota,Alaska,598
 Minnesota,Arizona,5766
@@ -2594,7 +2546,6 @@ Minnesota,Minnesota,233308
 Minnesota,Rhode Island,175
 Minnesota,Vermont,125
 Minnesota,District of Columbia,243
-Minnesota,Total Arriving,111722
 Rhode Island,Alabama,105
 Rhode Island,Alaska,0
 Rhode Island,Arizona,386
@@ -2647,7 +2598,6 @@ Rhode Island,Minnesota,128
 Rhode Island,Rhode Island,17234
 Rhode Island,Vermont,321
 Rhode Island,District of Columbia,454
-Rhode Island,Total Arriving,31611
 Vermont,Alabama,25
 Vermont,Alaska,141
 Vermont,Arizona,273
@@ -2700,7 +2650,6 @@ Vermont,Minnesota,160
 Vermont,Rhode Island,383
 Vermont,Vermont,12504
 Vermont,District of Columbia,210
-Vermont,Total Arriving,20343
 District of Columbia,Alabama,222
 District of Columbia,Alaska,169
 District of Columbia,Arizona,247
@@ -2753,56 +2702,3 @@ District of Columbia,Minnesota,226
 District of Columbia,Rhode Island,109
 District of Columbia,Vermont,96
 District of Columbia,District of Columbia,0
-District of Columbia,Total Arriving,54773
-Total Leaving,Alabama,0
-Total Leaving,Alaska,35735
-Total Leaving,Arizona,226763
-Total Leaving,Arkansas,75999
-Total Leaving,California,473266
-Total Leaving,Colorado,196957
-Total Leaving,Connecticut,82065
-Total Leaving,Florida,518460
-Total Leaving,Georgia,270241
-Total Leaving,Hawaii,55654
-Total Leaving,Idaho,58524
-Total Leaving,Illinois,215461
-Total Leaving,Indiana,132082
-Total Leaving,Iowa,74894
-Total Leaving,Kansas,92478
-Total Leaving,Kentucky,112860
-Total Leaving,Louisiana,95523
-Total Leaving,Michigan,130199
-Total Leaving,Mississippi,70907
-Total Leaving,Missouri,153605
-Total Leaving,Nevada,114794
-Total Leaving,New Hampshire,41499
-Total Leaving,New Mexico,61828
-Total Leaving,New York,282677
-Total Leaving,North Carolina,268439
-Total Leaving,Ohio,184712
-Total Leaving,Pennsylvania,235275
-Total Leaving,South Carolina,157577
-Total Leaving,South Dakota,27509
-Total Leaving,Tennessee,172344
-Total Leaving,Texas,518580
-Total Leaving,Utah,86159
-Total Leaving,Virginia,259094
-Total Leaving,Washington,201998
-Total Leaving,Wisconsin,100424
-Total Leaving,Wyoming,29871
-Total Leaving,Delaware,34599
-Total Leaving,Maine,29685
-Total Leaving,Maryland,159516
-Total Leaving,Massachusetts,144041
-Total Leaving,Montana,35581
-Total Leaving,Nebraska,49229
-Total Leaving,New Jersey,136810
-Total Leaving,North Dakota,34434
-Total Leaving,Oklahoma,110386
-Total Leaving,Oregon,126199
-Total Leaving,West Virginia,48868
-Total Leaving,Puerto Rico,25705
-Total Leaving,Minnesota,98354
-Total Leaving,Rhode Island,32362
-Total Leaving,Vermont,22466
-Total Leaving,District of Columbia,48752

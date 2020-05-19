@@ -10,7 +10,7 @@ public class UnbundleFD : MonoBehaviour {
        
     // Visual Object Data
     public List<GameObject> sensorToTakeIntoAccount = new List<GameObject>();
-    public List<KeyValuePair<GameObject, GameObject>> pointsList = new List<KeyValuePair<GameObject, GameObject>>();
+    public List<Tuple<GameObject, GameObject, float>> pointsList = new List<Tuple<GameObject, GameObject, float>>();
     public List<GameObject> gameObjectToAvoid = new List<GameObject>();
     public List<GameObject> attractivePlane = new List<GameObject>();
     //public Dictionary<int, TubeRenderer> tubeList = new Dictionary<int, TubeRenderer>();
@@ -110,44 +110,70 @@ public class UnbundleFD : MonoBehaviour {
         
     }
 
-    public void initUnbundling(List<KeyValuePair<GameObject, GameObject>> listGO)
+    public void initUnbundling(List<Tuple<GameObject, GameObject, float>> listGO)
     {
         initUnbundling(listGO, true);
     }
 
     public void removeLinesFromObject(GameObject go)
     {
-        int id = 0;
-        List<KeyValuePair<GameObject, GameObject>> temp = new List<KeyValuePair<GameObject, GameObject>>(); 
-        foreach (var item in pointsList)
+        var templ = pointsList.Select(x => new Tuple<GameObject, GameObject>(x.Item1.transform.parent.gameObject, x.Item2.transform.parent.gameObject));
+
+        List<Tuple<GameObject, GameObject, float>> temp = new List<Tuple<GameObject, GameObject, float>>();
+        //var tempLineTab = lineTab.Select(x => x).ToArray();
+        //var tempBeginLineNormal = beginLineNormal.Select(x => x).ToArray();
+        //var tempEndLineNormal = endLineNormal.Select(x => x).ToArray();
+        //var tempTubeList = tubeList.Select(x => x).ToArray();
+        //var tempLineNb = lineNb;
+        int id = pointsList.Count() - 1;
+
+        foreach (var item in pointsList.AsEnumerable().Reverse())
         {
 
-            if (item.Key.Equals(go) || item.Value.Equals(go))
+            if (item.Item1.transform.parent.gameObject.Equals(go) || item.Item2.transform.parent.gameObject.Equals(go))
             {
-                var l = lineTab.OfType<Vector3>().ToList();
-                l.RemoveRange(id * 32, 32);
-                lineTab = l.ToArray();
+                try
+                {
+                    var l = lineTab.OfType<Vector3>().ToList();
+                    l.RemoveRange(id * lineLenght, lineLenght);
+                    lineTab = l.ToArray();
 
-                l = beginLineNormal.OfType<Vector3>().ToList();
-                l.RemoveAt(id);
-                beginLineNormal = l.ToArray();
+                    l = beginLineNormal.OfType<Vector3>().ToList();
+                    l.RemoveAt(id);
+                    beginLineNormal = l.ToArray();
 
-                l = endLineNormal.OfType<Vector3>().ToList();
-                l.Add(Vector3.zero);
-                endLineNormal = l.ToArray();
+                    l = endLineNormal.OfType<Vector3>().ToList();
+                    l.RemoveAt(id);
+                    endLineNormal = l.ToArray();
 
-                var line =  tubeList[id * 32];
-                tubeList.Remove(id * 32);
-                GameObject.Destroy(line);
-                lineNb--;
+                    var line = tubeList[id * lineLenght];
+                    tubeList.Remove(id * lineLenght);
+                    GameObject.Destroy(line);
+                    lineNb--;
+                    
+                }
+                catch
+                {
+                    Debug.Log("asdas");
+                }
 
             }
             else {
                 temp.Add(item);
             }
-            id++;
+            id--;
+
         }
-        pointsList = temp;
+        pointsList = temp.AsEnumerable().Reverse().ToList();
+        //Fix the indices after removing bunch of lines :(
+        var tl = new Dictionary<int, LineRenderer>();
+        int tlid = 0;
+        foreach (var values in tubeList)
+        {
+            tl[tlid] = values.Value;
+            tlid += lineLenght;
+        }
+        tubeList = tl;
 
         previousPositions = new List<Vector3[]>();
         for (int i = 0; i < 2; i++)
@@ -162,7 +188,7 @@ public class UnbundleFD : MonoBehaviour {
 
     }
 
-    public void addLine(GameObject go, GameObject go2)
+    public void addLine(GameObject go, GameObject go2, float lineWidth)
     {
         lineNb += 1;
 
@@ -185,7 +211,7 @@ public class UnbundleFD : MonoBehaviour {
         l.Add(Vector3.zero);
         endLineNormal = l.ToArray();
 
-        pointsList.Add(new KeyValuePair<GameObject, GameObject>(go, go2));
+        pointsList.Add(new Tuple<GameObject, GameObject, float>(go, go2, lineWidth));
 
 
 
@@ -228,8 +254,8 @@ public class UnbundleFD : MonoBehaviour {
         LineRenderer lr = tubeGO.AddComponent<LineRenderer>();
         lr.positionCount = pointsTube.Length;
         lr.SetPositions(pointsTube);
-        lr.startWidth = 0.015f;
-        lr.endWidth = 0.015f;
+        lr.startWidth = lineWidth;
+        lr.endWidth = lineWidth;
         Material[] matArray = new Material[1];
         linkMat.color = colorT;
         matArray[0] = linkMat;
@@ -310,7 +336,7 @@ public class UnbundleFD : MonoBehaviour {
 
     }
 
-    public void initUnbundling(List<KeyValuePair<GameObject, GameObject>> listGO, bool drawing)
+    public void initUnbundling(List<Tuple<GameObject, GameObject, float>> listGO, bool drawing)
     {
         LineRendererDrawing = drawing;
         pointsList = listGO;
@@ -327,10 +353,10 @@ public class UnbundleFD : MonoBehaviour {
 
         Color32[] colorTube = new Color32[lineLenght];
 
-        foreach (KeyValuePair<GameObject, GameObject> kv in pointsList)
+        foreach (Tuple<GameObject, GameObject, float> kv in pointsList)
         {
-            GameObject go = kv.Key;
-            GameObject sensorVisu = kv.Value;
+            GameObject go = kv.Item1;
+            GameObject sensorVisu = kv.Item2;
 
             List<Vector3> line = new List<Vector3>();
             //Debug.Log("Use of the KeyValue Pair");
@@ -703,10 +729,10 @@ public class UnbundleFD : MonoBehaviour {
     {
         //Updating points to link positions
         int count = 0;
-        foreach (KeyValuePair<GameObject, GameObject> kv in pointsList)
+        foreach (Tuple<GameObject, GameObject, float> kv in pointsList)
         {
-            GameObject go = kv.Key;
-            GameObject sensorVisu = kv.Value;
+            GameObject go = kv.Item1;
+            GameObject sensorVisu = kv.Item2;
 
             lineTab[lineLenght * count] = go.transform.position;
             lineTab[lineLenght * count + (lineLenght-1)] = sensorVisu.transform.position;
@@ -1039,7 +1065,7 @@ public class UnbundleFD : MonoBehaviour {
             Debug.Log("Tube Creation");
             int countTube = 0;
             int idVec = 0;
-            foreach (KeyValuePair<GameObject, GameObject> kv in pointsList)
+            foreach (Tuple<GameObject, GameObject, float> kv in pointsList)
             {
                 GameObject tubeGO = new GameObject("Tube-" + countTube);
                 //tubeGO.transform.SetParent(this.transform);
@@ -1054,8 +1080,8 @@ public class UnbundleFD : MonoBehaviour {
                 }
                 lr.positionCount = pointsTube.Length;
                 lr.SetPositions(pointsTube);
-                lr.startWidth = 0.015f;
-                lr.endWidth = 0.015f;
+                lr.startWidth = kv.Item3;
+                lr.endWidth = kv.Item3;
                 Material[] matArray = new Material[1];
                 linkMat.color = colorT;
                 matArray[0] = linkMat;

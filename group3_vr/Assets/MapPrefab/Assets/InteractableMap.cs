@@ -38,44 +38,42 @@ public abstract class InteractableMap : InteractableObject
     /// <summary>
     /// Draws a flow between given origin and the siblings, which are currently selected.
     /// </summary>
-    /// <param name="origin">Origin of the flows</param>
+    /// <param name="origin_map">Origin of the flows</param>
     /// <returns></returns>
     /// 
-    public virtual void GetInternalFlows(InteractableMap origin)
+    public virtual void GetInternalFlows(MapContainer origin_map)
     {
-        foreach (var state in origin.siblings)
+
+        Dictionary<String, InteractableMap> lchild = new Dictionary<string, InteractableMap>();
+        foreach (var ma2p in origin_map.GetComponentsInChildren<InteractableMap>())
         {
+            lchild[ma2p.name] = ma2p;
+        }
+
+        foreach (var pair in this.getMapController().flattenedList[origin_map.parentName].Take(100))
+        {
+
             try
             {
-                if (state.Key != origin.name && state.Value.IsSelected())
-                {
-                    var destination = state.Value;
+                var origin = lchild[pair.Item1];
+                var destination = lchild[pair.Item2];
+                var flowData = pair.Item3;
 
-                    float flowData = origin.getMapController().getFlowData(origin.name, origin.parentName, state.Value.name, state.Value.parentName);
-                    if (flowData == -1) continue;
-
-                    Bezier b = new Bezier(this.transform, origin, destination);
-
-                    this.lines.Add(b.gameObject);
-                    destination.AddLine(b.gameObject);
-
-                    b.line.startWidth = 0.1F * (0.00000699192F * flowData + 0.05F);
-                    Debug.Log("line width = " + b.line.startWidth.ToString());
-                    b.line.endWidth = b.line.startWidth;
-
-                    b.line.material = new Material(Shader.Find("Sprites/Default"));
-
-                    b.line.startColor = Color.green; //new Color(253, 187, 45, 255);
-                    b.line.endColor = Color.blue; // new Color(34, 193,195, 255);
-
-                    //b.createCollider();
-
-                }
+                Bezier b = new Bezier(origin_map.transform, origin, destination, 0.1F * (0.00000699192F * flowData + 0.05F));
             }
-            catch {
-                continue;
-            }
+            catch { }
+
+            //b.line.startWidth = 0.1F * (0.00000699192F * flowData + 0.05F);
+            //Debug.Log("line width = " + b.line.startWidth.ToString());
+            //b.line.endWidth = b.line.startWidth;
+
+            //b.line.material = new Material(Shader.Find("Sprites/Default"));
+
+            //b.line.startColor = Color.green; //new Color(253, 187, 45, 255);
+            //b.line.endColor = Color.blue; // new Color(34, 193,195, 255);
+
         }
+
 
     }
 
@@ -116,9 +114,10 @@ public abstract class InteractableMap : InteractableObject
             MapContainer main = mapGameObject.AddComponent(typeof(MapContainer)) as MapContainer;
             main?.Draw(this, this.GetLevel() + 1, this.transform.parent.transform, direction);
 
+
             this.selected = true;
             CreateLine();
-            this.GetInternalFlows(this);
+            this.GetInternalFlows(main);
             return main.gameObject;
         }
         else

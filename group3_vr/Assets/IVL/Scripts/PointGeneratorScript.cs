@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,7 +15,7 @@ public class PointGeneratorScript : MonoBehaviour {
     public bool removeLine = false;
 
     List<GameObject> sensorToTakeIntoAccount = new List<GameObject>();
-    public List<KeyValuePair<GameObject, GameObject>> pointsList = new List<KeyValuePair<GameObject, GameObject>>();
+    public List<Tuple<GameObject, GameObject, float>> pointsList = new List<Tuple<GameObject, GameObject, float>>();
 
     int i = 0;
     public UnbundleFD unbundle;
@@ -26,12 +27,12 @@ public class PointGeneratorScript : MonoBehaviour {
 		for(i = 0; i<nbLine; i++)
         {
             //P1 Generation
-            float x1 = Random.Range(-0.5f, 0.5f);
-            float y1 = Random.Range(-0.5f, 0.5f);
+            float x1 = UnityEngine.Random.Range(-0.5f, 0.5f);
+            float y1 = UnityEngine.Random.Range(-0.5f, 0.5f);
 
             float sign = Mathf.Sign(y1);
-            float x2 = Random.Range(-0.5f, 0.5f);
-            float y2 = Random.Range(Mathf.Min(0, 0.5f*sign), Mathf.Max(0, 0.5f * sign));
+            float x2 = UnityEngine.Random.Range(-0.5f, 0.5f);
+            float y2 = UnityEngine.Random.Range(Mathf.Min(0, 0.5f*sign), Mathf.Max(0, 0.5f * sign));
 
             Vector3 p1S = new Vector3(x1, y1, 0f);
             Vector3 p1W = Screen1.transform.TransformPoint(p1S);
@@ -53,7 +54,7 @@ public class PointGeneratorScript : MonoBehaviour {
             p2.name = "Point+"+i+"-V";
 
 
-            KeyValuePair<GameObject, GameObject> kv = new KeyValuePair<GameObject, GameObject>(p1, p2);
+            Tuple<GameObject, GameObject, float> kv = new Tuple<GameObject, GameObject, float>(p1, p2, 0.015f);
             pointsList.Add(kv);
             sensorToTakeIntoAccount.Add(p1);
         }
@@ -70,12 +71,12 @@ public class PointGeneratorScript : MonoBehaviour {
         if (addLine)
         {
             addLine = false;
-            float x1 = Random.Range(-0.5f, 0.5f);
-            float y1 = Random.Range(-0.5f, 0.5f);
+            float x1 = UnityEngine.Random.Range(-0.5f, 0.5f);
+            float y1 = UnityEngine.Random.Range(-0.5f, 0.5f);
 
             float sign = Mathf.Sign(y1);
-            float x2 = Random.Range(-0.5f, 0.5f);
-            float y2 = Random.Range(Mathf.Min(0, 0.5f * sign), Mathf.Max(0, 0.5f * sign));
+            float x2 = UnityEngine.Random.Range(-0.5f, 0.5f);
+            float y2 = UnityEngine.Random.Range(Mathf.Min(0, 0.5f * sign), Mathf.Max(0, 0.5f * sign));
 
             Vector3 p1S = new Vector3(x1, y1, 0f);
             Vector3 p1W = Screen1.transform.TransformPoint(p1S);
@@ -95,7 +96,7 @@ public class PointGeneratorScript : MonoBehaviour {
             p2.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
             p2.transform.forward = Screen2.transform.forward;
             p2.name = "Point+" + i + "-V";
-            unbundle.addLine(p1, p2);
+            unbundle.addLine(p1, p2, 1);
             i++;
 
             recent = p2;

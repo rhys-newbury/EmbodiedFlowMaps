@@ -4525,7 +4525,10 @@ MonoBehaviour:
   Screen1: {fileID: 1893529181}
   Screen2: {fileID: 1893529181}
   nbLine: 15
+  addLine: 0
+  removeLine: 0
   unbundle: {fileID: 1753814514}
+  recent: {fileID: 0}
 --- !u!4 &1275237214
 Transform:
   m_ObjectHideFlags: 0
@@ -5361,6 +5364,7 @@ MonoBehaviour:
   isMaster: 1
   SyncOtherClient: 1
   radiusTube: 0.001
+  drawSphere: 0
   colorT: {r: 0, g: 0, b: 0, a: 0}
   shader: {fileID: 7200000, guid: a3759dd24f605ce4d9f8d1f687100cd1, type: 3}
   deltaSim: 0.001
