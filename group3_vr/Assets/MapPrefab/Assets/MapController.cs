@@ -26,7 +26,7 @@ public class MapController : MonoBehaviour
 
     private Dictionary<string, Dictionary<string, float>> flow = new Dictionary<string, Dictionary<string, float>>();
     //State -> County -> State -> County
-    private Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, float>>>> county_flow = new Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, float>>>>();
+    internal Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, float>>>> county_flow = new Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, float>>>>();
 
 
     private Dictionary<string, Dictionary<string, float>> populationDenisty = new Dictionary<string, Dictionary<string, float>>();
@@ -37,8 +37,7 @@ public class MapController : MonoBehaviour
 
     internal Dictionary<String, List<Tuple<String, String, float>>> flattenedList = new Dictionary<string, List<Tuple<string, string, float>>>();
 
-
-  
+    internal Dictionary<Tuple<String, String>, List<Tuple<String, String, String, String, float>>> county_flattened = new Dictionary<Tuple<string, string>, List<Tuple<string, string, string, string, float>>>();
 
     public static bool isIncoming = true;
 
@@ -236,6 +235,7 @@ public class MapController : MonoBehaviour
 
             float inc_data = float.Parse(data[4]);
 
+            #region old_version
             if (!county_flow.ContainsKey(state1))
             {
                 county_flow[state1] = new Dictionary<string, Dictionary<string, Dictionary<string, float>>>();
@@ -263,7 +263,7 @@ public class MapController : MonoBehaviour
             }
             if (state1 == state2)
             {
-                    flattenedList[state1].Add(new Tuple<string, string, float>(county1, county2, inc_data));
+                flattenedList[state1].Add(new Tuple<string, string, float>(county1, county2, inc_data));
             }
 
 
@@ -286,7 +286,7 @@ public class MapController : MonoBehaviour
             {
                 county_flow["America"][state2][state1][county1] = 0;
             }
-                                          
+
 
 
             county_flow["America"][state2][state1][county1] += inc_data;
@@ -303,7 +303,70 @@ public class MapController : MonoBehaviour
             }
 
             current_county["America"][state2] += inc_data;
+            #endregion
 
+            //string ordered_state1;
+            //string ordered_state2;
+
+            //if (string.Compare(state1, state2) < 0)
+            //{
+            //    ordered_state1 = state1;
+            //    ordered_state2 = state2;
+            //}
+            //else
+            //{
+            //    ordered_state1 = state2;
+            //    ordered_state2 = state1;
+            //}
+
+            //var ordered_tuple = new Tuple<string, string>(ordered_state1, ordered_state2);
+            //if (!county_flattened.ContainsKey(ordered_tuple))
+            //{
+            //    county_flattened[ordered_tuple] = new List<Tuple<string, string, string, string, float>>();
+            //}
+            ////Between Counties
+            //county_flattened[ordered_tuple].Add(new Tuple<string, string, string, string, float>(state1, county1, state2, county2, inc_data));
+            
+            
+            ////From State To County
+            //ordered_tuple = new Tuple<string, string>("America", state2);
+            //float current = county_flow["America"][state2][state1][county1];
+
+            //From County To State
+
+
+        }
+        foreach (var state1 in county_flow)
+        {
+            foreach (var county1 in state1.Value)
+            {
+                foreach (var state2 in county1.Value)
+                {
+                    foreach (var county2 in state2.Value)
+                    {
+                        string ordered_state1;
+                        string ordered_state2;
+                        if (string.Compare(state1.Key, state2.Key) < 0)
+                        {
+                            ordered_state1 = state1.Key;
+                            ordered_state2 = state2.Key;
+                        }
+                        else
+                        {
+                            ordered_state1 = state2.Key;
+                            ordered_state2 = state1.Key;
+                        }
+
+                        var ordered_tuple = new Tuple<string, string>(ordered_state1, ordered_state2);
+                        if (!county_flattened.ContainsKey(ordered_tuple))
+                        {
+                            county_flattened[ordered_tuple] = new List<Tuple<string, string, string, string, float>>();
+                        }
+
+                        county_flattened[ordered_tuple].Add(new Tuple<string, string, string, string, float>(state1.Key, county1.Key, state2.Key, county2.Key, county2.Value));
+                    }
+                }
+            }
         }
         //var a = county_flow["America"];
         var keys = new List<string>(flattenedList.Keys);
@@ -312,16 +375,21 @@ public class MapController : MonoBehaviour
             flattenedList[key] = flattenedList[key].OrderBy(x => x.Item3).Reverse().ToList();
         }
 
+        var ckeys = new List<Tuple<string, string>>(county_flattened.Keys);
+        foreach (Tuple<string, string> key in ckeys)
+        {
+            county_flattened[key] = county_flattened[key].OrderBy(x => x.Item5).Reverse().ToList();
+        }
 
 
 
         //var c = b[0];
 
 
-    
 
 
-}
+
+    }
 
 
     public float getPopulationDensity(string current, string parent)

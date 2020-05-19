@@ -50,7 +50,7 @@ public class Bezier : System.Object
     /// <param name="origin">Origin of the curve</param>
     /// <param name="destination">Destination of the curve</param>
     /// <returns></returns>
-    public Bezier(Transform parent, InteractableMap origin, InteractableMap destination, float lineWidth)
+    public Bezier(Transform parent, InteractableMap origin, InteractableMap destination, float lineWidth, Transform dest_parent = null)
     {
         //gameObject = new GameObject();
 
@@ -94,7 +94,7 @@ public class Bezier : System.Object
         p1.name = "Point+";
 
         GameObject p2 = new GameObject();
-        p2.transform.SetParent(parent.transform);
+        p2.transform.SetParent(dest_parent == null ? parent.transform : dest_parent.transform);
         p2.transform.position = p2W;
         p2.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
         p2.transform.forward = destination.transform.parent.transform.forward;

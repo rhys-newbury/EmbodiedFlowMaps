@@ -194,6 +194,9 @@ public class MapContainer : MonoBehaviour
         IsLinked(i1, i2);
         currently_joined[i1][i2] = val;
         currently_joined[i2][i1] = val;
+
+
+
     }
     /// <summary>
     /// Set update flag.
@@ -261,10 +264,6 @@ public class MapContainer : MonoBehaviour
 
         MapContainer[] l = FindObjectsOfType(typeof(MapContainer)) as MapContainer[];
 
-        foreach (var i in lines)
-        {
-            Destroy(i);
-        }
 
         foreach (var item in l)
         {
@@ -277,55 +276,76 @@ public class MapContainer : MonoBehaviour
                     SetLinkStatus(this.parentName, item.parentName, false);
                 
                 }
-                else if (seperation < 0.5 || IsLinked(this.parentName, item.parentName))
-
+                else if (seperation < 0.5 && !IsLinked(this.parentName, item.parentName))
                 {
-                    SetLinkStatus(this.parentName, item.parentName, true);
+                   SetLinkStatus(this.parentName, item.parentName, true);
 
-                    var selected1 = this.GetComponentsInChildren<InteractableMap>().Where(x => x.IsSelected()).ToArray();
-                    var selected2 = item.GetComponentsInChildren<InteractableMap>().Where(x => x.IsSelected()).ToArray();
+                    //var f1 = this.mapController.county_flow;
 
-                    if (selected1.Any() && selected2.Any())
+                    //var f1 = this.mapController.county_flow()
+                    string ordered_state1;
+                    string ordered_state2;
+                    if (string.Compare(this.parentName, item.parentName) < 0)
                     {
-                        foreach (var origin in selected1)
+                        ordered_state1 = this.parentName;
+                        ordered_state2 = item.parentName;
+                    }
+                    else
+                    {
+                        ordered_state1 = item.parentName;
+                        ordered_state2 = this.parentName;
+                    }
+
+                    var flows = this.mapController.county_flattened[new Tuple<string, string>(ordered_state1, ordered_state2)];
+
+                    Dictionary<String, InteractableMap> lchild1 = new Dictionary<string, InteractableMap>();
+                    foreach (var ma2p in this.GetComponentsInChildren<InteractableMap>())
+                    {
+                        lchild1[ma2p.name] = ma2p;
+                    }
+
+                    Dictionary<String, InteractableMap> lchild2 = new Dictionary<string, InteractableMap>();
+                    foreach (var ma2p in item.GetComponentsInChildren<InteractableMap>())
+                    {
+                        lchild2[ma2p.name] = ma2p;
+                    }
+
+                    foreach (var val in flows.Take(100))
+                    {
+                        InteractableMap origin;
+                        InteractableMap destination;
+                        Transform origin_t;
+                        Transform dest_t;
+
+
+                        if (val.Item1 == this.parentName)
                         {
-                            foreach (var destination in selected2)
-                            {
-
-                                
-                                if (origin.getMapController().getFlowData(origin.name, origin.parentName, destination.name, destination.parentName) != -1)
-                                {
-                                
-                                    Bezier b = new Bezier(this.transform, origin, destination, 1);
-                                    lines.Add(b.line);
-                                    item.AddLines(b.line);
-
-                                    b.line.material = new Material(Shader.Find("Sprites/Default"));
-
-                                    b.line.startColor = Color.green; //new Color(253, 187, 45, 255);
-                                    b.line.endColor = Color.blue; // new Color(34, 193,195, 255);
-
-
-                                    b.line.startWidth = 0.1F * (0.00000699192F * origin.getMapController().getFlowData(origin.name, origin.parentName, destination.name, destination.parentName) + 0.05F);
-
-                                    b.line.endWidth = b.line.startWidth; //origin.getMapContainer().getFlowColour(origin.getMapContainer().getFlowData(origin.name, origin.parentName, destination.name, destination.parentName));
-
-                                    //b.createCollider();
-                                }
-    
-
-                            }
+                            origin = lchild1[val.Item2];
+                            destination = lchild2[val.Item4];
+                            origin_t = this.transform;
+                            dest_t = item.transform;
                         }
+                        else
+                        {
+                            origin = lchild2[val.Item2];
+                            destination = lchild1[val.Item4];
+                            origin_t = item.transform;
+                            dest_t = this.transform;
+                        }
+                        var flowData = val.Item5;
+
+                        Bezier b = new Bezier(origin_t, origin, destination, 0.1F * (0.00000699192F * flowData + 0.05F), dest_t);
+
                     }
 
                 }
-
-
             }
+         }
 
-        }
     }
 
+
+         
   
 
     //private bool animWasPlaying = false;
