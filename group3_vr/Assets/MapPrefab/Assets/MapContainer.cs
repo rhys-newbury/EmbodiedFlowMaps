@@ -112,7 +112,7 @@ public class MapContainer : MonoBehaviour
             }
 
 
-            foreach (var pair in mc.flattenedList["America"].Take(100))
+            foreach (var pair in mc.flattenedList["America"].Take(20))
             {
 
                 try
@@ -121,7 +121,7 @@ public class MapContainer : MonoBehaviour
                     var destination = lchild[pair.Item2];
                     var flowData = pair.Item3;
 
-                    Bezier b = new Bezier(this.transform, origin, destination, 0.1F * (0.00000699192F * flowData + 0.05F));
+                    Bezier b = new Bezier(this.transform, origin, destination, 0.1F * (0.00000399192F * flowData + 0.05F));
                 }
                 catch { }
 
@@ -279,64 +279,11 @@ public class MapContainer : MonoBehaviour
                 else if (seperation < 0.5 && !IsLinked(this.parentName, item.parentName))
                 {
                    SetLinkStatus(this.parentName, item.parentName, true);
+                   link_two_maps(item);
 
                     //var f1 = this.mapController.county_flow;
 
                     //var f1 = this.mapController.county_flow()
-                    string ordered_state1;
-                    string ordered_state2;
-                    if (string.Compare(this.parentName, item.parentName) < 0)
-                    {
-                        ordered_state1 = this.parentName;
-                        ordered_state2 = item.parentName;
-                    }
-                    else
-                    {
-                        ordered_state1 = item.parentName;
-                        ordered_state2 = this.parentName;
-                    }
-
-                    var flows = this.mapController.county_flattened[new Tuple<string, string>(ordered_state1, ordered_state2)];
-
-                    Dictionary<String, InteractableMap> lchild1 = new Dictionary<string, InteractableMap>();
-                    foreach (var ma2p in this.GetComponentsInChildren<InteractableMap>())
-                    {
-                        lchild1[ma2p.name] = ma2p;
-                    }
-
-                    Dictionary<String, InteractableMap> lchild2 = new Dictionary<string, InteractableMap>();
-                    foreach (var ma2p in item.GetComponentsInChildren<InteractableMap>())
-                    {
-                        lchild2[ma2p.name] = ma2p;
-                    }
-
-                    foreach (var val in flows.Take(100))
-                    {
-                        InteractableMap origin;
-                        InteractableMap destination;
-                        Transform origin_t;
-                        Transform dest_t;
-
-
-                        if (val.Item1 == this.parentName)
-                        {
-                            origin = lchild1[val.Item2];
-                            destination = lchild2[val.Item4];
-                            origin_t = this.transform;
-                            dest_t = item.transform;
-                        }
-                        else
-                        {
-                            origin = lchild2[val.Item2];
-                            destination = lchild1[val.Item4];
-                            origin_t = item.transform;
-                            dest_t = this.transform;
-                        }
-                        var flowData = val.Item5;
-
-                        Bezier b = new Bezier(origin_t, origin, destination, 0.1F * (0.00000699192F * flowData + 0.05F), dest_t);
-
-                    }
 
                 }
             }
@@ -344,9 +291,67 @@ public class MapContainer : MonoBehaviour
 
     }
 
+    public void link_two_maps(MapContainer item)
+    {
+        string ordered_state1;
+        string ordered_state2;
+        if (string.Compare(this.parentName, item.parentName) < 0)
+        {
+            ordered_state1 = this.parentName;
+            ordered_state2 = item.parentName;
+        }
+        else
+        {
+            ordered_state1 = item.parentName;
+            ordered_state2 = this.parentName;
+        }
 
-         
-  
+        var flows = this.mapController.county_flattened[new Tuple<string, string>(ordered_state1, ordered_state2)];
+
+        Dictionary<String, InteractableMap> lchild1 = new Dictionary<string, InteractableMap>();
+        foreach (var ma2p in this.GetComponentsInChildren<InteractableMap>())
+        {
+            lchild1[ma2p.name] = ma2p;
+        }
+
+        Dictionary<String, InteractableMap> lchild2 = new Dictionary<string, InteractableMap>();
+        foreach (var ma2p in item.GetComponentsInChildren<InteractableMap>())
+        {
+            lchild2[ma2p.name] = ma2p;
+        }
+
+        foreach (var val in flows.Take(20))
+        {
+            InteractableMap origin;
+            InteractableMap destination;
+            Transform origin_t;
+            Transform dest_t;
+
+
+            if (val.Item1 == this.parentName)
+            {
+                origin = lchild1[val.Item2];
+                destination = lchild2[val.Item4];
+                origin_t = this.transform;
+                dest_t = item.transform;
+            }
+            else
+            {
+                origin = lchild2[val.Item2];
+                destination = lchild1[val.Item4];
+                origin_t = item.transform;
+                dest_t = this.transform;
+            }
+            var flowData = val.Item5;
+
+            Bezier b = new Bezier(origin_t, origin, destination, 0.1F * (0.00000399192F * flowData + 0.05F), dest_t);
+
+        }
+
+    }
+
+
+
 
     //private bool animWasPlaying = false;
     //private int resetCount = 0;

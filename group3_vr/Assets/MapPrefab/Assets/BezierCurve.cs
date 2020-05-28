@@ -99,7 +99,7 @@ public class Bezier : System.Object
         p2.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
         p2.transform.forward = destination.transform.parent.transform.forward;
         p2.name = "Point+" + "-V";
-        unbundle.addLine(p1, p2, lineWidth);
+        unbundle.addLine(p1, p2, lineWidth, origin, destination);
 
         //float dist = (p0 - p3).magnitude;
 

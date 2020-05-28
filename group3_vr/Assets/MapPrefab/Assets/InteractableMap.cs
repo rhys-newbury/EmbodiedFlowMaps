@@ -50,7 +50,7 @@ public abstract class InteractableMap : InteractableObject
             lchild[ma2p.name] = ma2p;
         }
 
-        foreach (var pair in this.getMapController().flattenedList[origin_map.parentName].Take(100))
+        foreach (var pair in this.getMapController().flattenedList[origin_map.parentName].Take(20))
         {
 
             try
@@ -131,6 +131,21 @@ public abstract class InteractableMap : InteractableObject
             return null;
         }
 
+    }
+
+    public MapContainer draw_map(Transform direction)
+    {
+        //Create the gameObject for the map and then Draw it.
+        GameObject mapGameObject = new GameObject();
+        mapGameObject.transform.parent = this.transform.root;
+        MapContainer main = mapGameObject.AddComponent(typeof(MapContainer)) as MapContainer;
+        main?.Draw(this, this.GetLevel() + 1, this.transform.parent.transform, direction);
+
+
+        this.selected = true;
+        CreateLine();
+        this.GetInternalFlows(main);
+        return main;
     }
 
     /// <summary>

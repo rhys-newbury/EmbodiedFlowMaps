@@ -96,7 +96,7 @@ public class PointGeneratorScript : MonoBehaviour {
             p2.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
             p2.transform.forward = Screen2.transform.forward;
             p2.name = "Point+" + i + "-V";
-            unbundle.addLine(p1, p2, 1);
+            //unbundle.addLine(p1, p2, 1);
             i++;
 
             recent = p2;

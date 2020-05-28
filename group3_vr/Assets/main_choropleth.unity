@@ -1097,6 +1097,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1408837142bdd640b4f7ba0e80dac42, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  UnbundleScript: {fileID: 1753814514}
 --- !u!114 &231006138
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2002,6 +2003,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1408837142bdd640b4f7ba0e80dac42, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  UnbundleScript: {fileID: 1753814514}
 --- !u!114 &382122162
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5370,8 +5372,8 @@ MonoBehaviour:
   deltaSim: 0.001
   maxDeltaSim: 0.005
   springConstant: 3044
-  repulsionConstant: -0.001
-  attractionConstant: 0.0005
+  repulsionConstant: -0.004
+  attractionConstant: 0
   obstacleRepulsionConstant: -0.1
   obstacleDMin: 0.3
   distanceMaxNormal: 0.5

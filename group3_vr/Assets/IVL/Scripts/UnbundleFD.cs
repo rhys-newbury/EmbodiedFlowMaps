@@ -13,8 +13,8 @@ public class UnbundleFD : MonoBehaviour {
     public List<Tuple<GameObject, GameObject, float>> pointsList = new List<Tuple<GameObject, GameObject, float>>();
     public List<GameObject> gameObjectToAvoid = new List<GameObject>();
     public List<GameObject> attractivePlane = new List<GameObject>();
-    //public Dictionary<int, TubeRenderer> tubeList = new Dictionary<int, TubeRenderer>();
-    public Dictionary<int, LineRenderer> tubeList = new Dictionary<int, LineRenderer>();
+    public Dictionary<int, TubeRenderer> tubeList = new Dictionary<int, TubeRenderer>();
+    //public Dictionary<int, LineRenderer> tubeList = new Dictionary<int, LineRenderer>();
 
     #region Debug Params
     private List<GameObject> sphereNodes = new List<GameObject>();
@@ -166,7 +166,7 @@ public class UnbundleFD : MonoBehaviour {
         }
         pointsList = temp.AsEnumerable().Reverse().ToList();
         //Fix the indices after removing bunch of lines :(
-        var tl = new Dictionary<int, LineRenderer>();
+        var tl = new Dictionary<int, TubeRenderer>();
         int tlid = 0;
         foreach (var values in tubeList)
         {
@@ -188,7 +188,7 @@ public class UnbundleFD : MonoBehaviour {
 
     }
 
-    public void addLine(GameObject go, GameObject go2, float lineWidth)
+    public void addLine(GameObject go, GameObject go2, float lineWidth, InteractableMap origin, InteractableMap destination)
     {
         lineNb += 1;
 
@@ -251,15 +251,21 @@ public class UnbundleFD : MonoBehaviour {
 
 
         GameObject tubeGO = new GameObject("Tube-");
-        LineRenderer lr = tubeGO.AddComponent<LineRenderer>();
-        lr.positionCount = pointsTube.Length;
-        lr.SetPositions(pointsTube);
-        lr.startWidth = lineWidth;
-        lr.endWidth = lineWidth;
+        TubeRenderer lr = tubeGO.AddComponent<TubeRenderer>();
+        //LineRenderer lr = tubeGO.AddComponent<LineRenderer>();
+        lr.points = pointsTube;
+        lr.radius = lineWidth;
+        lr.setParents(origin, destination);
+        
+        //lr.positionCount = pointsTube.Length;
+        
+        //lr.SetPositions(pointsTube);
+        //lr.startWidth = lineWidth;
+        //lr.endWidth = lineWidth;
         Material[] matArray = new Material[1];
         linkMat.color = colorT;
         matArray[0] = linkMat;
-        lr.materials = matArray;
+        //lr.materials = matArray;
         tubeList.Add(idBegining, lr);
 
         //tubeGO.tag = "Tube";
@@ -642,9 +648,9 @@ public class UnbundleFD : MonoBehaviour {
     public void ResetBundling()
     {
         initDone = false;
-        foreach (KeyValuePair<int, LineRenderer> entry in tubeList)
-        //foreach (KeyValuePair<int, TubeRenderer> entry in tubeList)
-        {
+        //foreach (KeyValuePair<int, LineRenderer> entry in tubeList)
+        foreach (KeyValuePair<int, TubeRenderer> entry in tubeList)
+            {
             // do something with entry.Value or entry.Key
             Destroy(entry.Value.gameObject);
         }
@@ -1069,7 +1075,7 @@ public class UnbundleFD : MonoBehaviour {
             {
                 GameObject tubeGO = new GameObject("Tube-" + countTube);
                 //tubeGO.transform.SetParent(this.transform);
-                LineRenderer lr = tubeGO.AddComponent<LineRenderer>();
+                TubeRenderer lr = tubeGO.AddComponent<TubeRenderer>();
                 Vector3[] pointsTube = new Vector3[lineLenght];
                 int idBegining = idVec;
                 for (int i = idVec; i < idBegining + lineLenght; i++)
@@ -1078,14 +1084,17 @@ public class UnbundleFD : MonoBehaviour {
                     pointsTube[i - idBegining] = lineTab[idVec];
                     idVec++;
                 }
-                lr.positionCount = pointsTube.Length;
-                lr.SetPositions(pointsTube);
-                lr.startWidth = kv.Item3;
-                lr.endWidth = kv.Item3;
-                Material[] matArray = new Material[1];
-                linkMat.color = colorT;
-                matArray[0] = linkMat;
-                lr.materials = matArray;
+                //lr.positionCount = pointsTube.Length;
+                //lr.SetPositions(pointsTube);
+                //lr.startWidth = kv.Item3;
+                //lr.endWidth = kv.Item3;
+                //Material[] matArray = new Material[1];
+                //linkMat.color = colorT;
+                //matArray[0] = linkMat;
+                //lr.materials = matArray;
+                lr.radius = kv.Item3;
+                lr.points = pointsTube;
+
                 tubeList.Add(idBegining, lr);
 
                 //tubeGO.tag = "Tube";
@@ -1106,7 +1115,7 @@ public class UnbundleFD : MonoBehaviour {
             previousPositions.Add(tmp);
 
 
-            foreach (KeyValuePair<int, LineRenderer> entry in tubeList)
+            foreach (KeyValuePair<int, TubeRenderer> entry in tubeList)
             {
                 Vector3[] pointsTube = new Vector3[lineLenght];
                 int idBegining = entry.Key;
@@ -1115,8 +1124,8 @@ public class UnbundleFD : MonoBehaviour {
                     pointsTube[i - idBegining] = getAvgPos(i);
 
                 }
-                entry.Value.SetPositions(pointsTube);
-                //entry.Value.points = pointsTube;
+                //entry.Value.SetPositions(pointsTube);
+                entry.Value.points = pointsTube;
             }
 
         }

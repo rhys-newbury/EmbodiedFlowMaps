@@ -29,12 +29,53 @@ public class ControllerInteraction : MonoBehaviour
     private bool touchpadPressed = false;
     private float touchpadAngle;
 
+    public UnbundleFD UnbundleScript;
+
+    bool triggerPressed = false;
+
+    bool optim3d = false;
+    LineRenderer lineRenderer;
+
+    //List<int> selectedTube = new List<int>();
+
+    bool bundle;
+
+    float sizeRay;
+    private Transform cp1;
+    private Transform cp2;
+    private bool reset_parents;
+    private MapContainer m1;
+    private MapContainer m2;
+
     /// <summary>
     /// Calculations to be performed on every frame.
     /// </summary>
     /// <returns></returns>
     private void Update()
     {
+
+        //lineRenderer.SetPosition(0, this.transform.position);
+        //if (triggerPressed)
+        //{
+        //    //lineRenderer.SetPosition(1, this.transform.position + this.transform.forward * sizeRay);
+
+        //    //Test of the line segments distance;
+
+
+        //    //RaycastHit hit;
+        //    //if (Physics.Raycast(transform.position, this.transform.forward, out hit, 100.0f))
+        //    //{
+        //    //    Debug.Log("Hit something");
+        //    //}
+        //}
+
+
+
+        //else
+        //{
+        //    lineRenderer.SetPosition(1, this.transform.position + this.transform.forward * 0.2f);
+        //}
+
         try
         {
 
@@ -130,12 +171,21 @@ public class ControllerInteraction : MonoBehaviour
 
         controller = GetComponent<VRTK_ControllerEvents>();
         controller.TriggerPressed += Controller_TriggerPressed;
+        controller.TriggerReleased += Controller_TriggerReleased;
         controller.TouchpadAxisChanged += Controller_TouchpadAxisChanged;
         controller.TouchpadReleased += Controller_TouchpadReleased;
         controller.TouchpadPressed += Controller_TouchpadPressed;
         controller.GripClicked += Controller_GripClicked;
-        
-        
+
+        lineRenderer = gameObject.AddComponent<LineRenderer>();
+        lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
+        lineRenderer.widthMultiplier = 0.02f;
+        lineRenderer.positionCount = 2;
+        bundle = true;
+        sizeRay = 1;
+        lineRenderer.material.color = Color.green;
+
+
         helpTooltip = gameObject.transform.GetChild(0).GetComponent<VRTK_ControllerTooltips>();
         helpTooltip.ToggleTips(false);
 
@@ -151,6 +201,18 @@ public class ControllerInteraction : MonoBehaviour
                       
     }
 
+    private void Controller_TriggerReleased(object sender, ControllerInteractionEventArgs e)
+    {
+        triggerPressed = false;
+        if (reset_parents)
+        {
+            m1.transform.parent = cp1;
+            m2.transform.parent = cp2;
+
+            reset_parents = false;
+        }
+    }
+
 
 
     /// <summary>
@@ -159,6 +221,8 @@ public class ControllerInteraction : MonoBehaviour
     /// 
     private void Controller_GripClicked(object sender, ControllerInteractionEventArgs e) {
         // Report that the current object is being grabbed. This can tell the stack it is being removed
+
+   
         currentObject?.OnGripPressed();
         selectingObject = false;
         currentObject?.OnPointerLeave();
@@ -173,6 +237,9 @@ public class ControllerInteraction : MonoBehaviour
     /// 
     private void Controller_TouchpadPressed(object sender, ControllerInteractionEventArgs e) {
         this.touchpadPressed = true;
+
+
+
     }
     /// <summary>
     /// When Grip is clicked, disable touchpad pressed flag.
@@ -196,8 +263,36 @@ public class ControllerInteraction : MonoBehaviour
     private void Controller_TriggerPressed(object sender, ControllerInteractionEventArgs e) {
 
         //If still on an object
+        triggerPressed = true;
 
-        if (currentObject != null)
+        TubeRenderer closestTube = pickingTube(this.transform.position, this.transform.position + this.transform.forward * sizeRay);
+        if (closestTube != null)
+        {
+            //closestTube.GetComponent<Renderer>().material.color = lineRenderer.material.color;
+            var p1 = closestTube.p1;
+            var p2 = closestTube.p2;
+
+            m1 = p1.draw_map(pointer.transform.parent.transform);
+            m2 = p2.draw_map(pointer.transform.parent.transform);
+
+            //m1.transform.position = p1.transform            //m1.transform.position = p1.transform
+
+
+            m1.link_two_maps(m2);
+
+            cp1 = m1.transform.parent;
+            cp2 = m2.transform.parent;
+
+            m1.transform.parent = pointer.transform;
+            m2.transform.parent = pointer.transform;
+
+            reset_parents = true;
+
+
+        }
+        
+
+        else if (currentObject != null)
         {
             //Do something on click
             GameObject go = currentObject.OnTriggerPressed(pointer.transform.parent.transform);
@@ -257,5 +352,48 @@ public class ControllerInteraction : MonoBehaviour
 
 
     }
+
+
+
+    TubeRenderer pickingTube(Vector3 P1S1, Vector3 P1S2)
+    {
+        Dictionary<int, TubeRenderer> tubeList = UnbundleScript.tubeList;
+
+        float minDist = 1000;
+        TubeRenderer tubeClosest = null;
+        int idClosestTube = -1;
+        //bool found = false;
+
+        foreach (KeyValuePair<int, TubeRenderer> entry in tubeList)
+        {
+                float locMidDist = 1000;
+
+                Vector3[] points = entry.Value.points;
+                for (int i = 1; i < points.Length; i++)
+                {
+                    float dist = SegmentUtils.Dist_Segments(points[i - 1], points[i], P1S1, P1S2);
+                    if (dist < locMidDist)
+                    {
+                        locMidDist = dist;
+                    }
+                }
+
+                if (locMidDist < minDist)
+                {
+                    minDist = locMidDist;
+                    idClosestTube = entry.Key;
+                    tubeClosest = entry.Value;
+                }
+            
+
+        }
+
+        if (minDist < 0.01f)
+        {
+            return tubeClosest;
+        }
+        return null;
+    }
+
 
 }
