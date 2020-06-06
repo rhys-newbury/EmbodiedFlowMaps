@@ -84,6 +84,8 @@ RWStructuredBuffer<float3> normSrcVec;
 RWStructuredBuffer<float3> normDestVec;
 // Create a RenderTexture for the points to avoid
 RWStructuredBuffer<float3> avoidPoints;
+RWStructuredBuffer<float3> delta_avoidPoints;
+
 // Create a RenderTexture for the attractive plane
 RWStructuredBuffer<float3> attracPlane;
 
@@ -124,13 +126,17 @@ void MultiplyLToWNorm(uint3 id : SV_DispatchThreadID)
 void MultiplyWToLObs(uint3 id : SV_DispatchThreadID)
 {
 	avoidPoints[id.x] = mul(matwToL, float4(avoidPoints[id.x], 1.0)).xyz;
+	delta_avoidPoints[id.x] = mul(matlToW, float4(delta_avoidPoints[id.x], 1.0)).xyz;
 }
 
 [numthreads(1,1,1)] // VALIDATED // Could be faster with higher thread dim (but not necessary for testing)
 void MultiplyLToWObs(uint3 id : SV_DispatchThreadID)
 {
 	avoidPoints[id.x] = mul(matlToW, float4(avoidPoints[id.x], 1.0)).xyz;
+	delta_avoidPoints[id.x] = mul(matlToW, float4(delta_avoidPoints[id.x], 1.0)).xyz;
 }
+
+
 
 
 [numthreads(1, 1, 1)] // NOT VALIDATED // Could be faster with higher thread dim (but not necessary for testing)
@@ -143,6 +149,7 @@ void MultiplyWToLPla(uint3 id : SV_DispatchThreadID)
 void MultiplyLToWPla(uint3 id : SV_DispatchThreadID)
 {
 	attracPlane[id.x] = mul(matlToW, float4(attracPlane[id.x], 1.0)).xyz;
+
 }
 
 
@@ -290,87 +297,100 @@ float3 calculateNormalEffect(float3 n, float3 p0, float3 pi, float dmax, float f
 [numthreads(lineSize, 1, 1)]
 void executeFDEUB(uint3 id : SV_DispatchThreadID, uint3 groupId : SV_GroupThreadID, uint3 lineIndex : SV_GroupID)
 {
-	// Do not run this kernel if the line position is the first or last element of a line
-	if (groupId.x == 0 || groupId.x >= (lineSize - 1))
-	{
-		return;
-	}
-
-	int m = lineIndex.x;
-
-	// Spring force
-	float3 fs = float3(0.0, 0.0, 0.0); // spring force
-	float kCorrect = k / distance(pos[(m + 1) * lineSize - 1].xyz, pos[m * lineSize].xyz);
-	// in 2D perspective space / distance(getPersProj(0.05, pos[(m + 1) * lineSize - 1].xyz), getPersProj(0.05, pos[m * lineSize].xyz));
-	// in 3D / distance(pos[(m + 1) * lineSize - 1].xyz, pos[m * lineSize].xyz)
-	fs = calculateSpringEffect(pos[id.x - 1], pos[id.x], pos[id.x + 1], kCorrect, 0.0);
-		
-	// Compute the repulsing force of each other lines
-	//float3 testDir = normalize(pos[id.x - 1] + pos[id.x + 1] - 2 * pos[id.x]); // Direction of the line - Useless now?
-	float3 fr = float3(0.0, 0.0, 0.0);
-	float3 fa = float3(0.0, 0.0, 0.0);
-	for (uint i = 0; i < lineNb; i++)
-	{
-		if (i == lineIndex.x)
+	for (uint t = 0; t < 20; t++) {
+		// Do not run this kernel if the line position is the first or last element of a line
+		if (groupId.x == 0 || groupId.x >= (lineSize - 1))
 		{
-			//fr.xyz += distance(pos[i * lineSize], pos[id.x]) <= dmax ? calculateLinkRepulsion(pos[i * lineSize], pos[id.x], kr) : 0;
-			//fr.xyz += distance(pos[(i + 1) * lineSize - 1], pos[id.x]) <= dmax ? calculateLinkRepulsion(pos[(i + 1) * lineSize - 1], pos[id.x], kr) : 0;
-			continue;
+			return;
 		}
-		for (uint j = 0; j < lineSize; j++)
+
+		int m = lineIndex.x;
+
+		// Spring force
+		float3 fs = float3(0.0, 0.0, 0.0); // spring force
+		float kCorrect = k / distance(pos[(m + 1) * lineSize - 1].xyz, pos[m * lineSize].xyz);
+		// in 2D perspective space / distance(getPersProj(0.05, pos[(m + 1) * lineSize - 1].xyz), getPersProj(0.05, pos[m * lineSize].xyz));
+		// in 3D / distance(pos[(m + 1) * lineSize - 1].xyz, pos[m * lineSize].xyz)
+		fs = calculateSpringEffect(pos[id.x - 1], pos[id.x], pos[id.x + 1], kCorrect, 0.0);
+
+		// Compute the repulsing force of each other lines
+		//float3 testDir = normalize(pos[id.x - 1] + pos[id.x + 1] - 2 * pos[id.x]); // Direction of the line - Useless now?
+		float3 fr = float3(0.0, 0.0, 0.0);
+		float3 fa = float3(0.0, 0.0, 0.0);
+		for (uint i = 0; i < lineNb; i++)
 		{
-			if (bundleId[m] != bundleId[i])
+			if (i == lineIndex.x)
 			{
-				// Compute repulsion
-				float3 test = calculateLinkRepulsion(pos[i * lineSize + j], pos[id.x], kr, 1000); //
-				if (length(test) > 0.00001)
-				{
-					fr.xyz += test;// cross(testDir, cross(test, testDir));
-				}
-				//fr.xyz += length(test) > 0.0001 ? cross(testDir, cross(test, testDir)) : float3(0.0, 0.0, 0.0);
+				//fr.xyz += distance(pos[i * lineSize], pos[id.x]) <= dmax ? calculateLinkRepulsion(pos[i * lineSize], pos[id.x], kr) : 0;
+				//fr.xyz += distance(pos[(i + 1) * lineSize - 1], pos[id.x]) <= dmax ? calculateLinkRepulsion(pos[(i + 1) * lineSize - 1], pos[id.x], kr) : 0;
+				continue;
 			}
-			else {
-				// Compute attraction
-				float3 testDir = normalize(pos[id.x - 1] - pos[id.x]); // Vector direction of link
-				//float3 testDir = normalize(pos[id.x - 1] + pos[id.x + 1] - 2 * pos[id.x]); // Vector direction of link
-				fa.xyz += calculateLinkAttraction(pos[i * lineSize + j], pos[id.x], testDir, ka);
+			for (uint j = 0; j < lineSize; j++)
+			{
+				if (bundleId[m] != bundleId[i])
+				{
+					// Compute repulsion
+					float3 test = calculateLinkRepulsion(pos[i * lineSize + j], pos[id.x], kr, 1000); //
+					if (length(test) > 0.00001)
+					{
+						fr.xyz += test;// cross(testDir, cross(test, testDir));
+					}
+					//fr.xyz += length(test) > 0.0001 ? cross(testDir, cross(test, testDir)) : float3(0.0, 0.0, 0.0);
+				}
+				else {
+					// Compute attraction
+					float3 testDir = normalize(pos[id.x - 1] - pos[id.x]); // Vector direction of link
+					//float3 testDir = normalize(pos[id.x - 1] + pos[id.x + 1] - 2 * pos[id.x]); // Vector direction of link
+					fa.xyz += calculateLinkAttraction(pos[i * lineSize + j], pos[id.x], testDir, ka);
+				}
 			}
 		}
+
+		// Origin/Destination Force
+		float3 fp = float3(0.0, 0.0, 0.0);
+		fp += calculateNormalEffect(normSrcVec[m], pos[m * lineSize], pos[id.x], dmax, fmax);
+		fp += calculateNormalEffect(normDestVec[m], pos[(m + 1) * lineSize - 1], pos[id.x], dmax, fmax);
+
+		// Obstacle repulsion force - We use the same reuplsion model as for the link but with different coeff
+		float3 fo = float3(0.0, 0.0, 0.0);
+		for (uint k = 0; k < obsNb; k++)
+		{
+			fo += abs(calculateLinkRepulsion(avoidPoints[k], pos[id.x], kor, dmin / length(avoidPoints[k])));
+			fo = fo * float3(0, 0, -1);//delta_avoidPoints[k];
+			//	// NB: Here we divide the distance threshold by the lenght (i.e. distance to eye) of the opbstacle).
+			//	// Doing this counteract the change of angular resolution based on distance
+			//	// This means that we always repulse until a distance from obstacle that is independent from pov.
+		}	
+
+		float3 fap = float3(0.0, 0.0, 0.0);
+
+		for (uint k = 0; k < nbPlane * 4; k = k + 4)
+		{
+			//fap += calculatePlaneEffect(pos[id.x], attracPlane[k+3], attracPlane[k+2], attracPlane[k+1], attracPlane[k]);
+		}
+		// Add displacement to the displacement matrix
+		float3 mfr = multiplyByRotation(fr);
+
+		mfr = float3(mfr.x, abs(mfr.y), mfr.z);
+
+		float3 cfr = multiplyByInverse(mfr);
+
+
+
+		//fr = float3(fr.x, abs(fr.y), fr.z);
+		dispVec[id.x] = fs + fa + cfr + fo + fp;
+
+
+		float3 move = delta * dispVec[id.x].xyz;
+		if (length(move.xyz) > maxDelta)
+		{
+			move.xyz = maxDelta * normalize(move.xyz);
+		}
+		pos[id.x].xyz += move.xyz;
+
+
+
 	}
-
-	// Origin/Destination Force
-	float3 fp = float3(0.0, 0.0, 0.0);
-	fp += calculateNormalEffect(normSrcVec[m], pos[m * lineSize], pos[id.x], dmax, fmax);
-	fp += calculateNormalEffect(normDestVec[m], pos[(m + 1) * lineSize - 1], pos[id.x], dmax, fmax);
-
-	// Obstacle repulsion force - We use the same reuplsion model as for the link but with different coeff
-	float3 fo = float3(0.0, 0.0, 0.0);
-	for (uint k = 0; k < obsNb; k++)
-	{
-		fo += abs(calculateLinkRepulsion(avoidPoints[k], pos[id.x], kor, dmin / length(avoidPoints[k])));
-		fo = fo * float3(1, 0, 0);
-	//	// NB: Here we divide the distance threshold by the lenght (i.e. distance to eye) of the opbstacle).
-	//	// Doing this counteract the change of angular resolution based on distance
-	//	// This means that we always repulse until a distance from obstacle that is independent from pov.
-	}
-
-	float3 fap = float3(0.0, 0.0, 0.0);
-
-	for (uint k = 0; k < nbPlane*4; k=k+4)
-	{
-		//fap += calculatePlaneEffect(pos[id.x], attracPlane[k+3], attracPlane[k+2], attracPlane[k+1], attracPlane[k]);
-	}
-	// Add displacement to the displacement matrix
-	float3 mfr = multiplyByRotation(fr);
-	
-	mfr = float3(mfr.x, abs(mfr.y), mfr.z);
-
-	float3 cfr = multiplyByInverse(mfr);
-
-
-
-	//fr = float3(fr.x, abs(fr.y), fr.z);
-	dispVec[id.x] = fs + fa + cfr + fo + fp;
 
 
 	//dispVec[id.x] = dispVec[id.x] > 0 ? dispVec[id.x] : float3(0,0,0);

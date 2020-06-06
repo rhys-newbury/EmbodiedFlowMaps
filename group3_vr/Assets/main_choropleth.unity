@@ -710,8 +710,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 213405709}
   m_LocalRotation: {x: 0.00010473081, y: -0.008727145, z: 2.4385119e-11, w: 0.9999619}
-  m_LocalPosition: {x: -2.4, y: 2.081, z: -0.22000003}
-  m_LocalScale: {x: 0.45000008, y: 0.46138513, z: 0.45000005}
+  m_LocalPosition: {x: 2.9, y: 1, z: -3}
+  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 10
@@ -5359,7 +5359,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sensorToTakeIntoAccount: []
   gameObjectToAvoid:
-  - {fileID: 1893529181}
+  - {fileID: 213405709}
   attractivePlane: []
   mainCam: {fileID: 1148182085}
   otherClients: []

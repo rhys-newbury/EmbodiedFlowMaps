@@ -41,6 +41,9 @@ public class UnbundleFD : MonoBehaviour {
     Vector3[] endLineNormal;
     // Position of objects to avoid
     Vector3[] pointsToAvoid;
+    Vector3[] prev_pointsToAvoid;
+    Vector3[] delta;
+
     // Bundle Id list    
     int[] bundleId;
     public bool drawSphere = false;
@@ -59,6 +62,7 @@ public class UnbundleFD : MonoBehaviour {
     ComputeBuffer normSrcVecBuffer;
     ComputeBuffer normDestVecBuffer;
     ComputeBuffer myAvoidPointBuffer;
+    ComputeBuffer myDeltaAvoidBuffer;
     ComputeBuffer myAttractivePlane;
     ComputeBuffer myBundleIdBuffer;
     // GPU kernels
@@ -148,7 +152,7 @@ public class UnbundleFD : MonoBehaviour {
 
                     var line = tubeList[id * lineLenght];
                     tubeList.Remove(id * lineLenght);
-                    GameObject.Destroy(line);
+                    GameObject.Destroy(line.gameObject);
                     lineNb--;
                     
                 }
@@ -250,7 +254,7 @@ public class UnbundleFD : MonoBehaviour {
         lineCounter++;
 
 
-        GameObject tubeGO = new GameObject("Tube-");
+        GameObject tubeGO = new GameObject("Tube-" + lineNb.ToString());
         TubeRenderer lr = tubeGO.AddComponent<TubeRenderer>();
         //LineRenderer lr = tubeGO.AddComponent<LineRenderer>();
         lr.points = pointsTube;
@@ -322,7 +326,8 @@ public class UnbundleFD : MonoBehaviour {
         shader.SetBuffer(FDEUKernel, "normDestVec", normDestVecBuffer);
 
         shader.SetBuffer(FDEUKernel, "avoidPoints", myAvoidPointBuffer);
-       
+        shader.SetBuffer(FDEUKernel, "delta_avoidPoints", myDeltaAvoidBuffer);
+
         shader.SetBuffer(dispKernel, "pos", myLineBuffer);
         shader.SetBuffer(dispKernel, "dispVec", myDisplacementBuffer);
 
@@ -459,6 +464,8 @@ public class UnbundleFD : MonoBehaviour {
 
     private void updateAvoidPointArray()
     {
+        prev_pointsToAvoid = pointsToAvoid.Select(x => new Vector3(x.x, x.y, x.z)).ToArray();
+
         for (int i = 0; i < gameObjectToAvoid.Count; i++)
         {
             pointsToAvoid[i] = gameObjectToAvoid[i].transform.position;
@@ -561,8 +568,8 @@ public class UnbundleFD : MonoBehaviour {
         if (pointsToAvoid.Length > 0)
         {
             myAvoidPointBuffer = new ComputeBuffer(pointsToAvoid.Length, 3 * sizeof(float));
-        
             myAvoidPointBuffer.SetData(pointsToAvoid);
+           
         }
         else
         {
@@ -570,7 +577,21 @@ public class UnbundleFD : MonoBehaviour {
             Vector3[] dummyPoint = new Vector3[1];
             dummyPoint[0] = new Vector3(0, 0, 0);
             myAvoidPointBuffer.SetData(dummyPoint);
+
         }
+        if (delta != null && delta.Length > 0)
+        {
+            myDeltaAvoidBuffer = new ComputeBuffer(delta.Length, 3 * sizeof(float));
+            myDeltaAvoidBuffer.SetData(delta);
+        }
+        else
+        {
+            myDeltaAvoidBuffer = new ComputeBuffer(1, 3 * sizeof(float));
+            Vector3[] dummyPoint2 = new Vector3[1];
+            dummyPoint2[0] = new Vector3(0, 0, 0);
+            myDeltaAvoidBuffer.SetData(dummyPoint2);
+        }
+
         myBundleIdBuffer = new ComputeBuffer(bundleId.Length, sizeof(int));
         myBundleIdBuffer.SetData(bundleId);
         int nbPlane = (int) (planeCoord.Length / 4.0);
@@ -603,9 +624,14 @@ public class UnbundleFD : MonoBehaviour {
         {
             shader.SetBuffer(fwdTransfObsKern, "avoidPoints", myAvoidPointBuffer);
             shader.SetBuffer(bckTransfObsKern, "avoidPoints", myAvoidPointBuffer);
+
+            shader.SetBuffer(fwdTransfObsKern, "delta_avoidPoints", myDeltaAvoidBuffer);
+            shader.SetBuffer(bckTransfObsKern, "delta_avoidPoints", myDeltaAvoidBuffer);
+
+
         }
         //Plane Attraction Coordinate change
-        if(planeCoord.Length > 0)
+        if (planeCoord.Length > 0)
         {
             shader.SetBuffer(fwdTransPlanKern, "attracPlane", myAttractivePlane);
             shader.SetBuffer(bckTransPlanKern, "attracPlane", myAttractivePlane);
@@ -617,13 +643,15 @@ public class UnbundleFD : MonoBehaviour {
         shader.SetBuffer(FDEUKernel, "normDestVec", normDestVecBuffer);
         //if (pointsToAvoid.Length > 0)
         //{
-            shader.SetBuffer(FDEUKernel, "avoidPoints", myAvoidPointBuffer);
+        shader.SetBuffer(FDEUKernel, "avoidPoints", myAvoidPointBuffer);
+        shader.SetBuffer(FDEUKernel, "delta_avoidPoints", myDeltaAvoidBuffer);
+
         //}
         //if(planeCoord.Length > 0)
         //if(nbPlane > 0)
         //{
-            //Debug.Log("Set AttractPlane property...");
-            shader.SetBuffer(FDEUKernel, "attracPlane", myAttractivePlane);
+        //Debug.Log("Set AttractPlane property...");
+        shader.SetBuffer(FDEUKernel, "attracPlane", myAttractivePlane);
         //}
         shader.SetBuffer(FDEUKernel, "bundleId", myBundleIdBuffer);
         // Displacement kernel Buffers
@@ -666,6 +694,7 @@ public class UnbundleFD : MonoBehaviour {
     // Update is called once per frame
     void Update()
     {
+
         if (initDone && isMaster)
         {
             //myText.text = " Link Repulsion : " + (int)Math.Round(-repulsionConstant / 0.00000001) + " \nNormal Repulsion : " + (int)Math.Round(forceMaxNormal / 0.005);
@@ -805,8 +834,6 @@ public class UnbundleFD : MonoBehaviour {
         var inv = m.inverse;
 
         Vector3 test = new Vector3(0.5F, 0.4F, 0.6F);
-        Debug.Log(inv.MultiplyVector(m.MultiplyVector(test)));
-
 
         shader.SetFloat("im00", inv.m00);
         shader.SetFloat("im01", inv.m01);
@@ -846,15 +873,27 @@ public class UnbundleFD : MonoBehaviour {
 
         //Updating Obstacles position
         updateAvoidPointArray();
-        if (pointsToAvoid.Length > 0)
+        if (pointsToAvoid.Length > 0 && prev_pointsToAvoid.Length > 0 && pointsToAvoid.Length == prev_pointsToAvoid.Length)
         {
+            var updatedDelta = pointsToAvoid.Zip(prev_pointsToAvoid, (x, y) => (x - y).normalized).ToArray();
+
+            delta = delta == null ? updatedDelta : delta.Zip(updatedDelta, (x, y) => y.magnitude == 0 ? x : y).ToArray();
+
             myAvoidPointBuffer.SetData(pointsToAvoid);
+            myDeltaAvoidBuffer.SetData(delta);
+
             shader.SetBuffer(fwdTransfObsKern, "avoidPoints", myAvoidPointBuffer);
             shader.SetBuffer(bckTransfObsKern, "avoidPoints", myAvoidPointBuffer);
-            
+
+            shader.SetBuffer(fwdTransfObsKern, "delta_avoidPoints", myDeltaAvoidBuffer);
+            shader.SetBuffer(bckTransfObsKern, "delta_avoidPoints", myDeltaAvoidBuffer);
+
+
+
         }
 
         shader.SetBuffer(FDEUKernel, "avoidPoints", myAvoidPointBuffer);
+        shader.SetBuffer(FDEUKernel, "delta_avoidPoints", myDeltaAvoidBuffer);
 
 
         //updating Plane position
