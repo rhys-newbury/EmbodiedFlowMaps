@@ -925,6 +925,11 @@ public class UnbundleFD : MonoBehaviour {
         if (pointsToAvoid.Length > 0)
         {
             shader.Dispatch(fwdTransfObsKern, pointsToAvoid.Length, 1, 1);
+
+            Vector3[] delta_transform = new Vector3[pointsToAvoid.Length];
+            myDeltaAvoidBuffer.GetData(delta_transform);
+            Debug.Log(delta_transform);
+
         }
         // Apply FDEUB
 
