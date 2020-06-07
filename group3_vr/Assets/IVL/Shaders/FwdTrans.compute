@@ -356,7 +356,7 @@ void executeFDEUB(uint3 id : SV_DispatchThreadID, uint3 groupId : SV_GroupThread
 		for (uint k = 0; k < obsNb; k++)
 		{
 			fo += abs(calculateLinkRepulsion(avoidPoints[k], pos[id.x], kor, dmin / length(avoidPoints[k])));
-			fo = fo * float3(0, 0, -1);//delta_avoidPoints[k];
+			fo = fo * delta_avoidPoints[k];
 			//	// NB: Here we divide the distance threshold by the lenght (i.e. distance to eye) of the opbstacle).
 			//	// Doing this counteract the change of angular resolution based on distance
 			//	// This means that we always repulse until a distance from obstacle that is independent from pov.
