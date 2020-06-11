@@ -237,16 +237,41 @@ public class MapRenderer
     /// </summary>
     /// <returns>(float, float) containing x and y respectively</returns>
     /// 
-    public static (float, float) convert(float latitude, float longitude) {
+    public static (float, float) convert(float latitude, float longitude, bool mercator=false) {
 
-        float x = (longitude + 180) * (MAPWIDTH / 360);
+        if (mercator)
+        {
 
-        float latRad = latitude * Mathf.PI / 180;
+            float x = (longitude + 180) * (MAPWIDTH / 360);
 
-        float mercN = Mathf.Log(Mathf.Tan((Mathf.PI / 4) + (latRad / 2)));
-        float y = (MAPHEIGHT / 2) - (MAPWIDTH * mercN / (2 * Mathf.PI));
+            float latRad = latitude * Mathf.PI / 180;
 
-        return (x / 100, -y / 100);
+            float mercN = Mathf.Log(Mathf.Tan((Mathf.PI / 4) + (latRad / 2)));
+            float y = (MAPHEIGHT / 2) - (MAPWIDTH * mercN / (2 * Mathf.PI));
+
+            return (x / 100, -y / 100);
+        }
+        else
+        {
+
+            float lat0 = -96F * (Mathf.PI / 180);  // Latitude_Of_Origin
+            float lng0 = 37.5F * (Mathf.PI / 180);  // Central_Meridian
+            float phi1 = 29.5F * (Mathf.PI / 180);   // Standard_Parallel_1
+            float phi2 = 45.5F * (Mathf.PI / 180);  // Standard_Parallel_2
+
+
+            float n = 0.5F * (Mathf.Sin(phi1) + Mathf.Sin(phi2));
+            float c = Mathf.Cos(phi1);
+            float C = c * c + 2 * n * Mathf.Sin(phi1);
+            float p0 = Mathf.Sqrt(C - 2 * n * Mathf.Sin(lat0)) / n;
+            float theta = n * (longitude * Mathf.PI / 180 - lng0);
+            float p = Mathf.Sqrt(C - 2 * n * Mathf.Sin(latitude * Mathf.PI / 180)) / n;
+
+            float x = p * Mathf.Sin(theta);
+            float y = p0 - p * Mathf.Cos(theta);
+
+            return (-y, x);
+        }
 
     }
     /// <summary>

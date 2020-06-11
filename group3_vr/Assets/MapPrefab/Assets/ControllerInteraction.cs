@@ -26,6 +26,8 @@ public class ControllerInteraction : MonoBehaviour
     private Vector3 oldPos = new Vector3(0,0,0);
 
     private List<float> velocityBuffer = (new float[] { 0, 0, 0, 0, 0 }).ToList();
+    private List<float> velocityBufferLong = (new float[] { 0, 0, 0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }).ToList();
+
     private bool touchpadPressed = false;
     private float touchpadAngle;
 
@@ -97,6 +99,10 @@ public class ControllerInteraction : MonoBehaviour
                 {
                     velocityBuffer.RemoveAt(0);
                     velocityBuffer.Add(speed);
+
+                    velocityBufferLong.RemoveAt(0);
+                    velocityBufferLong.Add(speed);
+
                 }
                 oldPos = newPos;
 
