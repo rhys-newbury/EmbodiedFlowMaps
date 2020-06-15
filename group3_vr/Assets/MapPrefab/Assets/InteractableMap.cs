@@ -12,7 +12,7 @@ public abstract class InteractableMap : InteractableObject
 
     private string name;
     public string parentName;
-    protected GameObject wrapper;
+    public GameObject wrapper;
     protected GameObject go;
     private GameObject objToSpawn;
     private Vector3[] vertices3D;
@@ -50,7 +50,7 @@ public abstract class InteractableMap : InteractableObject
             lchild[ma2p.name] = ma2p;
         }
 
-        foreach (var pair in this.getMapController().flattenedList[origin_map.parentName].Take(20))
+        foreach (var pair in this.getMapController().flattenedList[origin_map.parentName].Take(8))
         {
 
             try
@@ -523,7 +523,7 @@ public abstract class InteractableMap : InteractableObject
     /// 
     public virtual Vector3 GetTranslation(float x, float y)
     {
-        return new Vector3(x, -y, 0);
+        return new Vector3(-x, y, 0);
     }
     /// <summary>
     /// Get Final angle of map.

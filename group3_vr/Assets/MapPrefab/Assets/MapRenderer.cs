@@ -195,19 +195,42 @@ public class MapRenderer
 
         }
 
+        var lol = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        lol.transform.SetParent(gameObject.transform);
+        lol.transform.localScale = new Vector3(0.01F, 0.01F);
+
+        lol.transform.localPosition = new Vector3(TmpcenterX, TmpcenterY);
 
 
         float maximumY = 0;
+
+        List<float> x2 = new List<float>();
+        List<float> y2 = new List<float>();
         foreach (var child in children)
         {
-            child.SetPositionAndRotation(child.GetTranslation(TmpcenterX, TmpcenterY), child.GetAngle());
+            child.SetPositionAndRotation(new Vector3(0,0), child.GetAngle());
             child.SetSiblings(children);
             maximumY = Mathf.Max(maximumY, child.transform.parent.position.y);
+
+            x2.Add(child.transform.parent.localPosition.x);
+            y2.Add(child.transform.parent.localPosition.y);
         }
-        
+        Debug.Log(x2.Average());
+        Debug.Log(y2.Average());
 
+        foreach (var child in children)
+        {
+            //child.SetPositionAndRotation(new Vector3(-x2.Average(), -y2.Average()), child.GetAngle());
+            //child.wrapper.transform.Translate(new Vector3(-x2.Average(), -y2.Average(), 0), Space.Self);
+            child.wrapper.transform.localPosition += new Vector3(-x2.Average(), -y2.Average());
+            //child.SetSiblings(children);
+            //maximumY = Mathf.Max(maximumY, child.transform.parent.position.y);
 
-        gameObject.transform.SetPositionAndRotation(new Vector3(0-centerX, 1-centerY, -2), children[0].GetFinalAngle());
+            //x2.Add(child.transform.parent.position.x);
+            //y2.Add(child.transform.parent.position.y);
+        }
+
+        gameObject.transform.SetPositionAndRotation(new Vector3(0-centerX, 0-centerY, 0), children[0].GetFinalAngle());
 
 
         if (level != (int)LEVEL.COUNTY_LEVEL && haveTooltip)
@@ -225,10 +248,11 @@ public class MapRenderer
             tooltipData.drawLineTo = objectToolTip.transform;
         }
 
-        gameObject.transform.SetPositionAndRotation(new Vector3(0 - centerX, 1 - centerY, -2), children[0].GetFinalAngle());
+
+        //gameObject.transform.SetPositionAndRotation(new Vector3(centerX, centerY, 0), children[0].GetFinalAngle());
 
         gameObject.transform.localPosition = new Vector3(0, 0, 0);
-        gameObject.transform.localScale = scale;
+        //gameObject.transform.localScale = scale;
     }
 
 

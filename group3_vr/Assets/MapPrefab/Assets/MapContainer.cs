@@ -112,7 +112,7 @@ public class MapContainer : MonoBehaviour
             }
 
 
-            foreach (var pair in mc.flattenedList["America"].Take(20))
+            foreach (var pair in mc.flattenedList["America"].Take(8))
             {
 
                 try
@@ -320,7 +320,7 @@ public class MapContainer : MonoBehaviour
             lchild2[ma2p.name] = ma2p;
         }
 
-        foreach (var val in flows.Take(20))
+        foreach (var val in flows.Take(8))
         {
             InteractableMap origin;
             InteractableMap destination;
