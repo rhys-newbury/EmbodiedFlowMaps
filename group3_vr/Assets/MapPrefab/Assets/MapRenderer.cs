@@ -195,13 +195,6 @@ public class MapRenderer
 
         }
 
-        var lol = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        lol.transform.SetParent(gameObject.transform);
-        lol.transform.localScale = new Vector3(0.01F, 0.01F);
-
-        lol.transform.localPosition = new Vector3(TmpcenterX, TmpcenterY);
-
-
         float maximumY = 0;
 
         List<float> x2 = new List<float>();
