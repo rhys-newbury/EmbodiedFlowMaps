@@ -26,7 +26,7 @@ public class ControllerInteraction : MonoBehaviour
     private Vector3 oldPos = new Vector3(0,0,0);
 
     private List<float> velocityBuffer = (new float[] { 0, 0, 0, 0, 0 }).ToList();
-    private List<float> velocityBufferLong = (new float[] { 0, 0, 0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }).ToList();
+    private List<Vector3> velocityBufferLong = (new Vector3[] { Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero }).ToList();
 
     private bool touchpadPressed = false;
     private float touchpadAngle;
@@ -48,6 +48,7 @@ public class ControllerInteraction : MonoBehaviour
     private bool reset_parents;
     private MapContainer m1;
     private MapContainer m2;
+    private GameObject cobj;
 
     /// <summary>
     /// Calculations to be performed on every frame.
@@ -81,16 +82,16 @@ public class ControllerInteraction : MonoBehaviour
         try
         {
 
-            var obj = GetComponent<VRTK_InteractGrab>().GetGrabbedObject();
+            cobj = GetComponent<VRTK_InteractGrab>().GetGrabbedObject();
 
-            if (touchpadPressed) OnUpdateTouchPadPressed(touchpadAngle, pointer.transform.parent.transform, obj);
+            if (touchpadPressed) OnUpdateTouchPadPressed(touchpadAngle, pointer.transform.parent.transform, cobj);
 
             long time = DateTime.Now.Ticks;
            
             //Time Limit between frames
-            if (time-oldTime < 300000) {
+            if (time-oldTime < 500000) {
 
-                Vector3 newPos = obj.transform.position;
+                Vector3 newPos = cobj.transform.position;
                 Vector3 delta = newPos - oldPos;
                 float speed = delta.magnitude / time * (Mathf.Pow(10,20));
 
@@ -101,23 +102,47 @@ public class ControllerInteraction : MonoBehaviour
                     velocityBuffer.Add(speed);
 
                     velocityBufferLong.RemoveAt(0);
-                    velocityBufferLong.Add(speed);
+                    velocityBufferLong.Add(newPos - oldPos);
 
                 }
                 oldPos = newPos;
 
-                Debug.Log(velocityBuffer);
-                
+                Debug.Log(velocityBuffer.Sum());
+                Debug.Log(velocityBuffer.Count((x) => x > 10));
                 //Condition for a throw to occur.
-                if (velocityBuffer.Sum() > 150 && velocityBuffer.Count((x) => x > 20) > 3) {
-                    obj.GetComponentInChildren<MapContainer>()?.OnThrow();
+                if (velocityBuffer.Sum() > 80 && velocityBuffer.Count((x) => x > 10) > 3) {
+                    List<float> angles = new List<float>();
+                    foreach (var i in velocityBufferLong)
+                    {
+                        foreach (var j in velocityBufferLong)
+                        {
+                            angles.Add(Vector3.Angle(i, j));
+                        }
+                    }
+                    var x = angles.Max();
+
+                    if (x > 150)
+                    {
+                        Debug.Log("filter");
+                        cobj.GetComponentInChildren<MapContainer>()?.Filter();
+                    }
+                    else
+                    {
+                        Debug.Log("throw");
+                        cobj.GetComponentInChildren<MapContainer>()?.OnThrow();
+                    }
+                    var y = angles[0];
+
+
                 }
-                
+
 
             }
             else {
                 //Reset the buffer
                 velocityBuffer = (new float[] { 0, 0, 0, 0, 0 }).ToList();
+                velocityBufferLong = (new Vector3[] { Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero }).ToList();
+
             }
             //Update the time
             oldTime = time;
@@ -217,6 +242,8 @@ public class ControllerInteraction : MonoBehaviour
 
             reset_parents = false;
         }
+
+        //var obj = GetComponent<VRTK_InteractGrab>().GetGrabbedObject();
     }
 
 

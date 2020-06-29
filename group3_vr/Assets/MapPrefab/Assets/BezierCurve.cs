@@ -19,11 +19,11 @@ public class Bezier : System.Object
     /// <summary>
     /// Store for the second control point.
     /// </summary>
-    private Vector3 p1;
+    //private Vector3 p1;
     /// <summary>
     /// Store for the third control point.
     /// </summary>
-    private Vector3 p2;
+    //private Vector3 p2;
     /// <summary>
     /// Store for the fourth control point.
     /// </summary>
@@ -37,11 +37,14 @@ public class Bezier : System.Object
     /// GameObject which holds the line
     /// </summary>
     internal GameObject gameObject;
+    GameObject p1;
+    GameObject p2;
     /// <summary>
     /// The line renderer instance
     /// </summary>
     internal LineRenderer line;
     private VRTK_InteractableObject interactObject;
+    private bool enabled = true;
 
     /// <summary>
     /// Constrctor for the class, which enables drawing between two points, with a specfied parent
@@ -86,14 +89,14 @@ public class Bezier : System.Object
         Vector3 p2W = destination.transform.parent.transform.position; //- destination.transform.parent.transform.TransformVector(new Vector3(0, 0, 0.07F));
 
         //GameObject p1 = GameObject.CreaCreatePrimitive(PrimitiveType.Sphere);
-        GameObject p1 = new GameObject();
+        p1 = new GameObject();
         p1.transform.SetParent(parent.transform);
         p1.transform.position = p1W;
         p1.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
         p1.transform.forward = origin.transform.parent.transform.forward;
         p1.name = "Point+";
 
-        GameObject p2 = new GameObject();
+        p2 = new GameObject();
         p2.transform.SetParent(dest_parent == null ? parent.transform : dest_parent.transform);
         p2.transform.position = p2W;
         p2.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
@@ -112,6 +115,30 @@ public class Bezier : System.Object
         //line.positionCount = this.points.Length;
         //line.SetPositions(this.points);
         //line.useWorldSpace = false;
+
+    }
+
+    public void disable()
+    {
+        this.enabled = false;
+        UnbundleFD unbundle = GameObject.Find("UnbundleManager").GetComponent<UnbundleFD>();
+        unbundle.change_line_status(p1, p2, false);
+    }
+    public void enable()
+    {
+        UnbundleFD unbundle = GameObject.Find("UnbundleManager").GetComponent<UnbundleFD>();
+        unbundle.change_line_status(p1, p2, true);
+        this.enabled = true;
+    }
+
+    public bool isEnabled()
+    {
+        return this.enabled;
+    }
+
+    public float getLength()
+    {
+        return (p1.transform.position - p2.transform.position).magnitude;
 
     }
 
@@ -136,8 +163,8 @@ public class Bezier : System.Object
     private void CreateBezier(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 v3, int num)
     {
         this.p0 = v0;
-        this.p1 = v1;
-        this.p2 = v2;
+        //this.p1 = v1;
+        //this.p2 = v2;
         this.p3 = v3;
 
         points = new Vector3[num + 1];
@@ -170,8 +197,8 @@ public class Bezier : System.Object
     float ttt = tt * t;
 
     Vector3 p = uuu * p0; //first term
-    p += 3 * uu* t * p1; //second term
-    p += 3 * u* tt * p2; //third term
+    //p += 3 * uu* t * p1; //second term
+    //p += 3 * u* tt * p2; //third term
     p += ttt* p3; //fourth term
 
     return p;

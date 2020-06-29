@@ -60,6 +60,7 @@ public abstract class InteractableMap : InteractableObject
                 var flowData = pair.Item3;
 
                 Bezier b = new Bezier(origin_map.transform, origin, destination, 0.1F * (0.00000699192F * flowData + 0.05F));
+                origin_map.internalLines.Add(b);
             }
             catch { }
 

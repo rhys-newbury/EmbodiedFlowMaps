@@ -158,7 +158,7 @@ public class UnbundleFD : MonoBehaviour {
                 }
                 catch
                 {
-                    Debug.Log("asdas");
+                    //Debug.Log("asdas");
                 }
 
             }
@@ -190,6 +190,25 @@ public class UnbundleFD : MonoBehaviour {
 
         update_shader();
 
+    }
+
+    internal void change_line_status(GameObject p1, GameObject p2, bool v)
+    {
+        //throw new NotImplementedException();
+        foreach (KeyValuePair<int, TubeRenderer> entry in tubeList)
+        {
+            if (entry.Value.p1 is null || entry.Value.p2 is null)
+            {
+                continue;
+            }
+            //InteractableMap p1m = p1.transform.parent.gameObject.GetComponent<InteractableMap>();
+            //InteractableMap p2m = p2.transform.parent.gameObject.GetComponent<InteractableMap>();
+
+            if ((entry.Value.go.Equals(p1) && entry.Value.go2.Equals(p2)) || entry.Value.go.Equals(p2) && entry.Value.go2.Equals(p1))
+            {
+                entry.Value.gameObject.SetActive(v);
+            }
+        }
     }
 
     public void addLine(GameObject go, GameObject go2, float lineWidth, InteractableMap origin, InteractableMap destination)
@@ -259,7 +278,8 @@ public class UnbundleFD : MonoBehaviour {
         //LineRenderer lr = tubeGO.AddComponent<LineRenderer>();
         lr.points = pointsTube;
         lr.radius = lineWidth;
-        lr.setParents(origin, destination);
+        
+        lr.setParents(origin, destination, go, go2);
         
         //lr.positionCount = pointsTube.Length;
         
@@ -797,27 +817,13 @@ public class UnbundleFD : MonoBehaviour {
         var QS = s - b;
 
         var perp = -Vector3.Cross(QR, QS);
-        Debug.Log(perp);
-
-        //var lol = 0;
-        //if (drawSphere)
-        //{
-        //    drawSphere = false;
-        //    foreach (var p in vl)
-        //    {
-        //        var g = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        //        g.name = lol++.ToString();
-        //        g.transform.position = mf.transform.TransformPoint(p);
-        //        g.transform.localScale = new Vector3(0.05F, 0.05F, 0.05F);
-        //    }
-        //}
-
+    
 
         //var t = mf.transform.TransformDirection(Vector3.up);
 
         var m = rotation_between_two_vectora(perp, Vector3.up);
 
-        Debug.Log(m);
+        //Debug.Log(m);
 
         shader.SetFloat("m00", m.m00);
         shader.SetFloat("m01", m.m01);
@@ -928,7 +934,7 @@ public class UnbundleFD : MonoBehaviour {
 
             Vector3[] delta_transform = new Vector3[pointsToAvoid.Length];
             myDeltaAvoidBuffer.GetData(delta_transform);
-            Debug.Log(delta_transform);
+            //Debug.Log(delta_transform);
 
         }
         // Apply FDEUB
@@ -1124,7 +1130,7 @@ public class UnbundleFD : MonoBehaviour {
                 int idBegining = idVec;
                 for (int i = idVec; i < idBegining + lineLenght; i++)
                 {
-                    Debug.Log(i + ";" + idVec + ";" + idBegining);
+                    //Debug.Log(i + ";" + idVec + ";" + idBegining);
                     pointsTube[i - idBegining] = lineTab[idVec];
                     idVec++;
                 }

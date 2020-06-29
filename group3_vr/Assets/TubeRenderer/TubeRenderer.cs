@@ -85,10 +85,12 @@ public class TubeRenderer : MonoBehaviour
 	////////////
     ///
    
-    public void setParents(InteractableMap p1, InteractableMap p2)
+    public void setParents(InteractableMap p1, InteractableMap p2, GameObject go, GameObject go2)
     {
         this.p1 = p1;
         this.p2 = p2;
+        this.go = go;
+        this.go2 = go2;
 
     }
 
@@ -406,6 +408,8 @@ public class TubeRenderer : MonoBehaviour
 	Postprocess Postprocesses;
     internal InteractableMap p1;
     internal InteractableMap p2;
+    internal GameObject go;
+    internal GameObject go2;
 
 
     /// <summary>

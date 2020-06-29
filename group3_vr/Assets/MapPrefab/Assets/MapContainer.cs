@@ -11,6 +11,7 @@ using System;
 /// </summary>
 public class MapContainer : MonoBehaviour
 {
+    public DateTime lastTime = DateTime.Now;
 
     private static bool _startUp = true;
 
@@ -23,6 +24,8 @@ public class MapContainer : MonoBehaviour
     private MapController mapController;
     private int level;
     public static bool update;
+
+    public int numberLines = 8;
 
 
 
@@ -45,7 +48,9 @@ public class MapContainer : MonoBehaviour
 
     public Vector3 startPos;
 
-    
+    internal List<Bezier> internalLines = new List<Bezier>();
+
+
 
     /// <summary>
     /// When object is created, set up Animations and VRTK Interactions
@@ -67,6 +72,8 @@ public class MapContainer : MonoBehaviour
         interactObject.grabAttachMechanicScript = grabAttach;
         interactObject.secondaryGrabActionScript = scaleAction;
 
+        interactObject.InteractableObjectUngrabbed += InteractObject_InteractableObjectUngrabbed; ;
+
         grabAttach.precisionGrab = true;
 
         rigidBody.useGravity = false;
@@ -74,6 +81,11 @@ public class MapContainer : MonoBehaviour
 
         scaleAction.lockAxis = new Vector3State(false, false, true);
         scaleAction.uniformScaling = true;
+    }
+
+    private void InteractObject_InteractableObjectUngrabbed(object sender, InteractableObjectEventArgs e)
+    {
+        reset_filter();
     }
 
     private void Start()
@@ -112,7 +124,7 @@ public class MapContainer : MonoBehaviour
             }
 
 
-            foreach (var pair in mc.flattenedList["America"].Take(8))
+            foreach (var pair in mc.flattenedList["America"].Take(numberLines))
             {
 
                 try
@@ -122,6 +134,8 @@ public class MapContainer : MonoBehaviour
                     var flowData = pair.Item3;
 
                     Bezier b = new Bezier(this.transform, origin, destination, 0.1F * (0.00000399192F * flowData + 0.05F));
+
+                    internalLines.Add(b);
                 }
                 catch { }
 
@@ -167,6 +181,32 @@ public class MapContainer : MonoBehaviour
         //Do not destroy country
         
         if (level > 0) Destroy(this.gameObject);
+
+
+    }
+
+    public void Filter()
+    {
+        try
+        {
+
+            var l = DateTime.Now;
+            if ((l - lastTime).Seconds > 0.05)
+            {
+                internalLines.OrderBy(x => x.getLength()).Reverse()
+                    .Where(x => x.isEnabled()).ToList()[0].disable();
+                lastTime = l;
+            }
+        }
+        catch
+        {
+
+        }
+        //internalLines[0].disable();
+
+
+
+        
 
 
     }
@@ -291,6 +331,12 @@ public class MapContainer : MonoBehaviour
 
     }
 
+    internal void reset_filter()
+    {
+        Array.ForEach(internalLines.Where(x => !x.isEnabled())
+            .ToArray(), x => x.enable());
+    }
+
     public void link_two_maps(MapContainer item)
     {
         string ordered_state1;
@@ -345,6 +391,9 @@ public class MapContainer : MonoBehaviour
             var flowData = val.Item5;
 
             Bezier b = new Bezier(origin_t, origin, destination, 0.1F * (0.00000399192F * flowData + 0.05F), dest_t);
+
+            this.internalLines.Add(b);
+            item.internalLines.Add(b);
 
         }
 

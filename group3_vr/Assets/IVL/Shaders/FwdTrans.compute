@@ -297,7 +297,7 @@ float3 calculateNormalEffect(float3 n, float3 p0, float3 pi, float dmax, float f
 [numthreads(lineSize, 1, 1)]
 void executeFDEUB(uint3 id : SV_DispatchThreadID, uint3 groupId : SV_GroupThreadID, uint3 lineIndex : SV_GroupID)
 {
-	for (uint t = 0; t < 20; t++) {
+	for (uint t = 0; t < 10; t++) {
 		// Do not run this kernel if the line position is the first or last element of a line
 		if (groupId.x == 0 || groupId.x >= (lineSize - 1))
 		{
