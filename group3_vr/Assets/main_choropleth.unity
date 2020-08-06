@@ -4204,6 +4204,10 @@ MonoBehaviour:
   gameObjectToAvoid:
   - {fileID: 213405709}
   attractivePlane: []
+  normal_force_factor: 20
+  x_normal: 0
+  y_normal: 0
+  z_normal: 0
   mainCam: {fileID: 1148182085}
   otherClients: []
   isMaster: 1

@@ -15,6 +15,10 @@ public class UnbundleFD : MonoBehaviour {
     public List<GameObject> attractivePlane = new List<GameObject>();
     public Dictionary<int, TubeRenderer> tubeList = new Dictionary<int, TubeRenderer>();
     //public Dictionary<int, LineRenderer> tubeList = new Dictionary<int, LineRenderer>();
+    public float normal_force_factor = 50;
+    public float x_normal = 0;
+    public float y_normal = 0;
+    public float z_normal = 0;
 
     #region Debug Params
     private List<GameObject> sphereNodes = new List<GameObject>();
@@ -44,6 +48,9 @@ public class UnbundleFD : MonoBehaviour {
     Vector3[] prev_pointsToAvoid;
     Vector3[] delta;
 
+    Vector3[] StartNormal;
+    Vector3[] EndNormal;
+
     // Bundle Id list    
     int[] bundleId;
     public bool drawSphere = false;
@@ -65,6 +72,12 @@ public class UnbundleFD : MonoBehaviour {
     ComputeBuffer myDeltaAvoidBuffer;
     ComputeBuffer myAttractivePlane;
     ComputeBuffer myBundleIdBuffer;
+
+
+    ComputeBuffer myStartNormalBuffer;
+    ComputeBuffer myEndNormalBuffer;
+
+
     // GPU kernels
     private int fwdTransfKernel;
     private int bckTransfKernel;
@@ -234,6 +247,15 @@ public class UnbundleFD : MonoBehaviour {
         l.Add(Vector3.zero);
         endLineNormal = l.ToArray();
 
+        l = StartNormal.OfType<Vector3>().ToList();
+        l.Add(Vector3.zero);
+        StartNormal = l.ToArray();
+
+        l = EndNormal.OfType<Vector3>().ToList();
+        l.Add(Vector3.zero);
+        EndNormal = l.ToArray();
+
+
         pointsList.Add(new Tuple<GameObject, GameObject, float>(go, go2, lineWidth));
 
 
@@ -269,6 +291,8 @@ public class UnbundleFD : MonoBehaviour {
         //endLineNormal[2 * lineCounter] = sensorVisu.transform.position;
         endLineNormal[lineCounter] = normal2;
 
+        StartNormal[lineCounter] = origin.gameObject.transform.parent.transform.parent.forward;
+        EndNormal[lineCounter] = origin.gameObject.transform.parent.transform.parent.forward;
 
         lineCounter++;
 
@@ -335,7 +359,14 @@ public class UnbundleFD : MonoBehaviour {
         normDestVecBuffer = new ComputeBuffer(endLineNormal.Length, 3 * sizeof(float));
         normDestVecBuffer.SetData(endLineNormal);
 
-        
+        myStartNormalBuffer = new ComputeBuffer(StartNormal.Length, 3 * sizeof(float));
+        myStartNormalBuffer.SetData(StartNormal);
+
+        myEndNormalBuffer = new ComputeBuffer(EndNormal.Length, 3 * sizeof(float));
+        myEndNormalBuffer.SetData(EndNormal);
+
+
+
         myBundleIdBuffer = new ComputeBuffer(bundleId.Length, sizeof(int));
         myBundleIdBuffer.SetData(bundleId);
 
@@ -356,6 +387,8 @@ public class UnbundleFD : MonoBehaviour {
         shader.SetBuffer(FDEUKernel, "dispVec", myDisplacementBuffer);
         shader.SetBuffer(FDEUKernel, "normSrcVec", normSrcVecBuffer);
         shader.SetBuffer(FDEUKernel, "normDestVec", normDestVecBuffer);
+        shader.SetBuffer(FDEUKernel, "start_normal", myStartNormalBuffer);
+        shader.SetBuffer(FDEUKernel, "end_normal", myEndNormalBuffer);
 
         shader.SetBuffer(FDEUKernel, "avoidPoints", myAvoidPointBuffer);
         shader.SetBuffer(FDEUKernel, "delta_avoidPoints", myDeltaAvoidBuffer);
@@ -391,6 +424,10 @@ public class UnbundleFD : MonoBehaviour {
         lineTab = new Vector3[lineLenght * lineNb];
         beginLineNormal = new Vector3[lineNb];
         endLineNormal = new Vector3[lineNb];
+
+        StartNormal = new Vector3[lineNb];
+        EndNormal = new Vector3[lineNb];
+
         int posPointer = 0;
         int lineCounter = 0;
 
@@ -442,6 +479,8 @@ public class UnbundleFD : MonoBehaviour {
             //endLineNormal[2 * lineCounter] = sensorVisu.transform.position;
             endLineNormal[lineCounter] = normal2;
 
+            StartNormal[lineCounter] = normal1;
+            EndNormal[lineCounter] = normal2;
 
             lineCounter++;
         }
@@ -593,10 +632,22 @@ public class UnbundleFD : MonoBehaviour {
         myLineBuffer = new ComputeBuffer(lineTab.Length, 3 * sizeof(float));
         myLineBuffer.SetData(lineTab);
         myDisplacementBuffer = new ComputeBuffer(lineTab.Length, 3 * sizeof(float));
+
+
         normSrcVecBuffer = new ComputeBuffer(beginLineNormal.Length, 3 * sizeof(float));
         normSrcVecBuffer.SetData(beginLineNormal);
         normDestVecBuffer = new ComputeBuffer(endLineNormal.Length, 3 * sizeof(float));
         normDestVecBuffer.SetData(endLineNormal);
+
+        myStartNormalBuffer = new ComputeBuffer(StartNormal.Length, 3 * sizeof(float));
+        myStartNormalBuffer.SetData(StartNormal);
+
+        myEndNormalBuffer = new ComputeBuffer(EndNormal.Length, 3 * sizeof(float));
+        myEndNormalBuffer.SetData(EndNormal);
+
+
+
+
         if (pointsToAvoid.Length > 0)
         {
             myAvoidPointBuffer = new ComputeBuffer(pointsToAvoid.Length, 3 * sizeof(float));
@@ -673,6 +724,8 @@ public class UnbundleFD : MonoBehaviour {
         shader.SetBuffer(FDEUKernel, "dispVec", myDisplacementBuffer);
         shader.SetBuffer(FDEUKernel, "normSrcVec", normSrcVecBuffer);
         shader.SetBuffer(FDEUKernel, "normDestVec", normDestVecBuffer);
+        shader.SetBuffer(FDEUKernel, "start_normal", myStartNormalBuffer);
+        shader.SetBuffer(FDEUKernel, "end_normal", myEndNormalBuffer);
         //if (pointsToAvoid.Length > 0)
         //{
         shader.SetBuffer(FDEUKernel, "avoidPoints", myAvoidPointBuffer);
@@ -703,6 +756,8 @@ public class UnbundleFD : MonoBehaviour {
         shader.SetInt("nbPlane", planeCoord.Length);
         shader.SetFloat("dmaxP", distancePlane);
         shader.SetFloat("fmaxP", forcePlane);
+        shader.SetFloat("factor", normal_force_factor);
+
     }
 
     public void ResetBundling()
@@ -817,6 +872,22 @@ public class UnbundleFD : MonoBehaviour {
             count++;
 
         }
+        count = 0;
+        foreach (var lr in tubeList)
+        {
+            if (count == 0)
+            {
+                count++;
+                continue;
+          
+            }
+
+            StartNormal[count] = lr.Value.p1.gameObject.transform.parent.transform.parent.forward;
+            EndNormal[count] = lr.Value.p1.gameObject.transform.parent.transform.parent.forward;
+            count++;
+
+        }
+
         var mf = GameObject.Find("Screen2");
         //Top Left
         var vl = mf.GetComponent<MeshFilter>().sharedMesh.vertices;
@@ -865,7 +936,17 @@ public class UnbundleFD : MonoBehaviour {
         shader.SetFloat("im21", inv.m11);
         shader.SetFloat("im22", inv.m12);
 
+            
 
+
+
+
+        GameObject map = GameObject.Find("map");
+
+        Vector3 forward = map.transform.forward * normal_force_factor;
+        Debug.Log(forward);
+        //Debug.Log
+        //shader.SetFloats("/*normal*/", new float[] { forward.x, forward.y, -forward.z });
 
 
 
@@ -880,12 +961,20 @@ public class UnbundleFD : MonoBehaviour {
 
         normSrcVecBuffer.SetData(beginLineNormal);
         normDestVecBuffer.SetData(endLineNormal);
+
+        myStartNormalBuffer.SetData(StartNormal);
+        myEndNormalBuffer.SetData(EndNormal);
+
+
         shader.SetBuffer(fwdTransfNormalKern, "normSrcVec", normSrcVecBuffer);
         shader.SetBuffer(fwdTransfNormalKern, "normDestVec", normDestVecBuffer);
         shader.SetBuffer(bckTransfNormalKern, "normSrcVec", normSrcVecBuffer);
         shader.SetBuffer(bckTransfNormalKern, "normDestVec", normDestVecBuffer);
         shader.SetBuffer(FDEUKernel, "normSrcVec", normSrcVecBuffer);
         shader.SetBuffer(FDEUKernel, "normDestVec", normDestVecBuffer);
+
+        shader.SetBuffer(FDEUKernel, "start_normal", myStartNormalBuffer);
+        shader.SetBuffer(FDEUKernel, "end_normal", myEndNormalBuffer);
 
 
 
@@ -965,6 +1054,8 @@ public class UnbundleFD : MonoBehaviour {
         shader.SetFloat("fmax", forceMaxNormal);
         shader.SetFloat("dmaxP", distancePlane);
         shader.SetFloat("fmaxP", forcePlane);
+        shader.SetFloat("factor", normal_force_factor);
+
         shader.Dispatch(FDEUKernel, lineNb, 1, 1);
         #region DEBUG parts
         //Vector3[] tmpArray = new Vector3[lineTab.Length];
@@ -1150,7 +1241,7 @@ public class UnbundleFD : MonoBehaviour {
                 //lr.SetPositions(pointsTube);
                 //lr.startWidth = kv.Item3;
                 //lr.endWidth = kv.Item3;
-                //Material[] matArray = new Material[1];
+                //Material[] matArray = new Marterial[1];
                 //linkMat.color = colorT;
                 //matArray[0] = linkMat;
                 //lr.materials = matArray;

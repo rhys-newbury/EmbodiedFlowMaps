@@ -68,6 +68,12 @@ float im20;
 float im21;
 float im22;
 
+float factor;
+
+
+//float3 normal;
+//float3 normal;
+
 
 
 // Create a RenderTexture with enableReadWrite flag and set it
@@ -85,6 +91,9 @@ RWStructuredBuffer<float3> normDestVec;
 // Create a RenderTexture for the points to avoid
 RWStructuredBuffer<float3> avoidPoints;
 RWStructuredBuffer<float3> delta_avoidPoints;
+
+RWStructuredBuffer<float3> start_normal;
+RWStructuredBuffer<float3> end_normal;
 
 // Create a RenderTexture for the attractive plane
 RWStructuredBuffer<float3> attracPlane;
@@ -369,17 +378,21 @@ void executeFDEUB(uint3 id : SV_DispatchThreadID, uint3 groupId : SV_GroupThread
 			//fap += calculatePlaneEffect(pos[id.x], attracPlane[k+3], attracPlane[k+2], attracPlane[k+1], attracPlane[k]);
 		}
 		// Add displacement to the displacement matrix
-		float3 mfr = multiplyByRotation(fr);
+		/*float3 mfr = multiplyByRotation(fr);
 
 		mfr = float3(mfr.x, abs(mfr.y), mfr.z);
 
-		float3 cfr = multiplyByInverse(mfr);
+		float3 cfr = multiplyByInverse(mfr) * 5;
+*/
 
-
-
+		//float3 fz = float3(-20, 0, 0);
 		//fr = float3(fr.x, abs(fr.y), fr.z);
-		dispVec[id.x] = fs + fa + cfr + fo + fp;
+		float3 f_normal_1 = float3(start_normal[m].x * factor, start_normal[m].y * factor, -start_normal[m].z * factor);
+		float3 f_normal_2 = float3(end_normal[m].x * factor, end_normal[m].y * factor, -end_normal[m].z * factor);
 
+		dispVec[id.x] = fs + fa + fr + fo + fp + f_normal_2 +f_normal_2;
+
+		//dispVec[id.x] = normal;
 
 		float3 move = delta * dispVec[id.x].xyz;
 		if (length(move.xyz) > maxDelta)
