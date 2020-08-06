@@ -104,6 +104,8 @@ public class Bezier : System.Object
         p2.name = "Point+" + "-V";
         unbundle.addLine(p1, p2, lineWidth, origin, destination);
 
+
+
         //float dist = (p0 - p3).magnitude;
 
         //Vector3 p1 = p0 + origin.transform.parent.transform.TransformVector(new Vector3(0, 0, dist));

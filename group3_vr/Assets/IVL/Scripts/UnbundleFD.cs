@@ -278,9 +278,18 @@ public class UnbundleFD : MonoBehaviour {
         //LineRenderer lr = tubeGO.AddComponent<LineRenderer>();
         lr.points = pointsTube;
         lr.radius = lineWidth;
-        
+
+
+        var tempMaterial = new Material(lr.GetComponent<Renderer>().sharedMaterial);
+        tempMaterial.shader = Shader.Find("Particles/Standard Surface");
+        lr.GetComponent<Renderer>().sharedMaterial = tempMaterial;
+
+
+
         lr.setParents(origin, destination, go, go2);
         
+
+
         //lr.positionCount = pointsTube.Length;
         
         //lr.SetPositions(pointsTube);
@@ -289,7 +298,9 @@ public class UnbundleFD : MonoBehaviour {
         Material[] matArray = new Material[1];
         linkMat.color = colorT;
         matArray[0] = linkMat;
+        //lr.colors = 
         //lr.materials = matArray;
+        
         tubeList.Add(idBegining, lr);
 
         //tubeGO.tag = "Tube";
@@ -308,6 +319,7 @@ public class UnbundleFD : MonoBehaviour {
 
 
     }
+
 
     public void update_shader()
     {
@@ -1176,6 +1188,13 @@ public class UnbundleFD : MonoBehaviour {
                 }
                 //entry.Value.SetPositions(pointsTube);
                 entry.Value.points = pointsTube;
+                var startColour = new Color32(0, 0, 255, 0);
+                var endColour = new Color32(0, 255, 0, 0);
+
+                var colours = Enumerable.Range(1, pointsTube.Length).Select(x => x * 1.0f / pointsTube.Length).Select(x => Color32.Lerp(startColour, endColour, x));
+                
+                entry.Value.colors = colours.ToArray();
+
             }
 
         }

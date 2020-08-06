@@ -113,6 +113,10 @@ public class MapContainer : MonoBehaviour
             this.level = 0;
 
             MapRenderer map = new MapRenderer();
+            GameObject plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            plane.transform.rotation = Quaternion.Euler(new Vector3(0, 90, -90));
+            plane.transform.parent = this.gameObject.transform;
+
             map.drawMultiple(this.gameObject, reportGrabbed, file,0, this.transform.root.GetComponent<MapController>().haveTooltip, this.transform.root.GetComponent<MapController>().mapScale, parentName);
 
             this.transform.root.GetComponent<MapController>().startUp = false;
@@ -133,7 +137,7 @@ public class MapContainer : MonoBehaviour
                     var destination = lchild[pair.Item2];
                     var flowData = pair.Item3;
 
-                    Bezier b = new Bezier(this.transform, origin, destination, 0.1F * (0.00000399192F * flowData + 0.05F));
+                    Bezier b = new Bezier(this.transform, origin, destination, 0.1F * (0.00000199192F * flowData + 0.05F));
 
                     internalLines.Add(b);
                 }
@@ -390,7 +394,7 @@ public class MapContainer : MonoBehaviour
             }
             var flowData = val.Item5;
 
-            Bezier b = new Bezier(origin_t, origin, destination, 0.1F * (0.00000399192F * flowData + 0.05F), dest_t);
+            Bezier b = new Bezier(origin_t, origin, destination, 0.1F * (0.00000199192F * flowData + 0.05F), dest_t);
 
             this.internalLines.Add(b);
             item.internalLines.Add(b);
