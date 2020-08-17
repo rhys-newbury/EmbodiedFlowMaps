@@ -108,7 +108,7 @@ public class MapContainer : MonoBehaviour
         if (mc != null && this.transform.root.GetComponent<MapController>().startUp)
         {
             //Debug.Log(this.transform.root);
-            string file = mc.mainMap;
+            string file = Application.streamingAssetsPath + "/" + mc.mainMap;
             this.parentName = "America";
             this.level = 0;
 
@@ -483,10 +483,10 @@ public class MapContainer : MonoBehaviour
 
         this.level = level;
 
+
         if (level == (int)MapRenderer.LEVEL.STATE_LEVEL)
         {
-             file = this.transform.root.GetComponent<MapController>().pathToStates + interactableMap.name + ".json";
-
+            file = this.transform.root.GetComponent<MapController>().getPathToState() + interactableMap.name + ".json";
 
             map.drawMultiple(this.gameObject, reportGrabbed, file, level, true, this.transform.root.GetComponent<MapController>().mapScale, "", interactableMap);
             this.transform.position = start_pos.position;
@@ -498,7 +498,8 @@ public class MapContainer : MonoBehaviour
         
         else
         {
-            file = this.transform.root.GetComponent<MapController>().pathToStates + interactableMap.parentName + ".json";
+            file = this.transform.root.GetComponent<MapController>().getPathToState() + interactableMap.name + ".json";
+
             foreach (var line in File.ReadAllLines(file))
             {
                 if (line.Contains(interactableMap.name))
@@ -516,13 +517,7 @@ public class MapContainer : MonoBehaviour
             //countyStack.Add(this);
         }
 
-        //this.transform.localScale = new Vector3(0.25F, 0.25F, 0.25F);
-        
-            
-
-
-
-      
+        //this.transform.localScale = new Vector3(0.25F, 0.25F, 0.25F);       
 
     }
 }
