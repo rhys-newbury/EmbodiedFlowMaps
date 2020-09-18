@@ -491,6 +491,11 @@ PrefabInstance:
       propertyPath: animationStarted
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3300351564035835785, guid: 16607c3f3440712409b1c1a6dd7a8109,
+        type: 3}
+      propertyPath: numberLines
+      value: 20
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 6073352600722129961, guid: 16607c3f3440712409b1c1a6dd7a8109, type: 3}
     - {fileID: 7896932721951209164, guid: 16607c3f3440712409b1c1a6dd7a8109, type: 3}
@@ -4204,7 +4209,7 @@ MonoBehaviour:
   gameObjectToAvoid:
   - {fileID: 213405709}
   attractivePlane: []
-  normal_force_factor: 20
+  normal_force_factor: 5
   x_normal: 0
   y_normal: 0
   z_normal: 0

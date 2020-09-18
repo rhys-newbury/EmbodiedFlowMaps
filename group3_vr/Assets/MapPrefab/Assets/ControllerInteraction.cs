@@ -376,7 +376,7 @@ public class ControllerInteraction : MonoBehaviour
             currentObject = e.raycastHit.collider.gameObject.GetComponent<InteractableObject>();
             selectingObject = true;
             currentObject?.OnPointerEnter(changeText);
-            dataToolTip.ToggleTips(true);
+            //dataToolTip.ToggleTips(true);
             helpTooltip.ToggleTips(false);
             helpTooltipState = false;
         }

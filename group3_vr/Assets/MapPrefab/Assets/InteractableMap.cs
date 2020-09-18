@@ -18,6 +18,8 @@ public abstract class InteractableMap : InteractableObject
     private Vector3[] vertices3D;
     public Action<bool> reportGrabbed;
     private Triangulator T;
+    private Triangulator T2;
+
     private Color color;
     private float alpha;
     private MeshRenderer meshRenderer;
@@ -50,7 +52,7 @@ public abstract class InteractableMap : InteractableObject
             lchild[ma2p.name] = ma2p;
         }
 
-        foreach (var pair in this.getMapController().flattenedList[origin_map.parentName].Take(8))
+        foreach (var pair in this.getMapController().flattenedList[origin_map.parentName].Take(100))
         {
 
             try
@@ -201,10 +203,10 @@ public abstract class InteractableMap : InteractableObject
         var text = this.name + ": \n" + inc_flow.ToString("N0") +  "Moved In \n" + out_flow.ToString("N0") + " Moved Out";
 
 
-        changeText(text);
+        //changeText(text);
         tooltip.displayText = text;
         
-        this.go.SetActive(true);
+        //this.go.SetActive(true);
 
 
     }
@@ -240,18 +242,20 @@ public abstract class InteractableMap : InteractableObject
     {
 
         List<Vector3> verticesList = new List<Vector3>(vertices3D);
-        List<Vector3> verticesExtrudedList = new List<Vector3>();
+
+        List<Vector3> verticesExtrudedList = verticesList.Select(item => new Vector3(item.x, item.y, 0.05F)).ToList();
+
         List<int> indices = new List<int>();
 
         var originalVertexCount = vertices3D.Length;
 
         for (int i = 0; i < verticesList.Count; i++)
         {
-            verticesExtrudedList.Add(new Vector3(verticesList[i].x, verticesList[i].y, 0.1F));
+            verticesExtrudedList.Add(new Vector3(verticesList[i].x, verticesList[i].y, 0F));
         }
 
         //add the extruded parts to the end of vertices list
-        verticesList.AddRange(verticesExtrudedList);
+        //verticesList.AddRange(verticesExtrudedList);
 
         for (int i = 0; i < originalVertexCount; i++)
         {
@@ -272,29 +276,83 @@ public abstract class InteractableMap : InteractableObject
 
         }
 
+
+
+
+
         // Use the triangulator to get indices for creating triangles
         var indices2 = T.Triangulate().ToList();
-        indices2.AddRange(indices);
+        indices2.AddRange(indices.Select(x => x));
+
+        indices.AddRange(T.Triangulate().ToList());
+
+        var go_sides = new GameObject();
+        var go_sides_mesh = go_sides.AddComponent<MeshFilter>();
+
+        var mesh2= new Mesh
+        {
+            vertices = verticesExtrudedList.ToArray(),
+            triangles = indices.ToArray()
+        };
+        mesh2.RecalculateBounds();
+        mesh2.RecalculateNormals();
+
+        go_sides_mesh.mesh = mesh2;
+        go_sides.transform.SetParent(this.transform);
+
+        var meshRenderer2 = go_sides.AddComponent<MeshRenderer>();
+        meshRenderer2.material = new Material(Shader.Find("Standard"));
+        //meshRenderer.material.
+        meshRenderer2.material.color = new Color(0.8F, 0.8F, 0.8F); // this.color;
+
+
+        var mapcollider2 = go_sides.AddComponent<MeshCollider>();
+        //mapcollider.convex = true;
+        mapcollider2.sharedMesh = go_sides_mesh.mesh;
+
+
 
         //Mesh mesh = new Mesh();
         this.mesh = new Mesh
         {
             vertices = verticesList.ToArray(),
-            triangles = indices2.ToArray()
+            triangles = T.Triangulate().ToArray()
         };
+
+
+
+
+        Color[] colrs = new Color[verticesList.Count()];
+        Color meshColor = this.getMapController().getCountryColour(this.getMapController().getPopulationDensity(this.name, this.parentName));
+
+        for (int i = 0; i < originalVertexCount; i++)
+        {
+            colrs[i] = meshColor;
+        }
+        for (int i = originalVertexCount; i < verticesList.Count(); i++)
+        {
+            colrs[i] = meshColor;
+        }
+        //this.mesh.colors = colrs;
 
         this.mesh.RecalculateNormals();
         this.mesh.RecalculateBounds();
 
         //Color meshColor = UnityEngine.Random.ColorHSV();
-        Color meshColor = this.getMapController().getCountryColour(this.getMapController().getPopulationDensity(this.name, this.parentName));
         this.alpha = meshColor.a;
         this.color = meshColor;
 
         // Set up game object with mesh;
         meshRenderer = objToSpawn.AddComponent<MeshRenderer>();
         meshRenderer.material = new Material(Shader.Find("Sprites/Default"));
+        //meshRenderer.material.
         meshRenderer.material.color = this.color;
+
+        //var tempMaterial = new Material(this.GetComponent<Renderer>().sharedMaterial);
+        //meshRenderer.material.shader = 
+        //tempMaterial.co
+        //lr.GetComponent<Renderer>().sharedMaterial = tempMaterial;
+
 
         var filter = objToSpawn.AddComponent<MeshFilter>();
         filter.mesh = this.mesh;
@@ -341,9 +399,7 @@ public abstract class InteractableMap : InteractableObject
     public void SetPositionAndRotation(Vector3 pos, Quaternion angle)    
     {
         this.transform.SetPositionAndRotation(pos, angle);
-
-
-
+               
         this.wrapper.transform.SetPositionAndRotation(this.transform.TransformPoint(new Vector3(centerX, centerY, -0.05F)), new Quaternion(0, 0, 0, 1));
 
         this.objToSpawn.transform.SetParent(this.wrapper.transform);
