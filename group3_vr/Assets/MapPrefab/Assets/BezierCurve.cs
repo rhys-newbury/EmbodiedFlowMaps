@@ -85,8 +85,10 @@ public class Bezier : System.Object
         //rigidBody.useGravity = false;
         //rigidBody.isKinematic = true;
 
-        Vector3 p1W = origin.transform.parent.transform.position; //- origin.transform.parent.transform.TransformVector(new Vector3(0, 0, 0.07F));
+        Vector3 p1W = origin.transform.parent.transform.position;
         Vector3 p2W = destination.transform.parent.transform.position; //- destination.transform.parent.transform.TransformVector(new Vector3(0, 0, 0.07F));
+        p1W.z = 0;
+        p2W.z = 0;
 
         //GameObject p1 = GameObject.CreaCreatePrimitive(PrimitiveType.Sphere);
         p1 = new GameObject();

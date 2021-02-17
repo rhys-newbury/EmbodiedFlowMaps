@@ -119,6 +119,7 @@ public class UnbundleFD : MonoBehaviour {
 
     public bool LineRendererDrawing;
     public Material linkMat;
+    internal bool reset_colours;
 
 
 
@@ -208,8 +209,10 @@ public class UnbundleFD : MonoBehaviour {
     internal void change_line_status(GameObject p1, GameObject p2, bool v)
     {
         //throw new NotImplementedException();
+        var index = -1;
         foreach (KeyValuePair<int, TubeRenderer> entry in tubeList)
         {
+            index += 1;
             if (entry.Value.p1 is null || entry.Value.p2 is null)
             {
                 continue;
@@ -219,7 +222,12 @@ public class UnbundleFD : MonoBehaviour {
 
             if ((entry.Value.go.Equals(p1) && entry.Value.go2.Equals(p2)) || entry.Value.go.Equals(p2) && entry.Value.go2.Equals(p1))
             {
-                entry.Value.gameObject.SetActive(v);
+                //entry.Value.gameObject.SetActive(v);
+                pointsList[index].Item1.transform.parent = null;
+                pointsList[index].Item2.transform.parent = null;
+                pointsList[index].Item1.AddComponent<Rigidbody>();
+                pointsList[index].Item2.AddComponent<Rigidbody>();
+
             }
         }
     }
@@ -304,9 +312,17 @@ public class UnbundleFD : MonoBehaviour {
         lr.radius = lineWidth;
 
 
-        var tempMaterial = new Material(lr.GetComponent<Renderer>().sharedMaterial);
-        tempMaterial.shader = Shader.Find("Particles/Standard Surface");
-        lr.GetComponent<Renderer>().sharedMaterial = tempMaterial;
+        //Material tempMaterial = new Material(lr.GetComponent<Renderer>().sharedMaterial);
+        //tempMaterial.shader = Shader.Find("Particles/Standard Surface");
+        //lr.GetComponent<Renderer>().sharedMaterial = tempMaterial;
+
+        Material[] tempMaterial = new Material[2];
+        tempMaterial[0] = new Material(lr.GetComponent<Renderer>().sharedMaterial);
+        tempMaterial[0].shader = Shader.Find("Particles/Standard Surface");
+        tempMaterial[1] = null;
+            
+        lr.GetComponent<Renderer>().materials = tempMaterial;
+
 
 
 
@@ -1279,14 +1295,30 @@ public class UnbundleFD : MonoBehaviour {
                 }
                 //entry.Value.SetPositions(pointsTube);
                 entry.Value.points = pointsTube;
-                var startColour = new Color32(0, 0, 255, 0);
-                var endColour = new Color32(0, 255, 0, 0);
+                Color32 startColour = new Color32(0, 0, 255, 0);
+                Color32 endColour = new Color32(0, 255, 0, 0);
+
+                if (reset_colours)
+                {
+
+                    var tm = entry.Value.GetComponent<Renderer>().materials;
+
+                    if (tm.Length > 1 && !(tm[1] is null))
+                    {
+                        tm[1] = null;
+                        entry.Value.GetComponent<Renderer>().materials = tm;
+                    }
+
+
+                }
 
                 var colours = Enumerable.Range(1, pointsTube.Length).Select(x => x * 1.0f / pointsTube.Length).Select(x => Color32.Lerp(startColour, endColour, x));
                 
                 entry.Value.colors = colours.ToArray();
 
             }
+            reset_colours = false;
+
 
         }
     }

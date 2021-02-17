@@ -80,11 +80,16 @@ public class TubeRenderer : MonoBehaviour
 	const string logPrepend = "<b>[TubeRenderer]</b> ";
 
 
-	////////////
-	// PUBLIC //
-	////////////
+   public Color32 startColour = new Color32(0, 0, 255, 0);
+   public Color32 endColour = new Color32(0, 255, 0, 0);
+
+
+
+    ////////////
+    // PUBLIC //
+    ////////////
     ///
-   
+
     public void setParents(InteractableMap p1, InteractableMap p2, GameObject go, GameObject go2)
     {
         this.p1 = p1;

@@ -18,6 +18,8 @@ public abstract class InteractableMap : InteractableObject
     private Vector3[] vertices3D;
     public Action<bool> reportGrabbed;
     private Triangulator T;
+    private Triangulator T2;
+
     private Color color;
     private float alpha;
     private MeshRenderer meshRenderer;
@@ -34,6 +36,7 @@ public abstract class InteractableMap : InteractableObject
     internal InteractableMap parent;
     public Dictionary<string, InteractableMap> siblings = new Dictionary<string, InteractableMap>();
     private MapController mapController;
+    private LineRenderer state_line;
 
     /// <summary>
     /// Draws a flow between given origin and the siblings, which are currently selected.
@@ -50,7 +53,7 @@ public abstract class InteractableMap : InteractableObject
             lchild[ma2p.name] = ma2p;
         }
 
-        foreach (var pair in this.getMapController().flattenedList[origin_map.parentName].Take(8))
+        foreach (var pair in this.getMapController().flattenedList[origin_map.parentName].Take(50))
         {
 
             try
@@ -117,7 +120,7 @@ public abstract class InteractableMap : InteractableObject
 
 
             this.selected = true;
-            CreateLine();
+            //CreateLine();
             this.GetInternalFlows(main);
             return main.gameObject;
         }
@@ -190,23 +193,39 @@ public abstract class InteractableMap : InteractableObject
     /// 
     public override void OnPointerEnter(Action<string> changeText)
     {
-        this.color.a = 0.3F;
-        this.meshRenderer.material.color = this.color;
-        VRTK_ObjectTooltip tooltip = go.GetComponent<VRTK_ObjectTooltip>();
+        //this.color.a = 0.3F;
+        //this.meshRenderer.material.color = this.color;
+        //VRTK_ObjectTooltip tooltip = go.GetComponent<VRTK_ObjectTooltip>();
 
-        var inc_flow = Mathf.Max(0,this.getMapController().getData(this.name, this.parentName, true));
-        
-        var out_flow = Mathf.Max(0,this.getMapController().getData(this.name, this.parentName, false));
+        var inc_flow = Mathf.Max(0, this.getMapController().getData(this.name, this.parentName, true));
 
-        var text = this.name + ": \n" + inc_flow.ToString("N0") +  "Moved In \n" + out_flow.ToString("N0") + " Moved Out";
+        var out_flow = Mathf.Max(0, this.getMapController().getData(this.name, this.parentName, false));
+
+        var text = this.name + ": \n" + inc_flow.ToString("N0") + "Moved In \n" + out_flow.ToString("N0") + " Moved Out";
 
 
         changeText(text);
-        tooltip.displayText = text;
-        
-        this.go.SetActive(true);
+        changeThickness(true);
+        //tooltip.displayText = text;
+
+        //this.go.SetActive(true);
 
 
+    }
+
+    private void changeThickness(bool v)
+    {
+        //throw new NotImplementedException();
+        if (v)
+        {
+            state_line.startWidth = 0.004F;
+            state_line.endWidth = 0.0004F;
+        }
+        else
+        {
+            state_line.startWidth = 0.016F;
+            state_line.endWidth = 0.0016F;
+        }
     }
 
     /// <summary>
@@ -216,10 +235,11 @@ public abstract class InteractableMap : InteractableObject
     /// 
     public override void OnPointerLeave()
     {
-        this.color.a = this.alpha;
-        this.meshRenderer.material.color = this.color;
-        this.go.SetActive(false);
-    }
+        //this.color.a = this.alpha;
+        //this.meshRenderer.material.color = this.color;
+        //this.go.SetActive(false);
+        changeThickness(false);
+        }
 
     /// <summary>
     /// Return a boolean, depicting whether the object is selected
@@ -240,18 +260,20 @@ public abstract class InteractableMap : InteractableObject
     {
 
         List<Vector3> verticesList = new List<Vector3>(vertices3D);
-        List<Vector3> verticesExtrudedList = new List<Vector3>();
+
+        List<Vector3> verticesExtrudedList = verticesList.Select(item => new Vector3(item.x, item.y, 0.05F)).ToList();
+
         List<int> indices = new List<int>();
 
         var originalVertexCount = vertices3D.Length;
 
         for (int i = 0; i < verticesList.Count; i++)
         {
-            verticesExtrudedList.Add(new Vector3(verticesList[i].x, verticesList[i].y, 0.1F));
+            verticesExtrudedList.Add(new Vector3(verticesList[i].x, verticesList[i].y, 0F));
         }
 
         //add the extruded parts to the end of vertices list
-        verticesList.AddRange(verticesExtrudedList);
+        //verticesList.AddRange(verticesExtrudedList);
 
         for (int i = 0; i < originalVertexCount; i++)
         {
@@ -272,29 +294,83 @@ public abstract class InteractableMap : InteractableObject
 
         }
 
+
+
+
+
         // Use the triangulator to get indices for creating triangles
         var indices2 = T.Triangulate().ToList();
-        indices2.AddRange(indices);
+        indices2.AddRange(indices.Select(x => x));
+
+        indices.AddRange(T.Triangulate().ToList());
+
+        var go_sides = new GameObject();
+        var go_sides_mesh = go_sides.AddComponent<MeshFilter>();
+
+        var mesh2 = new Mesh
+        {
+            vertices = verticesExtrudedList.ToArray(),
+            triangles = indices.ToArray()
+        };
+        mesh2.RecalculateBounds();
+        mesh2.RecalculateNormals();
+
+        go_sides_mesh.mesh = mesh2;
+        go_sides.transform.SetParent(this.transform);
+
+        var meshRenderer2 = go_sides.AddComponent<MeshRenderer>();
+        meshRenderer2.material = new Material(Shader.Find("Standard"));
+        //meshRenderer.material.
+        meshRenderer2.material.color = new Color(0.8F, 0.8F, 0.8F); // this.color;
+
+
+        var mapcollider2 = go_sides.AddComponent<MeshCollider>();
+        //mapcollider.convex = true;
+        mapcollider2.sharedMesh = go_sides_mesh.mesh;
+
+
 
         //Mesh mesh = new Mesh();
         this.mesh = new Mesh
         {
             vertices = verticesList.ToArray(),
-            triangles = indices2.ToArray()
+            triangles = T.Triangulate().ToArray()
         };
+
+
+
+
+        Color[] colrs = new Color[verticesList.Count()];
+        Color meshColor = this.getMapController().getCountryColour(this.getMapController().getPopulationDensity(this.name, this.parentName));
+
+        for (int i = 0; i < originalVertexCount; i++)
+        {
+            colrs[i] = meshColor;
+        }
+        for (int i = originalVertexCount; i < verticesList.Count(); i++)
+        {
+            colrs[i] = meshColor;
+        }
+        //this.mesh.colors = colrs;
 
         this.mesh.RecalculateNormals();
         this.mesh.RecalculateBounds();
 
         //Color meshColor = UnityEngine.Random.ColorHSV();
-        Color meshColor = this.getMapController().getCountryColour(this.getMapController().getPopulationDensity(this.name, this.parentName));
         this.alpha = meshColor.a;
         this.color = meshColor;
 
         // Set up game object with mesh;
         meshRenderer = objToSpawn.AddComponent<MeshRenderer>();
         meshRenderer.material = new Material(Shader.Find("Sprites/Default"));
+        //meshRenderer.material.
         meshRenderer.material.color = this.color;
+
+        //var tempMaterial = new Material(this.GetComponent<Renderer>().sharedMaterial);
+        //meshRenderer.material.shader = 
+        //tempMaterial.co
+        //lr.GetComponent<Renderer>().sharedMaterial = tempMaterial;
+
 
         var filter = objToSpawn.AddComponent<MeshFilter>();
         filter.mesh = this.mesh;
@@ -302,7 +378,7 @@ public abstract class InteractableMap : InteractableObject
         var mapcollider = objToSpawn.AddComponent<MeshCollider>();
         //mapcollider.convex = true;
         mapcollider.sharedMesh = this.mesh;
-        
+
 
     }
 
@@ -328,7 +404,7 @@ public abstract class InteractableMap : InteractableObject
     internal void Deselect()
     {
         this.selected = false;
-        DestoryLine();
+        //DestoryLine();
     }
 
     /// <summary>
@@ -338,11 +414,9 @@ public abstract class InteractableMap : InteractableObject
     /// <param name="angle">The new angle of the shape</param>
     /// <returns></returns>
     /// 
-    public void SetPositionAndRotation(Vector3 pos, Quaternion angle)    
+    public void SetPositionAndRotation(Vector3 pos, Quaternion angle)
     {
         this.transform.SetPositionAndRotation(pos, angle);
-
-
 
         this.wrapper.transform.SetPositionAndRotation(this.transform.TransformPoint(new Vector3(centerX, centerY, -0.05F)), new Quaternion(0, 0, 0, 1));
 
@@ -373,18 +447,18 @@ public abstract class InteractableMap : InteractableObject
         this.centerY = (bounds[1] + bounds[3]) / 2F;
 
 
-        this.go = Instantiate(Resources.Load("MapToolTip")) as GameObject;
-        go.transform.parent = this.wrapper.transform;
-        VRTK_ObjectTooltip tooltip = go.GetComponent<VRTK_ObjectTooltip>();
-        tooltip.alwaysFaceHeadset = true;
-        tooltip.displayText = this.name;
-        tooltip.alwaysFaceHeadset = true;
-        this.go.SetActive(false);
+        //this.go = Instantiate(Resources.Load("MapToolTip")) as GameObject;
+        //go.transform.parent = this.wrapper.transform;
+        //VRTK_ObjectTooltip tooltip = go.GetComponent<VRTK_ObjectTooltip>();
+        //tooltip.alwaysFaceHeadset = true;
+        //tooltip.displayText = this.name;
+        //tooltip.alwaysFaceHeadset = true;
+        //this.go.SetActive(false);
 
 
         this.objToSpawn = objToSpawn;
         this.objToSpawn.name = name;
-        
+
         this.DrawObject();
 
 
@@ -445,22 +519,22 @@ public abstract class InteractableMap : InteractableObject
             return;
         }
 
-        var line = objToSpawn.AddComponent<LineRenderer>();
-        line.useWorldSpace = false;
+        state_line = objToSpawn.AddComponent<LineRenderer>();
+        state_line.useWorldSpace = false;
         var tempVertices3D = vertices3D.ToList();
         tempVertices3D.Add(vertices3D[0]);
         //Chuck her in front of the country so its visible
         tempVertices3D = tempVertices3D.Select(x => new Vector3(x.x, x.y, -0.005F)).ToList();
         var finaltempVertices3D = tempVertices3D.ToArray();
-        line.positionCount = finaltempVertices3D.Length;
-        line.SetPositions(finaltempVertices3D);
+        state_line.positionCount = finaltempVertices3D.Length;
+        state_line.SetPositions(finaltempVertices3D);
 
-        line.material = new Material(Shader.Find("Sprites/Default"));
-        line.startColor = new Color(0.3F, 0.3F, 0.3F);//Color.grey;
-        line.endColor = new Color(0.3F, 0.3F, 0.3F); ;
-        line.startWidth = 0.004F;
-        line.endWidth = 0.0004F;
-        line.alignment = LineAlignment.TransformZ;
+        state_line.material = new Material(Shader.Find("Sprites/Default"));
+        state_line.startColor = new Color(0.3F, 0.3F, 0.3F);//Color.grey;
+        state_line.endColor = new Color(0.3F, 0.3F, 0.3F); ;
+        state_line.startWidth = 0.004F;
+        state_line.endWidth = 0.0004F;
+        state_line.alignment = LineAlignment.TransformZ;
     }
     /// <
 
@@ -482,7 +556,7 @@ public abstract class InteractableMap : InteractableObject
         //line.SetPositions(finaltempVertices3D);
 
         //line.material = new Material(Shader.Find("Sprites/Default"));
-        line.startColor = new Color(224,80,70);
+        line.startColor = new Color(224, 80, 70);
         line.endColor = new Color(224, 80, 70);
         line.startWidth = 0.01F;
         line.endWidth = 0.01F;
@@ -507,7 +581,7 @@ public abstract class InteractableMap : InteractableObject
         line.alignment = LineAlignment.TransformZ;
 
         MapContainer.DeselectState();
-      }
+    }
     /// <summary>
     /// Default angle of map
     /// </summary>
@@ -533,7 +607,7 @@ public abstract class InteractableMap : InteractableObject
     /// 
     public virtual Quaternion GetFinalAngle()
     {
-        return new Quaternion(0,0,0,1);
+        return new Quaternion(0, 0, 0, 1);
     }
 
 
@@ -555,9 +629,9 @@ public abstract class InteractableMap : InteractableObject
     /// 
     internal virtual void Delete()
     {
-            this.children.ForEach(x => x.Delete());
-            this.children.Clear();
-        
+        this.children.ForEach(x => x.Delete());
+        this.children.Clear();
+
 
         try
         {
@@ -580,5 +654,4 @@ public abstract class InteractableMap : InteractableObject
         }
     }
 }
-
 

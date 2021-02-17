@@ -356,7 +356,7 @@ GameObject:
   - component: {fileID: 441652}
   - component: {fileID: 11464476}
   m_Layer: 2
-  m_Name: ObjectTooltip
+  m_Name: MapTooltip
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -392,7 +392,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   displayText: TooltipText
   fontSize: 45
-  containerSize: {x: 500, y: 60}
+  containerSize: {x: 500, y: 200}
   drawLineFrom: {fileID: 0}
   drawLineTo: {fileID: 0}
   lineWidth: 0.001

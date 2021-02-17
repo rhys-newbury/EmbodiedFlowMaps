@@ -17,7 +17,9 @@ public class ControllerInteraction : MonoBehaviour
 
     private VRTK_ControllerTooltips dataToolTip;
 
-    private Action<string> changeText;
+    private Action<string> changeMapText;
+    private Action<string> changeFlowText;
+
 
     private VRTK_ControllerEvents controller;
     private VRTK_Pointer pointer;
@@ -26,7 +28,7 @@ public class ControllerInteraction : MonoBehaviour
     private Vector3 oldPos = new Vector3(0,0,0);
 
     private List<float> velocityBuffer = (new float[] { 0, 0, 0, 0, 0 }).ToList();
-    private List<Vector3> velocityBufferLong = (new Vector3[] { Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero }).ToList();
+    private List<Vector3> velocityBufferLong = (new Vector3[] { Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero }).ToList();
 
     private bool touchpadPressed = false;
     private float touchpadAngle;
@@ -49,6 +51,7 @@ public class ControllerInteraction : MonoBehaviour
     private MapContainer m1;
     private MapContainer m2;
     private GameObject cobj;
+    private bool reset_vel_buffer;
 
     /// <summary>
     /// Calculations to be performed on every frame.
@@ -85,6 +88,14 @@ public class ControllerInteraction : MonoBehaviour
             cobj = GetComponent<VRTK_InteractGrab>().GetGrabbedObject();
 
             if (touchpadPressed) OnUpdateTouchPadPressed(touchpadAngle, pointer.transform.parent.transform, cobj);
+            
+            if (reset_vel_buffer)
+            {
+                reset_vel_buffer = false;
+                velocityBuffer = (new float[] { 0, 0, 0, 0, 0 }).ToList();
+                velocityBufferLong = (new Vector3[] { Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero }).ToList();
+
+            }
 
             long time = DateTime.Now.Ticks;
            
@@ -106,9 +117,9 @@ public class ControllerInteraction : MonoBehaviour
 
                 }
                 oldPos = newPos;
-
-                Debug.Log(velocityBuffer.Sum());
-                Debug.Log(velocityBuffer.Count((x) => x > 10));
+                Debug.LogError("sum: " + velocityBuffer.Sum().ToString());
+                //Debug.Log(velocityBuffer.Sum());
+                //Debug.Log(velocityBuffer.Count((x) => x > 10));
                 //Condition for a throw to occur.
                 if (velocityBuffer.Sum() > 80 && velocityBuffer.Count((x) => x > 10) > 3) {
                     List<float> angles = new List<float>();
@@ -119,17 +130,19 @@ public class ControllerInteraction : MonoBehaviour
                             angles.Add(Vector3.Angle(i, j));
                         }
                     }
-                    var x = angles.Max();
+                    var x = angles.Where((i) => i > 0).Select((i) => Mathf.Abs(i)).Average();
+                    Debug.LogError(x);
 
-                    if (x > 150)
+                    if (x > 60)
                     {
                         Debug.Log("filter");
                         cobj.GetComponentInChildren<MapContainer>()?.Filter();
                     }
                     else
                     {
-                        Debug.Log("throw");
-                        cobj.GetComponentInChildren<MapContainer>()?.OnThrow();
+                        Debug.LogError("throw");
+                        //velocityBuffer.Reverse()
+                        cobj.GetComponentInChildren<MapContainer>()?.OnThrow(velocityBufferLong.AsEnumerable().Reverse().Take(5).Aggregate(new Vector3(0, 0, 0), (s, v) => s + v) / (float)(5), GetComponent<VRTK_InteractGrab>());
                     }
                     var y = angles[0];
 
@@ -226,10 +239,22 @@ public class ControllerInteraction : MonoBehaviour
 
 
         //Anonymous function to Update the dataToolTip text.
-        changeText = delegate (string x) {
-            dataToolTip.UpdateText(VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip, x);
+        changeMapText = delegate (string x) {
+            dataToolTip.ToggleTips(true);
+            dataToolTip.ToggleTips(false, VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip);
+            dataToolTip.ToggleTips(true, VRTK_ControllerTooltips.TooltipButtons.StartMenuTooltip);
+            dataToolTip.UpdateText(VRTK_ControllerTooltips.TooltipButtons.StartMenuTooltip, x);
+
         };
-                      
+
+        changeFlowText = delegate (string x) {
+            dataToolTip.ToggleTips(true);
+            dataToolTip.ToggleTips(true, VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip);
+            dataToolTip.ToggleTips(false, VRTK_ControllerTooltips.TooltipButtons.StartMenuTooltip);
+            dataToolTip.UpdateText(VRTK_ControllerTooltips.TooltipButtons.StartMenuTooltip, x);
+        };
+
+
     }
 
     private void Controller_TriggerReleased(object sender, ControllerInteractionEventArgs e)
@@ -257,6 +282,10 @@ public class ControllerInteraction : MonoBehaviour
 
    
         currentObject?.OnGripPressed();
+        if (!(currentObject is null))
+        {
+            reset_vel_buffer = true;
+        }
         selectingObject = false;
         currentObject?.OnPointerLeave();
         currentObject = null;
@@ -301,25 +330,78 @@ public class ControllerInteraction : MonoBehaviour
         TubeRenderer closestTube = pickingTube(this.transform.position, this.transform.position + this.transform.forward * sizeRay);
         if (closestTube != null)
         {
-            //closestTube.GetComponent<Renderer>().material.color = lineRenderer.material.color;
-            var p1 = closestTube.p1;
-            var p2 = closestTube.p2;
+            bool SHOW_TOOLTIP = true;
+            if (SHOW_TOOLTIP)
+            {
+                if (dataToolTip.overallState)
+                {
+                    dataToolTip.ToggleTips(false);
 
-            m1 = p1.draw_map(pointer.transform.parent.transform);
-            m2 = p2.draw_map(pointer.transform.parent.transform);
+                    GameObject um = GameObject.Find("UnbundleManager");
+                    um.GetComponent<UnbundleFD>().reset_colours = true;
 
-            //m1.transform.position = p1.transform            //m1.transform.position = p1.transform
+                }
+                else
+                {
+                    dataToolTip.ToggleTips(true);
+
+                    InteractableMap p1 = closestTube.p1;
+                    InteractableMap p2 = closestTube.p2;
+
+                    var tm = closestTube.GetComponent<Renderer>().materials;
+
+                    tm[1] = new Material(closestTube.GetComponent<Renderer>().sharedMaterial);
+                    tm[1].shader = Shader.Find("VRTK/OutlineBasic");
+                    tm[1].SetColor("_OutlineColor", new Color(255, 255, 0, 0));
+                    closestTube.GetComponent<Renderer>().materials = tm;
+
+                    
+
+                    var f1 = p1.getMapController().getFlowData(p1.name, p1.parentName, p2.name, p2.parentName);
+                    var f2 = p1.getMapController().getFlowData(p2.name, p2.parentName, p1.name, p1.parentName);
+                    if (f1 > f2)
+                    {
+                        changeFlowText("Flow from " + p1.name + " to " + p2.name + " is " + f1.ToString("N0"));
+
+                    }
+                    else
+                    {
+                        changeFlowText("Flow from " + p2.name + " to " + p1.name + " is " + f2.ToString("N0"));
+                    }
 
 
-            m1.link_two_maps(m2);
 
-            cp1 = m1.transform.parent;
-            cp2 = m2.transform.parent;
+                }
 
-            m1.transform.parent = pointer.transform;
-            m2.transform.parent = pointer.transform;
 
-            reset_parents = true;
+                //var inc_flow = Mathf.Max(0, this.getMapController().getData(this.name, this.parentName, true));
+
+                //var out_flow = Mathf.Max(0, this.getMapController().getData(this.name, this.parentName, false));
+
+                //var text = this.name + ": \n" + inc_flow.ToString("N0") + "Moved In \n" + out_flow.ToString("N0") + " Moved Out";
+
+            }
+            else {
+                //closestTube.GetComponent<Renderer>().material.color = lineRenderer.material.color;
+                var p1 = closestTube.p1;
+                var p2 = closestTube.p2;
+
+                m1 = p1.draw_map(pointer.transform.parent.transform);
+                m2 = p2.draw_map(pointer.transform.parent.transform);
+
+                //m1.transform.position = p1.transform            //m1.transform.position = p1.transform
+
+
+                m1.link_two_maps(m2);
+
+                cp1 = m1.transform.parent;
+                cp2 = m2.transform.parent;
+
+                m1.transform.parent = pointer.transform;
+                m2.transform.parent = pointer.transform;
+
+                reset_parents = true;
+            }
 
 
         }
@@ -375,8 +457,8 @@ public class ControllerInteraction : MonoBehaviour
         try {
             currentObject = e.raycastHit.collider.gameObject.GetComponent<InteractableObject>();
             selectingObject = true;
-            currentObject?.OnPointerEnter(changeText);
-            dataToolTip.ToggleTips(true);
+            currentObject?.OnPointerEnter(changeMapText);
+            //dataToolTip.ToggleTips(true);
             helpTooltip.ToggleTips(false);
             helpTooltipState = false;
         }
@@ -421,7 +503,7 @@ public class ControllerInteraction : MonoBehaviour
 
         }
 
-        if (minDist < 0.01f)
+        if (minDist < 0.03f)
         {
             return tubeClosest;
         }

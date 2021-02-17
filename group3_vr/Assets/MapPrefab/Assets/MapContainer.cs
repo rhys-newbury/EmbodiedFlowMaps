@@ -128,7 +128,7 @@ public class MapContainer : MonoBehaviour
             }
 
 
-            foreach (var pair in mc.flattenedList["America"].Take(numberLines))
+            foreach (var pair in mc.flattenedList["America"].Take(50))
             {
 
                 try
@@ -170,7 +170,7 @@ public class MapContainer : MonoBehaviour
     /// </summary>
     /// <returns></returns>
     /// 
-    public void OnThrow()
+    public void OnThrow(Vector3 velocity, VRTK_InteractGrab ig)
     {
 
         int level = -1;
@@ -179,14 +179,40 @@ public class MapContainer : MonoBehaviour
         foreach (var item in this.GetComponentsInChildren<InteractableMap>())
         {
             item.Delete();
+            MeshCollider mc = item.GetComponent<MeshCollider>();
+            MeshCollider[] mc_l = item.GetComponentsInChildren<MeshCollider>();
+            mc_l.ToList().ForEach(x => x.convex = true);
+            mc.convex = true;
             item.parent?.Deselect();
             level = level == -1 ? item.GetLevel() : level;
         }
+        //transform.parent = null;
+        ig.ForceRelease();
+
         //Do not destroy country
-        
-        if (level > 0) Destroy(this.gameObject);
+        Rigidbody rb = this.GetComponent<Rigidbody>();
+        rb.useGravity = true;
+        rb.isKinematic = false;
+        rb.angularVelocity = Vector3.forward * 3.0f;
+        rb.angularDrag = 0;
+        rb.velocity = velocity * 5;
+        rb.velocity = new Vector3(rb.velocity.x, Mathf.Max(rb.velocity.y, 0), rb.velocity.z);
+
+        rb.mass = 0.01F;
+
+        InvokeRepeating("fade", 3.0f, 5f);
+
+        //if (level > 0)
+        //{
+        //    Destroy(this.gameObject);
+        //}
 
 
+    }
+    private void fade()
+    {
+        Destroy(this.gameObject);
+        CancelInvoke("fade");
     }
 
     public void Filter()
@@ -370,7 +396,7 @@ public class MapContainer : MonoBehaviour
             lchild2[ma2p.name] = ma2p;
         }
 
-        foreach (var val in flows.Take(8))
+        foreach (var val in flows.Take(10))
         {
             InteractableMap origin;
             InteractableMap destination;
