@@ -67,7 +67,7 @@ public class Legend : MonoBehaviour
             .ForEach(x =>
             {
                 var tootip = x.x.GetComponentInChildren<VRTK.VRTK_ObjectTooltip>();
-                tootip.displayText = format(x.y.x, x.y.y);
+               if(tootip)  tootip.displayText = format(x.y.x, x.y.y);
             });
     }
 

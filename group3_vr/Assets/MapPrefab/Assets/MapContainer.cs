@@ -25,7 +25,7 @@ public class MapContainer : MonoBehaviour
     private int level;
     public static bool update;
 
-    public int numberLines = 8;
+    public int numberLines = 20;
 
 
 
@@ -108,14 +108,14 @@ public class MapContainer : MonoBehaviour
         if (mc != null && this.transform.root.GetComponent<MapController>().startUp)
         {
             //Debug.Log(this.transform.root);
-            string file = mc.mainMap;
+            string file = Application.streamingAssetsPath + "/" + mc.mainMap;
             this.parentName = "America";
             this.level = 0;
 
             MapRenderer map = new MapRenderer();
-            GameObject plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
-            plane.transform.rotation = Quaternion.Euler(new Vector3(0, 90, -90));
-            plane.transform.parent = this.gameObject.transform;
+            //GameObject plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            //plane.transform.rotation = Quaternion.Euler(new Vector3(0, 90, -90));
+            //plane.transform.parent = this.gameObject.transform;
 
             map.drawMultiple(this.gameObject, reportGrabbed, file,0, this.transform.root.GetComponent<MapController>().haveTooltip, this.transform.root.GetComponent<MapController>().mapScale, parentName);
 
@@ -252,7 +252,7 @@ public class MapContainer : MonoBehaviour
 
 
     /// <summary>
-    /// Set the link status between two objects, set link both ways.
+    /// Set the ` status between two objects, set link both ways.
     /// </summary>
     /// <param name="i1">Object One</param>
     /// <param name="i2">Object Two</param>
@@ -369,6 +369,8 @@ public class MapContainer : MonoBehaviour
 
     public void link_two_maps(MapContainer item)
     {
+        //return;
+
         string ordered_state1;
         string ordered_state2;
         if (string.Compare(this.parentName, item.parentName) < 0)
@@ -509,10 +511,10 @@ public class MapContainer : MonoBehaviour
 
         this.level = level;
 
+
         if (level == (int)MapRenderer.LEVEL.STATE_LEVEL)
         {
-             file = this.transform.root.GetComponent<MapController>().pathToStates + interactableMap.name + ".json";
-
+            file = this.transform.root.GetComponent<MapController>().getPathToState() + interactableMap.name + ".json";
 
             map.drawMultiple(this.gameObject, reportGrabbed, file, level, true, this.transform.root.GetComponent<MapController>().mapScale, "", interactableMap);
             this.transform.position = start_pos.position;
@@ -524,7 +526,8 @@ public class MapContainer : MonoBehaviour
         
         else
         {
-            file = this.transform.root.GetComponent<MapController>().pathToStates + interactableMap.parentName + ".json";
+            file = this.transform.root.GetComponent<MapController>().getPathToState() + interactableMap.name + ".json";
+
             foreach (var line in File.ReadAllLines(file))
             {
                 if (line.Contains(interactableMap.name))
@@ -542,13 +545,7 @@ public class MapContainer : MonoBehaviour
             //countyStack.Add(this);
         }
 
-        //this.transform.localScale = new Vector3(0.25F, 0.25F, 0.25F);
-        
-            
-
-
-
-      
+        //this.transform.localScale = new Vector3(0.25F, 0.25F, 0.25F);       
 
     }
 }

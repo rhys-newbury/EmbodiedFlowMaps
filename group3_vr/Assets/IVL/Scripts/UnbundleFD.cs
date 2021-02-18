@@ -7,7 +7,10 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class UnbundleFD : MonoBehaviour {
-       
+
+    [Header("Map setting")]
+    public GameObject map;
+    [Header("Unbundle FD settings")]
     // Visual Object Data
     public List<GameObject> sensorToTakeIntoAccount = new List<GameObject>();
     public List<Tuple<GameObject, GameObject, float>> pointsList = new List<Tuple<GameObject, GameObject, float>>();
@@ -955,18 +958,10 @@ public class UnbundleFD : MonoBehaviour {
             
 
 
-
-
-        GameObject map = GameObject.Find("map");
-
         Vector3 forward = map.transform.forward * normal_force_factor;
         Debug.Log(forward);
         //Debug.Log
         //shader.SetFloats("/*normal*/", new float[] { forward.x, forward.y, -forward.z });
-
-
-
-
 
         myLineBuffer.SetData(lineTab);
         shader.SetBuffer(fwdTransfKernel, "pos", myLineBuffer);

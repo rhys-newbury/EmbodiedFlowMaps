@@ -307,7 +307,7 @@ public abstract class InteractableMap : InteractableObject
         var go_sides = new GameObject();
         var go_sides_mesh = go_sides.AddComponent<MeshFilter>();
 
-        var mesh2 = new Mesh
+        var mesh2= new Mesh
         {
             vertices = verticesExtrudedList.ToArray(),
             triangles = indices.ToArray()
@@ -417,7 +417,6 @@ public abstract class InteractableMap : InteractableObject
     public void SetPositionAndRotation(Vector3 pos, Quaternion angle)
     {
         this.transform.SetPositionAndRotation(pos, angle);
-
         this.wrapper.transform.SetPositionAndRotation(this.transform.TransformPoint(new Vector3(centerX, centerY, -0.05F)), new Quaternion(0, 0, 0, 1));
 
         this.objToSpawn.transform.SetParent(this.wrapper.transform);

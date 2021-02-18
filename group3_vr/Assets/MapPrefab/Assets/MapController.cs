@@ -9,9 +9,10 @@ using UnityEngine;
 /// </summary>
 public class MapController : MonoBehaviour
 { 
+    [Header("Map and data from StreamingAssets/ folder. User relative path.")]
     public string mainMap;
-    public string pathToStates;
-    public string pathToData;
+    public string stateFolder;
+    public string dataFolder;
 
     public Legend CountryLegend;
     //public ThicknessLegend FlowLegend;
@@ -55,6 +56,7 @@ public class MapController : MonoBehaviour
     /// 
     void Start()
     {
+        string pathToData =Application.streamingAssetsPath + "/" +  dataFolder + "/";
 
         populationDenisty.Add("America", new Dictionary<string, float>());
 
@@ -411,6 +413,15 @@ public class MapController : MonoBehaviour
         {
             return -1;
         }
+    }
+
+    /// <summary>
+    /// Get absolute path to stateFolder
+    /// </summary>
+    /// <returns></returns>
+    public string getPathToState()
+    {
+        return Application.streamingAssetsPath +  "/" + stateFolder + "/";
     }
 
 
